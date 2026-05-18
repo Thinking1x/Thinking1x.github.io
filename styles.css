@@ -1170,17 +1170,25 @@ body.glass-mode .background-cover {
 }
 
 /* ==========================================
-   HYPER-GLOW LAUNCHPAD EFFECT (Subtle)
+   HYPER-GLOW LAUNCHPAD EFFECT (Pure Glow, Zero Shake)
    ========================================== */
 .launchpad-flash.hyper-glow {
+    /* Brighter core color */
     background-color: hsla(var(--beat-hue, 180), 100%, 75%, 0.8) !important;
+    
+    /* Massive outer neon bloom + intense inner shadow */
     box-shadow: 0 0 35px hsla(var(--beat-hue, 180), 100%, 60%, 0.9),
                 inset 0 0 15px hsla(var(--beat-hue, 180), 100%, 90%, 1) !important;
-    transform: scale(1.01); /* Kept your 1.01 for the less intense shake! */
+                
+    /* Kills all physical movement, scaling, and keyframe animations */
+    transform: none !important;
+    animation: none !important; 
+    
     border-radius: 4px;
     z-index: 6;
     position: relative;
-    transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                box-shadow 0s, 
+    
+    /* Lightning fast fade for the lights, zero movement */
+    transition: box-shadow 0s, 
                 background-color 0s !important; 
 }
