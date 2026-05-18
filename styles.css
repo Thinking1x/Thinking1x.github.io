@@ -1174,6 +1174,7 @@ body.glass-mode #mainPage {
     background-color: transparent !important; 
 }
 
+/* 2. The Image Itself */
 #cover-bg-image {
     width: 100% !important;
     height: 100% !important;
