@@ -1159,7 +1159,7 @@ body.glass-mode #mainPage {
     background-color: transparent !important; 
 }
 
-/* 3. The Cover Image sitting at the absolute bottom layer */
+/* 1. The Cover Container (Back to blocking the glow) */
 .background-cover {
     display: none !important; 
     position: fixed !important;
@@ -1170,11 +1170,11 @@ body.glass-mode #mainPage {
     z-index: -999 !important; 
     pointer-events: none;
     
-    /* THE FIX: Replaced the solid #050505 wall with transparent so the RGB shines through! */
-    background-color: transparent !important; 
+    /* Rebuilt the solid dark wall to block the background RGB engine */
+    background-color: #050505 !important; 
 }
 
-/* 2. The Image Itself */
+/* 2. The Image Itself (Normal mode) */
 #cover-bg-image {
     width: 100% !important;
     height: 100% !important;
@@ -1183,8 +1183,7 @@ body.glass-mode #mainPage {
     filter: blur(10px) !important; 
     transform: scale(1.1) !important; 
     
-    /* THE MAGIC: This forces the image to absorb the neon lights behind it */
-    mix-blend-mode: overlay !important; 
+    /* Removed the mix-blend-mode so the colors don't bleed into the art! */
 }
 /* ==========================================
    HYPER-GLOW LAUNCHPAD EFFECT (Pure Glow, Zero Shake)
