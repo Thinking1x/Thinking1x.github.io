@@ -1120,12 +1120,29 @@ html, body {
 /* ==========================================
    TRANSPARENT / GLASS MODE
    ========================================== */
+/* ==========================================
+   TRANSPARENT (FLAT) MODE - BEAT SYNCED
+   ========================================== */
 body.glass-mode {
     background: transparent !important; 
-    /* If you are using this in OBS, it will be 100% see-through. 
-       If in a browser, it will just strip the dark colors. */
 }
 
+/* Strip solid backgrounds from panels, but NO blur! */
+body.glass-mode .sidebar,
+body.glass-mode .main-content,
+body.glass-mode .player-bar,
+body.glass-mode #mainPage {
+    
+    /* 🎵 THE MAGIC: The background darkness now pulses with the beat! */
+    background: rgba(0, 0, 0, var(--track-beat-alpha, 0.1)) !important; 
+    
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: rgba(255, 255, 255, 0.05);
+    
+    /* Lightning fast reaction so the panels don't lag behind the kick drum */
+    transition: background 0s !important; 
+}
 /* Strip solid backgrounds from panels and add blur */
 body.glass-mode .sidebar,
 body.glass-mode .main-content,
