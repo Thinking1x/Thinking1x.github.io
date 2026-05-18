@@ -209,14 +209,34 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleFileSelection() {
     const uploadFileInput = document.getElementById('uploadFileInput');
     if (!uploadFileInput) return;
-    const file = uploadFileInput.files[0];
-    if (file) {
+    
+    const files = uploadFileInput.files;
+    
+    if (files.length > 0) {
         const fileNameDisplay = document.getElementById('fileNameDisplay');
-        if (fileNameDisplay) fileNameDisplay.innerText = file.name;
-        
         const trackNameInput = document.getElementById('uploadTrackName');
+
+        // 1. Update the Drop Zone text (Handles single vs batch)
+        if (fileNameDisplay) {
+            if (files.length === 1) {
+                fileNameDisplay.innerText = files[0].name;
+            } else {
+                fileNameDisplay.innerText = `${files.length} signals ready for upload`;
+                fileNameDisplay.style.color = "var(--accent)"; // Give it a nice glow!
+            }
+        }
+        
+        // 2. Auto-fill the custom track name
         if (trackNameInput && trackNameInput.value === "") {
-            trackNameInput.value = file.name.replace('.mp3', '');
+            if (files.length === 1) {
+                // Strips ANY extension (.mp3, .flac, .wav) using Regex!
+                trackNameInput.value = files[0].name.replace(/\.[^/.]+$/, "");
+            } else {
+                // If it's a batch upload, we shouldn't force them all to have the same name.
+                // The triggerUpload loop will automatically use their individual file names.
+                trackNameInput.value = ""; 
+                trackNameInput.placeholder = "Auto-naming from files...";
+            }
         }
     }
 }
