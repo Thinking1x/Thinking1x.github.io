@@ -1169,20 +1169,21 @@ body.glass-mode #mainPage {
     height: 100vh !important;
     z-index: -999 !important; 
     pointer-events: none;
-    background-color: #050505 !important;
-}
-
-body.glass-mode .background-cover {
-    display: block !important; 
+    
+    /* THE FIX: Replaced the solid #050505 wall with transparent so the RGB shines through! */
+    background-color: transparent !important; 
 }
 
 #cover-bg-image {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important; 
-    opacity: 0.4 !important; /* Your 40% opacity choice */
+    opacity: 0.4 !important; 
     filter: blur(10px) !important; 
     transform: scale(1.1) !important; 
+    
+    /* THE MAGIC: This forces the image to absorb the neon lights behind it */
+    mix-blend-mode: overlay !important; 
 }
 /* ==========================================
    HYPER-GLOW LAUNCHPAD EFFECT (Pure Glow, Zero Shake)
