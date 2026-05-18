@@ -263,6 +263,13 @@ function startVisualizer() {
         renderFrame();
     }
 }
+// In startVisualizer() or playTrack()
+function updateDynamicBackground(coverArtUrl) {
+    const bgImage = document.getElementById('cover-bg-image');
+    if (bgImage) {
+        bgImage.src = coverArtUrl;
+    }
+}
 
 function renderFrame() {
     const root = document.documentElement; 

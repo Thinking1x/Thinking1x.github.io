@@ -125,9 +125,15 @@ body {
    APP SHELL
 ============================================= */
 #mainPage {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+    /* Your original flexbox layout (Keeps the UI stacked properly) */
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+
+    /* The NEW transparency upgrades */
+    background: transparent !important; /* Strips the solid dark color */
+    position: relative; /* Allows the background cover to position itself behind this */
+    overflow: hidden; /* Prevents the blurred background from causing weird scrollbars */
 }
 
 /* Mobile menu toggle — hidden on desktop */
