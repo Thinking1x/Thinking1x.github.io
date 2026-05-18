@@ -1182,9 +1182,9 @@ body.glass-mode #mainPage {
                 inset 0 0 15px hsla(var(--beat-hue, 180), 100%, 90%, 1) !important;
                 
     /* Physically pop the row forward */
-    transform: scale(1.02);
-    border-radius: 6px;
-    z-index: 10;
+    transform: scale(1.01);
+    border-radius: 4px;
+    z-index: 6;
     position: relative;
     
     /* Smooth out the pop so it looks bouncy, but keep color instant */
