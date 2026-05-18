@@ -1134,57 +1134,35 @@ html, body {
     transition: background-color 0s, box-shadow 0s; /* Instant ON */
 }
 /* ==========================================
-   TRANSPARENT (FLAT) MODE - BEAT SYNCED
-   ========================================== */
-/* ==========================================
-   TRANSPARENT (FLAT) MODE - BEAT SYNCED
-   ========================================== */
-/* Force the absolute base of the website to be clear */
-html, body.glass-mode {
-    background: transparent !important;
-    background-color: transparent !important;
-}
-
-/* Strip solid backgrounds from panels */
-body.glass-mode .sidebar,
-body.glass-mode .main-content,
-body.glass-mode .player-bar,
-body.glass-mode #mainPage {
-    background: rgba(0, 0, 0, var(--track-beat-alpha, 0.1)) !important; 
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-color: rgba(255, 255, 255, 0.05);
-    transition: background 0s !important; 
-}
-
-/* Force the cover image to the absolute back */
+/* 1. The Background Container (Locks it to the back wall) */
 .background-cover {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -999 !important; /* Forces it behind literally everything */
-    pointer-events: none; /* Prevents it from blocking your clicks */
+    position: fixed !important; /* Forces it out of the normal page layout */
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important; /* Stretch to full screen width */
+    height: 100vh !important; /* Stretch to full screen height */
+    z-index: -999 !important; /* Shoves it deep behind the UI */
+    pointer-events: none; /* Prevents it from blocking your mouse clicks */
+    background-color: #050505 !important; /* Dark base behind the image */
 }
 
-.background-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* Nice subtle shadow so text is readable */
-    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8));
-    z-index: -1;
-}
-
+/* 2. The Image Itself (Sets your 40% opacity) */
 #cover-bg-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: blur(5px);
-    transform: scale(1.1);
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Prevents squishing, crops perfectly to screen */
+    
+    /* YOUR REQUEST: EXACTLY 40% OPACITY */
+    opacity: 0.4 !important; 
+    
+    /* Adds a blur so it doesn't make your track text hard to read */
+    filter: blur(10px) !important; 
+    transform: scale(1.1) !important; /* Prevents ugly white borders from the blur */
+}
+
+/* 3. Keep the overlay just in case, but make it invisible for now */
+.background-overlay {
+    display: none !important; 
 }
 
 /* ==========================================
