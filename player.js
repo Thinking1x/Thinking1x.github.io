@@ -46,13 +46,25 @@ async function loadTrack(i, autoplay = false) {
         document.getElementById('npTitle').innerText = track.name;
         document.getElementById('npArtist').innerText = track.artist;
 
-        const coverArtEl = document.getElementById('npCover');
-        if (coverArtEl) {
-            coverArtEl.src = track.cover;
-            coverArtEl.onerror = () => {
-                coverArtEl.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect width='56' height='56' fill='%231a1a36'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='24' fill='%2300E5FF'%3E♪%3C/text%3E%3C/svg%3E`;
-            };
-        }
+// 1. Your existing code: Updates the tiny cover art in the player bar
+      const coverArtEl = document.getElementById('npCover');
+      if (coverArtEl) {
+          coverArtEl.src = track.cover;
+          coverArtEl.onerror = () => {
+              coverArtEl.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect width='56' height='56' fill='%231a1a36'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='24' fill='%2300E5FF'%3E♪%3C/text%3E%3C/svg%3E`;
+          };
+      }
+
+      // 2. THE NEW CODE: Updates the massive background image!
+      const bgImage = document.getElementById('cover-bg-image');
+      if (bgImage) {
+          bgImage.src = track.cover; // Matches the tiny cover perfectly
+          
+          // If the song has no artwork, just clear the background so it defaults to dark
+          bgImage.onerror = () => {
+              bgImage.src = ""; 
+          };
+      }
 
         renderTrackList();
 
@@ -261,13 +273,6 @@ function startVisualizer() {
         isVisualizerRunning = true;
         document.getElementById('snow-canvas').style.opacity = '1';
         renderFrame();
-    }
-}
-// In startVisualizer() or playTrack()
-function updateDynamicBackground(coverArtUrl) {
-    const bgImage = document.getElementById('cover-bg-image');
-    if (bgImage) {
-        bgImage.src = coverArtUrl;
     }
 }
 
