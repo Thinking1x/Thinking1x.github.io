@@ -1136,11 +1136,16 @@ html, body {
 /* ==========================================
    TRANSPARENT (FLAT) MODE - BEAT SYNCED
    ========================================== */
-body.glass-mode {
-    background: transparent !important; 
+/* ==========================================
+   TRANSPARENT (FLAT) MODE - BEAT SYNCED
+   ========================================== */
+/* Force the absolute base of the website to be clear */
+html, body.glass-mode {
+    background: transparent !important;
+    background-color: transparent !important;
 }
 
-/* Strip solid backgrounds from panels, NO blur, and pulse with the beat! */
+/* Strip solid backgrounds from panels */
 body.glass-mode .sidebar,
 body.glass-mode .main-content,
 body.glass-mode .player-bar,
@@ -1150,6 +1155,36 @@ body.glass-mode #mainPage {
     -webkit-backdrop-filter: none !important;
     border-color: rgba(255, 255, 255, 0.05);
     transition: background 0s !important; 
+}
+
+/* Force the cover image to the absolute back */
+.background-cover {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -999 !important; /* Forces it behind literally everything */
+    pointer-events: none; /* Prevents it from blocking your clicks */
+}
+
+.background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Nice subtle shadow so text is readable */
+    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.8));
+    z-index: -1;
+}
+
+#cover-bg-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(5px);
+    transform: scale(1.1);
 }
 
 /* ==========================================
