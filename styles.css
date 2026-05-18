@@ -125,15 +125,12 @@ body {
    APP SHELL
 ============================================= */
 #mainPage {
-    /* Your original flexbox layout (Keeps the UI stacked properly) */
     display: flex;
     flex-direction: column;
     height: 100vh;
-
-    /* The NEW transparency upgrades */
-    background: transparent !important; /* Strips the solid dark color */
-    position: relative; /* Allows the background cover to position itself behind this */
-    overflow: hidden; /* Prevents the blurred background from causing weird scrollbars */
+    
+    position: relative;
+    overflow: hidden;
 }
 .background-overlay {
     position: absolute;
@@ -1135,15 +1132,22 @@ html, body {
 }
 /* ==========================================
 /* 1. The Background Container (Locks it to the back wall) */
+/* 1. HIDDEN BY DEFAULT (Normal Mode) */
 .background-cover {
-    position: fixed !important; /* Forces it out of the normal page layout */
+    display: none !important; /* Shuts the image off completely to save computer memory */
+    position: fixed !important;
     top: 0 !important;
     left: 0 !important;
-    width: 100vw !important; /* Stretch to full screen width */
-    height: 100vh !important; /* Stretch to full screen height */
-    z-index: -999 !important; /* Shoves it deep behind the UI */
-    pointer-events: none; /* Prevents it from blocking your mouse clicks */
-    background-color: #050505 !important; /* Dark base behind the image */
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: -999 !important;
+    pointer-events: none;
+    background-color: #050505 !important;
+}
+
+/* 2. ONLY SHOW WHEN SWITCH IS ON */
+body.glass-mode .background-cover {
+    display: block !important; 
 }
 
 /* 2. The Image Itself (Sets your 40% opacity) */
