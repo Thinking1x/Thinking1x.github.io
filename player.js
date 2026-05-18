@@ -9,6 +9,8 @@ const savedState = localStorage.getItem('visualizerState');
 let userWantsVisualizer = localStorage.getItem('visState') === null ? true : (localStorage.getItem('visState') === 'true');
 let userWantsUIGlow = localStorage.getItem('glowState') === null ? true : (localStorage.getItem('glowState') === 'true');
 let userWantsLaunchpad = localStorage.getItem('padState') === null ? true : (localStorage.getItem('padState') === 'true');
+let userWantsTransparent = localStorage.getItem('transState') === 'true';
+let userWantsHyperGlow = localStorage.getItem('hyperState') === 'true';
 
 let audioCtx, analyser, dataArray;
 let isVisualizerRunning = false;
@@ -426,8 +428,10 @@ function triggerDynamicLaunchpad(bassStrength) {
         const randomTrack = visibleTracks[Math.floor(Math.random() * visibleTracks.length)];
         
         randomTrack.classList.add('launchpad-flash');
+        if (userWantsHyperGlow) randomTrack.classList.add('hyper-glow')
         setTimeout(() => {
             randomTrack.classList.remove('launchpad-flash');
+            randomTrack.classList.remove('hyper-glow'); // NEW
         }, 70);
     }
 }
@@ -465,14 +469,36 @@ function toggleLaunchpadMode() {
     userWantsLaunchpad = document.getElementById('launchpadToggleInput').checked;
     localStorage.setItem('padState', userWantsLaunchpad);
 }
+// Add these below your other toggle functions
+function toggleTransparentMode() {
+    userWantsTransparent = document.getElementById('transparentToggleInput').checked;
+    localStorage.setItem('transState', userWantsTransparent);
+    
+    if (userWantsTransparent) {
+        document.body.classList.add('glass-mode');
+    } else {
+        document.body.classList.remove('glass-mode');
+    }
+}
+
+function toggleHyperGlowMode() {
+    userWantsHyperGlow = document.getElementById('hyperGlowToggleInput').checked;
+    localStorage.setItem('hyperState', userWantsHyperGlow);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     // Set the physical switches to match the saved memory when the page loads
     const visInput = document.getElementById('visualizerToggleInput');
     const glowInput = document.getElementById('uiGlowToggleInput');
     const padInput = document.getElementById('launchpadToggleInput');
+    const transInput = document.getElementById('transparentToggleInput');
+    const hyperInput = document.getElementById('hyperGlowToggleInput');
     
     if (visInput) visInput.checked = userWantsVisualizer;
     if (glowInput) glowInput.checked = userWantsUIGlow;
     if (padInput) padInput.checked = userWantsLaunchpad;
+    if (transInput) transInput.checked = userWantsTransparent;
+    if (hyperInput) hyperInput.checked = userWantsHyperGlow;
+    if (userWantsTransparent) document.body.classList.add('glass-mode');
 });
+

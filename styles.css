@@ -1117,3 +1117,45 @@ html, body {
     border-radius: 4px;
     transition: background-color 0s, box-shadow 0s; /* Instant ON */
 }
+/* ==========================================
+   TRANSPARENT / GLASS MODE
+   ========================================== */
+body.glass-mode {
+    background: transparent !important; 
+    /* If you are using this in OBS, it will be 100% see-through. 
+       If in a browser, it will just strip the dark colors. */
+}
+
+/* Strip solid backgrounds from panels and add blur */
+body.glass-mode .sidebar,
+body.glass-mode .main-content,
+body.glass-mode .player-bar,
+body.glass-mode #mainPage {
+    background: rgba(10, 15, 30, 0.25) !important; 
+    backdrop-filter: blur(12px) saturate(150%);
+    -webkit-backdrop-filter: blur(12px) saturate(150%);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* ==========================================
+   HYPER-GLOW LAUNCHPAD EFFECT
+   ========================================== */
+.launchpad-flash.hyper-glow {
+    /* Brighter core color */
+    background-color: hsla(var(--beat-hue, 180), 100%, 75%, 0.8) !important;
+    
+    /* Massive outer neon bloom + intense inner shadow */
+    box-shadow: 0 0 35px hsla(var(--beat-hue, 180), 100%, 60%, 0.9),
+                inset 0 0 15px hsla(var(--beat-hue, 180), 100%, 90%, 1) !important;
+                
+    /* Physically pop the row forward */
+    transform: scale(1.02);
+    border-radius: 6px;
+    z-index: 10;
+    position: relative;
+    
+    /* Smooth out the pop so it looks bouncy, but keep color instant */
+    transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
+                box-shadow 0s, 
+                background-color 0s !important; 
+}
