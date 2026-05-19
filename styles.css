@@ -1195,3 +1195,62 @@ body.glass-mode .background-cover {
                 box-shadow 0s, 
                 background-color 0s !important; 
 }
+/* ==========================================
+   KEYBOARD LAUNCHPAD (Independent Split Mode)
+   ========================================== */
+.keyboard-flash {
+    /* Uses a separate kb-hue variable so the audio visualizer can't touch it */
+    background-color: hsla(var(--kb-hue, 180), 100%, 75%, 0.8) !important;
+    
+    /* Massive outer neon bloom + intense inner shadow */
+    box-shadow: 0 0 35px hsla(var(--kb-hue, 180), 100%, 60%, 0.9),
+                inset 0 0 15px hsla(var(--kb-hue, 180), 100%, 90%, 1) !important;
+                
+    border-radius: 4px;
+    z-index: 10;
+    position: relative;
+    
+    /* Forces the glow to be instant with zero delay */
+    transition: none !important; 
+    transform: none !important;
+    animation: none !important;
+}
+/* ==========================================
+   RHYTHM GAME INDICATORS (Beat-Synced Hints)
+   ========================================== */
+/* 1. Assign the correct letter to the first 8 rows */
+.track:nth-child(1)::after { content: "A"; }
+.track:nth-child(2)::after { content: "S"; }
+.track:nth-child(3)::after { content: "D"; }
+.track:nth-child(4)::after { content: "F"; }
+.track:nth-child(5)::after { content: "J"; }
+.track:nth-child(6)::after { content: "K"; }
+.track:nth-child(7)::after { content: "L"; }
+.track:nth-child(8)::after { content: ";"; }
+
+/* 2. Style the letters and animate them to the beat! */
+.track:nth-child(-n+8)::after {
+    position: absolute;
+    right: 60px; /* Keeps it safely away from your trash can icon */
+    top: 50%;
+    transform: translateY(-50%);
+    
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 0 15px #00E5FF, 0 0 30px #00E5FF;
+    pointer-events: none;
+    
+    /* 🎵 THE MAGIC: Fades in and out exactly with the kick drum! */
+    opacity: var(--track-beat-alpha, 0.1); 
+    transition: opacity 0.05s ease;
+}
+
+/* 3. When you successfully press the key, make the letter explode with light */
+.track.keyboard-flash::after {
+    opacity: 1 !important;
+    color: #ffffff;
+    text-shadow: 0 0 20px #ffffff, 0 0 40px #ffffff;
+    transform: translateY(-50%) scale(1.3);
+    transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
