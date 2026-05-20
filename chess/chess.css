@@ -1,0 +1,65 @@
+body {
+    background-color: #0f0f0f;
+    color: #f1f1f1;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: #1e1e1e;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid #333;
+    text-align: center;
+}
+
+h1 {
+    margin-top: 0;
+    color: #00E5FF; /* A nice neon blue accent */
+    letter-spacing: 2px;
+}
+
+.board-container {
+    width: 400px;
+    margin: 20px auto;
+}
+
+.status-box {
+    margin-top: 20px;
+    background: #121212;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+
+p {
+    margin: 0 0 15px 0;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+#status {
+    color: #00E5FF;
+}
+
+button {
+    background: #f1f1f1;
+    color: #0f0f0f;
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #00E5FF;
+    color: #000;
+}
