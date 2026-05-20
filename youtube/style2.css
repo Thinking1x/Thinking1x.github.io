@@ -1,0 +1,157 @@
+/* ==========================================
+   YOUTUBE DARK MODE THEME (style2.css)
+   ========================================== */
+
+body {
+    /* YouTube's exact dark mode background color */
+    background-color: #0f0f0f; 
+    color: #f1f1f1;
+    font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding-top: 80px; /* Space for the top nav bar */
+}
+
+/* 1. The Top Navigation Bar */
+.yt-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 56px;
+    background-color: #0f0f0f;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 100;
+}
+
+.yt-logo {
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    width: 200px;
+}
+
+/* 2. The Pill-Shaped Search Bar */
+.search-box {
+    display: flex;
+    flex: 1;
+    max-width: 600px;
+    align-items: center;
+}
+
+input {
+    flex: 1;
+    background: #121212;
+    border: 1px solid #303030;
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 40px 0 0 40px; /* Rounded on the left only */
+    outline: none;
+}
+
+input:focus {
+    border-color: #1c62b9; /* YouTube's subtle blue focus ring */
+}
+
+button {
+    background: #222222;
+    border: 1px solid #303030;
+    border-left: none; /* Merges with the input field */
+    color: #f1f1f1;
+    padding: 10px 20px;
+    border-radius: 0 40px 40px 0; /* Rounded on the right only */
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background: #272727;
+}
+
+.spacer {
+    width: 200px; /* Balances the flexbox so the search bar stays dead center */
+}
+
+/* 3. The Main Content Area */
+.yt-main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 4. The Horizontal Result Card (Like a YouTube Search Result) */
+#resultDisplay {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    margin-top: 20px;
+    text-decoration: none;
+}
+
+#resultDisplay.hidden {
+    display: none;
+}
+
+#coverArt {
+    width: 360px;
+    height: 202px; /* Perfect 16:9 aspect ratio */
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.track-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.track-info h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.track-info p {
+    color: #aaaaaa;
+    margin: 0 0 15px 0;
+    font-size: 0.9rem;
+}
+
+.play-btn {
+    align-self: flex-start;
+    background-color: #f1f1f1;
+    color: #0f0f0f;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.play-btn:hover {
+    background-color: #d9d9d9;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    #resultDisplay {
+        flex-direction: column;
+    }
+    #coverArt {
+        width: 100%;
+        height: auto;
+    }
+    .spacer, .yt-logo {
+        display: none; /* Hide logo on tiny screens to make room for search */
+    }
+}
