@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube API Database</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Database Link</h1>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search for a signal or artist...">
+            <button id="searchBtn">SEARCH</button>
+        </div>
+
+        <div id="resultDisplay" class="hidden">
+            <img id="coverArt" src="" alt="Video Cover">
+            <div class="track-info">
+                <h2 id="videoTitle">Loading...</h2>
+                <p id="channelName">Channel Name</p>
+                <a id="videoLink" href="#" target="_blank" class="play-btn">OPEN ON YOUTUBE</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="youtube.js"></script>
+</body>
+</html>
