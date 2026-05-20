@@ -155,3 +155,66 @@ button:hover {
         display: none; /* Hide logo on tiny screens to make room for search */
     }
 }
+/* ==========================================
+   4. THE YOUTUBE VIDEO GRID
+   ========================================== */
+.section-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+/* Creates a responsive grid that fits as many videos as possible */
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    row-gap: 40px;
+}
+
+.video-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.video-card:hover {
+    transform: scale(1.02);
+}
+
+.video-card img {
+    width: 100%;
+    aspect-ratio: 16/9; /* Forces the perfect YouTube thumbnail shape */
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 12px;
+}
+
+.video-card-info {
+    display: flex;
+    flex-direction: column;
+    padding-right: 15px;
+}
+
+.video-card-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin: 0 0 6px 0;
+    line-height: 1.4;
+    
+    /* Forces the title to perfectly cut off after 2 lines with "..." */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.video-card-channel {
+    color: #aaaaaa;
+    font-size: 0.9rem;
+    margin: 0;
+}
