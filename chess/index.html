@@ -9,42 +9,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="container">
         <h1>CHESS // TERMINAL</h1>
         
-        <div class="status-box">
-            <p>Status: <span id="status">White to move</span></p>
-            <button id="resetBtn">ABORT MATCH</button>
-        </div>
-
-        <div id="myBoard" class="board-container"></div>
-    </div>
-
-    <div id="gameOverModal" class="modal hidden">
-        <div class="modal-content">
-            <h2 id="modalTitle" class="glitch-text">SYSTEM OFFLINE</h2>
-            <p id="modalResult" class="result-text">Checkmate.</p>
-            
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <h3>TOTAL MOVES</h3>
-                    <p id="moveCount">0</p>
-                </div>
-                <div class="stat-box">
-                    <h3>WHITE CASUALTIES</h3>
-                    <p id="missingWhite" class="chess-symbols">None</p>
-                </div>
-                <div class="stat-box">
-                    <h3>BLACK CASUALTIES</h3>
-                    <p id="missingBlack" class="chess-symbols">None</p>
-                </div>
+        <div id="multiplayer-hub" style="margin-bottom: 20px; background: #1e293b; padding: 10px; border-radius: 6px; border: 1px dashed #00E5FF;">
+            <button id="createMatchBtn" class="neon-btn" style="width: auto; padding: 10px 20px;">CREATE MULTIPLAYER MATCH</button>
+            <div id="inviteLinkArea" class="hidden" style="margin-top: 10px;">
+                <span style="color: #94a3b8; font-size: 0.9rem;">Opponent Link:</span>
+                <input type="text" id="inviteLinkInput" readonly style="width: 100%; padding: 8px; margin-top: 5px; background: #0f172a; color: #00E5FF; border: 1px solid #334155; border-radius: 4px; cursor: pointer;">
             </div>
-
-            <button id="playAgainBtn" class="neon-btn">INITIALIZE NEW MATCH</button>
         </div>
-    </div>
-    <div class="status-box">
+        
+        <div class="status-box">
             <p>Status: <span id="status">White to move</span></p>
             
             <div class="revert-info">
@@ -58,9 +34,28 @@
             </div>
         </div>
 
+        <div id="myBoard" class="board-container"></div>
+    </div>
+
+    <div id="gameOverModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modalTitle" class="glitch-text">SYSTEM OFFLINE</h2>
+            <p id="modalResult" class="result-text">Checkmate.</p>
+            <div class="stats-grid">
+                <div class="stat-box"><h3>TOTAL MOVES</h3><p id="moveCount">0</p></div>
+                <div class="stat-box"><h3>WHITE CASUALTIES</h3><p id="missingWhite" class="chess-symbols">None</p></div>
+                <div class="stat-box"><h3>BLACK CASUALTIES</h3><p id="missingBlack" class="chess-symbols">None</p></div>
+            </div>
+            <button id="playAgainBtn" class="neon-btn">INITIALIZE NEW MATCH</button>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
+    
     <script src="chess.js"></script>
 </body>
 </html>

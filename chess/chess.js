@@ -1,14 +1,27 @@
+// ==========================================
+// 1. APPWRITE CONFIGURATION
+// ==========================================
+const { Client, Databases, ID } = Appwrite;
+const client = new Client()
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject('6a0eba1a001e0c61b69a'); // <--- PASTE YOUR PROJECT ID HERE!
+
+const databases = new Databases(client);
+const DB_ID = '6a0eba6b002840ded885';
+const COL_ID = 'matches';
+
+let currentMatchId = new URLSearchParams(window.location.search).get('match');
+
+// ==========================================
+// 2. CHESS ENGINE & HTML ELEMENTS
+// ==========================================
 const game = new Chess();
 const statusElement = document.getElementById('status');
 const resetBtn = document.getElementById('resetBtn');
-
-// New Revert Elements
 const revertBtn = document.getElementById('revertBtn');
 const whiteRevertsEl = document.getElementById('whiteReverts');
 const blackRevertsEl = document.getElementById('blackReverts');
-
-// State trackers
-let reverts = { w: 2, b: 2 }; // White and Black start with 2 reverts
+let reverts = { w: 2, b: 2 };
 
 // Modal Elements
 const modal = document.getElementById('gameOverModal');
@@ -24,8 +37,89 @@ const moveSound = new Audio('https://images.chesscomfiles.com/chess-themes/sound
 const captureSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/capture.mp3');
 const checkSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-check.mp3');
 const gameOverSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/game-end.mp3');
-const revertSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/notify.mp3'); // Sound for undo
+const revertSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/notify.mp3');
 
+// ==========================================
+// 3. MULTIPLAYER LOGIC
+// ==========================================
+const createMatchBtn = document.getElementById('createMatchBtn');
+const inviteLinkArea = document.getElementById('inviteLinkArea');
+const inviteLinkInput = document.getElementById('inviteLinkInput');
+
+// Click to copy the link easily
+inviteLinkInput.addEventListener('click', () => {
+    inviteLinkInput.select();
+    document.execCommand('copy');
+    alert("Link copied! Send it to your opponent.");
+});
+
+// A. Create a new match in Appwrite
+createMatchBtn.addEventListener('click', async () => {
+    createMatchBtn.innerText = "INITIALIZING SECURE UPLINK...";
+    try {
+        // Create a new document in Appwrite with the starting board
+        const doc = await databases.createDocument(DB_ID, COL_ID, ID.unique(), { 
+            fen: game.fen() 
+        });
+        
+        // Change the URL so they can share it
+        currentMatchId = doc.$id;
+        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?match=${currentMatchId}`;
+        window.history.pushState({path:newUrl}, '', newUrl);
+        
+        setupMultiplayerUI(newUrl);
+        subscribeToMatch();
+    } catch (error) {
+        console.error("Appwrite Error:", error);
+        alert("Failed to create match. Did you set permissions to 'Any'?");
+        createMatchBtn.innerText = "CREATE MULTIPLAYER MATCH";
+    }
+});
+
+// B. Join an existing match if URL has ?match=...
+async function initMultiplayer() {
+    if (currentMatchId) {
+        try {
+            // Pull the current board state from Appwrite
+            const doc = await databases.getDocument(DB_ID, COL_ID, currentMatchId);
+            game.load(doc.fen);
+            setupMultiplayerUI(window.location.href);
+            subscribeToMatch();
+        } catch (error) {
+            console.error(error);
+            alert("Match not found or expired.");
+        }
+    }
+}
+
+function setupMultiplayerUI(url) {
+    createMatchBtn.classList.add('hidden');
+    inviteLinkArea.classList.remove('hidden');
+    inviteLinkInput.value = url;
+}
+
+// C. The Realtime Listener (Listens for opponent moves)
+function subscribeToMatch() {
+    client.subscribe(`databases.${DB_ID}.collections.${COL_ID}.documents.${currentMatchId}`, response => {
+        const newFen = response.payload.fen;
+        
+        // Only update if the board actually changed (prevents glitchy loops)
+        if (newFen && newFen !== game.fen()) {
+            game.load(newFen);
+            board.position(newFen);
+            
+            // Play a sound when opponent moves!
+            if (game.in_check()) { checkSound.play(); } 
+            else { moveSound.play(); }
+            
+            updateStatus();
+        }
+    });
+}
+
+// ==========================================
+// 4. GAMEPLAY LOGIC (Drag & Drop)
+// ==========================================
 function onDragStart(source, piece) {
     if (game.game_over()) return false;
     if ((game.turn() === 'w' && piece.search(/^b/) !== -1) ||
@@ -53,6 +147,12 @@ function onDrop(source, target) {
     }
 
     updateStatus();
+
+    // 🚀 NEW: PUSH MOVE TO APPWRITE MULTIPLAYER CLOUD
+    if (currentMatchId) {
+        databases.updateDocument(DB_ID, COL_ID, currentMatchId, { fen: game.fen() })
+            .catch(err => console.error("Sync Error:", err));
+    }
 }
 
 function onSnapEnd() {
@@ -60,86 +160,43 @@ function onSnapEnd() {
 }
 
 // ==========================================
-// REVERT LOGIC
+// 5. REVERTS & UI UPDATES
 // ==========================================
 function updateRevertsUI() {
     whiteRevertsEl.innerText = reverts.w;
     blackRevertsEl.innerText = reverts.b;
 
-    // You can't revert if no moves have been made
     if (game.history().length === 0) {
         revertBtn.disabled = true;
         return;
     }
 
-    // The person who just moved is the one who needs the revert
-    // (If it's Black's turn, it means White just moved)
     const lastMoveColor = game.turn() === 'w' ? 'b' : 'w';
-
     if (reverts[lastMoveColor] > 0 && !game.game_over()) {
         revertBtn.disabled = false;
     } else {
-        revertBtn.disabled = true; // Lock button if they are out of reverts
+        revertBtn.disabled = true;
     }
 }
 
 revertBtn.addEventListener('click', () => {
     if (game.history().length === 0) return;
-
     const lastMoveColor = game.turn() === 'w' ? 'b' : 'w';
 
     if (reverts[lastMoveColor] > 0) {
-        game.undo(); // Erase the last move
-        reverts[lastMoveColor]--; // Deduct 1 revert token
-        
-        board.position(game.fen()); // Snap board back visually
-        $('.square-55d63').removeClass('highlight-square'); // Clear highlights
-        
+        game.undo();
+        reverts[lastMoveColor]--;
+        board.position(game.fen());
+        $('.square-55d63').removeClass('highlight-square');
         revertSound.play();
         updateStatus();
-    }
-});
-
-// ==========================================
-// THE CASUALTY CALCULATOR
-// ==========================================
-function calculatePostGameStats() {
-    const totalMoves = Math.ceil(game.history().length / 2);
-    const startCounts = { p: 8, n: 2, b: 2, r: 2, q: 1 };
-    const currentCounts = {
-        w: { p: 0, n: 0, b: 0, r: 0, q: 0 },
-        b: { p: 0, n: 0, b: 0, r: 0, q: 0 }
-    };
-
-    const currentBoard = game.board();
-    for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 8; j++) {
-            if (currentBoard[i][j] && currentBoard[i][j].type !== 'k') {
-                currentCounts[currentBoard[i][j].color][currentBoard[i][j].type]++;
-            }
+        
+        // 🚀 NEW: SYNC REVERT ACROSS NETWORK
+        if (currentMatchId) {
+            databases.updateDocument(DB_ID, COL_ID, currentMatchId, { fen: game.fen() });
         }
     }
-
-    const symbols = {
-        w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕' },
-        b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛' }
-    };
-
-    let wCasualties = '';
-    let bCasualties = '';
-
-    for (let type in startCounts) {
-        let wMissing = startCounts[type] - currentCounts.w[type];
-        let bMissing = startCounts[type] - currentCounts.b[type];
-
-        if (wMissing > 0) wCasualties += `${symbols.w[type]} x${wMissing} &nbsp;&nbsp;`;
-        if (bMissing > 0) bCasualties += `${symbols.b[type]} x${bMissing} &nbsp;&nbsp;`;
-    }
-
-    moveCountEl.innerText = totalMoves;
-    missingWhiteEl.innerHTML = wCasualties || 'None (Flawless)';
-    missingBlackEl.innerHTML = bCasualties || 'None (Flawless)';
-}
+});
 
 function updateStatus() {
     let statusHTML = '';
@@ -147,7 +204,6 @@ function updateStatus() {
 
     if (game.game_over()) {
         document.getElementById('myBoard').classList.add('game-over-flash');
-        
         if (game.in_checkmate()) {
             modalTitle.innerText = "CRITICAL FAILURE";
             modalResult.innerText = `${moveColor} was checkmated.`;
@@ -155,19 +211,17 @@ function updateStatus() {
             modalTitle.innerText = "STALEMATE";
             modalResult.innerText = "Match ended in a draw.";
         }
-        
-        calculatePostGameStats();
         setTimeout(() => modal.classList.remove('hidden'), 1000); 
-        
     } else {
         statusHTML = `${moveColor} to move`;
         if (game.in_check()) statusHTML += ' <span style="color: #ff4444;">(IN CHECK!)</span>';
     }
 
     statusElement.innerHTML = statusHTML;
-    updateRevertsUI(); // Check if revert button should be on/off
+    updateRevertsUI();
 }
 
+// Initialize Board
 const config = {
     draggable: true,
     position: 'start',
@@ -176,24 +230,8 @@ const config = {
     onSnapEnd: onSnapEnd,
     pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png'
 };
-
 const board = Chessboard('myBoard', config);
 
-// Reset / Play Again logic
-function resetGame() {
-    game.reset();
-    board.start();
-    
-    // Reset revert tokens
-    reverts = { w: 2, b: 2 };
-    
-    $('.square-55d63').removeClass('highlight-square');
-    document.getElementById('myBoard').classList.remove('game-over-flash');
-    modal.classList.add('hidden');
-    updateStatus();
-}
-
-resetBtn.addEventListener('click', resetGame);
-playAgainBtn.addEventListener('click', resetGame);
-
+// Run initialization
 updateStatus();
+initMultiplayer(); // Boot up network if URL has a match ID!
