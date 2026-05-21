@@ -65,7 +65,7 @@ const trackLibrary = {
     "": "", // Offline mode
     "chill": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3",
     "intense": "https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b32e02f9.mp3",
-    "chill2": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", 
+    "chill2": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", // Formally Lo-Fi, now Chill Option 2
     "epic": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" 
 };
 
@@ -212,6 +212,15 @@ const createMatchBtn = document.getElementById('createMatchBtn');
 const inviteLinkArea = document.getElementById('inviteLinkArea');
 const inviteLinkInput = document.getElementById('inviteLinkInput');
 
+// 🚀 NEW: Data Sync Helper Function
+// Packages the board layout AND the revert counts into one synced string
+function syncGameState() {
+    if (currentMatchId) {
+        const syncString = `${game.fen()}||${reverts.w}||${reverts.b}`;
+        databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: syncString });
+    }
+}
+
 inviteLinkInput.addEventListener('click', () => {
     inviteLinkInput.select();
     document.execCommand('copy');
@@ -222,7 +231,7 @@ createMatchBtn.addEventListener('click', async () => {
     createMatchBtn.innerText = "INITIALIZING SECURE UPLINK...";
     try {
         const doc = await databases.createDocument(DB_ID, MATCHES_COL, ID.unique(), { 
-            fen: game.fen(), whiteName: myUsername 
+            fen: `${game.fen()}||2||2`, whiteName: myUsername 
         });
         
         currentMatchId = doc.$id;
@@ -248,7 +257,17 @@ createMatchBtn.addEventListener('click', async () => {
 async function initMultiplayer() {
     try {
         const doc = await databases.getDocument(DB_ID, MATCHES_COL, currentMatchId);
-        game.load(doc.fen);
+        
+        // 🚀 NEW: Unpack the synced data when joining
+        let startFen = doc.fen;
+        if (startFen.includes('||')) {
+            const parts = startFen.split('||');
+            startFen = parts[0];
+            reverts.w = parseInt(parts[1]);
+            reverts.b = parseInt(parts[2]);
+        }
+        
+        game.load(startFen);
         
         myColor = 'b';
         blackPlayerName = myUsername;
@@ -283,10 +302,19 @@ function subscribeToMatch() {
         if (data.whiteName) whitePlayerName = data.whiteName;
         if (data.blackName) blackPlayerName = data.blackName;
 
-        const newFen = data.fen;
+        let newFen = data.fen;
+        
         if (newFen && newFen.startsWith('FORFEIT_')) {
             triggerGameOver(newFen.split('_')[1], 'forfeit');
             return;
+        }
+
+        // 🚀 NEW: Unpack the synced data on every move your opponent makes
+        if (newFen && newFen.includes('||')) {
+            const parts = newFen.split('||');
+            newFen = parts[0];
+            reverts.w = parseInt(parts[1]);
+            reverts.b = parseInt(parts[2]);
         }
 
         if (newFen && newFen !== game.fen()) {
@@ -326,8 +354,7 @@ function onDrop(source, target) {
     }
 
     updateStatus();
-
-    if (currentMatchId) databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: game.fen() });
+    syncGameState(); // 🚀 Sends the move AND the revert counters
 }
 
 function onSnapEnd() { board.position(game.fen()); }
@@ -338,22 +365,38 @@ function onSnapEnd() { board.position(game.fen()); }
 function updateRevertsUI() {
     whiteRevertsEl.innerText = reverts.w;
     blackRevertsEl.innerText = reverts.b;
-    if (game.history().length === 0 || isGameOver) { revertBtn.disabled = true; return; }
+    
+    if (game.history().length === 0 || isGameOver) { 
+        revertBtn.disabled = true; 
+        return; 
+    }
+    
     const lastMoveColor = game.turn() === 'w' ? 'b' : 'w';
-    revertBtn.disabled = (reverts[lastMoveColor] > 0 && !game.game_over()) ? false : true;
+    
+    // 🚀 UPGRADE: You can only undo if YOU made the last move, and YOU have reverts left
+    if (myColor === lastMoveColor && reverts[myColor] > 0 && !game.game_over()) {
+        revertBtn.disabled = false;
+    } else {
+        revertBtn.disabled = true;
+    }
 }
 
 revertBtn.addEventListener('click', () => {
     if (game.history().length === 0 || isGameOver) return;
+    
     const lastMoveColor = game.turn() === 'w' ? 'b' : 'w';
-    if (reverts[lastMoveColor] > 0) {
+    
+    // Final security check
+    if (myColor === lastMoveColor && reverts[myColor] > 0) {
         game.undo();
-        reverts[lastMoveColor]--;
+        reverts[myColor]--; // Deduct from YOUR specific reverts
+        
         board.position(game.fen());
         $('.square-55d63').removeClass('highlight-square');
         revertSound.play();
+        
         updateStatus();
-        if (currentMatchId) databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: game.fen() });
+        syncGameState(); // 🚀 Syncs the spent revert across the server
     }
 });
 
@@ -413,7 +456,7 @@ function updateStatus() {
         if (game.in_check()) statusHTML += ' <span style="color: #ff4444;">(IN CHECK!)</span>';
         statusElement.innerHTML = statusHTML;
         updateRevertsUI();
-        updateLiveHUD(); // 🚀 Re-calculate HUD stats every move!
+        updateLiveHUD(); 
     }
 }
 
@@ -429,7 +472,7 @@ function resetGame() {
     document.getElementById('myBoard').classList.remove('game-over-flash');
     modal.classList.add('hidden');
     updateStatus();
-    if (currentMatchId) databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: game.fen() });
+    syncGameState(); 
 }
 
 playAgainBtn.addEventListener('click', resetGame);
