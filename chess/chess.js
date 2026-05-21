@@ -1,7 +1,7 @@
 // ==========================================
 // 1. APPWRITE CONFIGURATION
 // ==========================================
-const { Client, Databases, ID, Query } = Appwrite; // 🚀 Added Query
+const { Client, Databases, ID, Query } = Appwrite;
 const client = new Client()
     .setEndpoint('https://sgp.cloud.appwrite.io/v1')
     .setProject('6a0eba1a001e0c61b69a');
@@ -9,7 +9,7 @@ const client = new Client()
 const databases = new Databases(client);
 const DB_ID = '6a0eba6b002840ded885';
 const MATCHES_COL = 'matches';
-const PLAYERS_COL = 'players'; // 🚀 The new collection!
+const PLAYERS_COL = 'players'; 
 
 let currentMatchId = new URLSearchParams(window.location.search).get('match');
 
@@ -17,7 +17,7 @@ let currentMatchId = new URLSearchParams(window.location.search).get('match');
 // 2. PLAYER IDENTITY & LOGIN
 // ==========================================
 let myUsername = '';
-let myPlayerDocId = ''; // Saves your ID so we can update your wins later
+let myPlayerDocId = ''; 
 
 const loginModal = document.getElementById('loginModal');
 const usernameInput = document.getElementById('usernameInput');
@@ -32,17 +32,13 @@ loginBtn.addEventListener('click', async () => {
     loginBtn.innerText = "AUTHENTICATING...";
     
     try {
-        // 1. Check if username exists in database
         const search = await databases.listDocuments(DB_ID, PLAYERS_COL, [
             Query.equal('username', user)
         ]);
 
         if (search.total > 0) {
-            // Player returning!
             myPlayerDocId = search.documents[0].$id;
-            console.log(`Welcome back ${user}. Wins: ${search.documents[0].wins}`);
         } else {
-            // New Player! Create their record.
             const newDoc = await databases.createDocument(DB_ID, PLAYERS_COL, ID.unique(), {
                 username: user,
                 wins: 0,
@@ -53,8 +49,6 @@ loginBtn.addEventListener('click', async () => {
 
         myUsername = user;
         loginModal.classList.add('hidden');
-        
-        // If they were invited via link, boot up the match
         if (currentMatchId) initMultiplayer();
         
     } catch (error) {
@@ -64,17 +58,17 @@ loginBtn.addEventListener('click', async () => {
     }
 });
 
-
 // ==========================================
 // 3. CHESS ENGINE & HTML ELEMENTS
 // ==========================================
 const game = new Chess();
 const statusElement = document.getElementById('status');
-const resetBtn = document.getElementById('resetBtn');
 const revertBtn = document.getElementById('revertBtn');
+const forfeitBtn = document.getElementById('forfeitBtn'); // 🚀 New Retreat Button
 const whiteRevertsEl = document.getElementById('whiteReverts');
 const blackRevertsEl = document.getElementById('blackReverts');
 let reverts = { w: 2, b: 2 };
+let isGameOver = false; // 🚀 Prevents double-logging stats
 
 let myColor = null; 
 const roleModal = document.getElementById('roleModal');
@@ -108,13 +102,12 @@ inviteLinkInput.addEventListener('click', () => {
     alert("Link copied! Send it to your opponent.");
 });
 
-// A. Create Match (Host is White)
 createMatchBtn.addEventListener('click', async () => {
     createMatchBtn.innerText = "INITIALIZING SECURE UPLINK...";
     try {
         const doc = await databases.createDocument(DB_ID, MATCHES_COL, ID.unique(), { 
             fen: game.fen(),
-            whiteName: myUsername // 🚀 Save Host Name
+            whiteName: myUsername 
         });
         
         currentMatchId = doc.$id;
@@ -135,7 +128,6 @@ createMatchBtn.addEventListener('click', async () => {
     }
 });
 
-// B. Join Match (Guest is Black)
 async function initMultiplayer() {
     try {
         const doc = await databases.getDocument(DB_ID, MATCHES_COL, currentMatchId);
@@ -147,7 +139,6 @@ async function initMultiplayer() {
         roleText.style.color = "#ff003c";
         roleModal.classList.remove('hidden');
 
-        // 🚀 Add Guest Name to Database
         await databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, {
             blackName: myUsername
         });
@@ -166,18 +157,25 @@ function setupMultiplayerUI(url) {
     inviteLinkInput.value = url;
 }
 
-// C. The Realtime Listener
 function subscribeToMatch() {
     client.subscribe(`databases.${DB_ID}.collections.${MATCHES_COL}.documents.${currentMatchId}`, response => {
         const data = response.payload;
         
-        // 🚀 Update the Scoreboard Names
         if (data.whiteName) whitePlayerDisplay.innerText = data.whiteName;
         if (data.blackName) blackPlayerDisplay.innerText = data.blackName;
 
-        if (data.fen && data.fen !== game.fen()) {
-            game.load(data.fen);
-            board.position(data.fen);
+        const newFen = data.fen;
+
+        // 🚀 NEW: Detect if the opponent surrendered!
+        if (newFen && newFen.startsWith('FORFEIT_')) {
+            const loserColor = newFen.split('_')[1]; // Extracts 'w' or 'b'
+            triggerGameOver(loserColor, 'forfeit');
+            return;
+        }
+
+        if (newFen && newFen !== game.fen()) {
+            game.load(newFen);
+            board.position(newFen);
             if (game.in_check()) { checkSound.play(); } else { moveSound.play(); }
             updateStatus();
         }
@@ -188,7 +186,7 @@ function subscribeToMatch() {
 // 5. GAMEPLAY LOGIC (Drag & Drop)
 // ==========================================
 function onDragStart(source, piece) {
-    if (game.game_over()) return false;
+    if (game.game_over() || isGameOver) return false;
     if (myColor && piece.charAt(0) !== myColor) return false;
     if (game.turn() !== piece.charAt(0)) return false;
 }
@@ -223,12 +221,12 @@ function onSnapEnd() {
 }
 
 // ==========================================
-// 6. REVERTS & UI UPDATES
+// 6. BUTTON CONTROLS (Revert & Retreat)
 // ==========================================
 function updateRevertsUI() {
     whiteRevertsEl.innerText = reverts.w;
     blackRevertsEl.innerText = reverts.b;
-    if (game.history().length === 0) {
+    if (game.history().length === 0 || isGameOver) {
         revertBtn.disabled = true;
         return;
     }
@@ -237,7 +235,7 @@ function updateRevertsUI() {
 }
 
 revertBtn.addEventListener('click', () => {
-    if (game.history().length === 0) return;
+    if (game.history().length === 0 || isGameOver) return;
     const lastMoveColor = game.turn() === 'w' ? 'b' : 'w';
 
     if (reverts[lastMoveColor] > 0) {
@@ -253,31 +251,67 @@ revertBtn.addEventListener('click', () => {
     }
 });
 
+// 🚀 NEW: The Surrender Button
+forfeitBtn.addEventListener('click', () => {
+    if (isGameOver || !myColor) return;
+    
+    const areYouSure = confirm("Are you sure you want to retreat? This counts as an automatic loss.");
+    if (!areYouSure) return;
+
+    // Send the secret code to the opponent's screen
+    if (currentMatchId) {
+        databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: `FORFEIT_${myColor}` });
+    }
+
+    // Trigger local game over
+    triggerGameOver(myColor, 'forfeit');
+});
+
 // ==========================================
-// 7. CASUALTY CALCULATOR & WIN TRACKER
+// 7. GAME OVER & WIN TRACKER
 // ==========================================
-async function recordGameStats() {
-    // 🚀 Only update stats if we have a profile ID
+
+// 🚀 NEW: Centralizes naming and shaming the loser
+function triggerGameOver(loserColor, reason) {
+    if (isGameOver) return; // Prevent double-triggering
+    isGameOver = true;
+    gameOverSound.play();
+    
+    document.getElementById('myBoard').classList.add('game-over-flash');
+    
+    const loserName = loserColor === 'w' ? whitePlayerDisplay.innerText : blackPlayerDisplay.innerText;
+    
+    if (reason === 'checkmate') {
+        modalTitle.innerText = "CRITICAL FAILURE";
+        modalResult.innerText = `${loserName} made a fatal error and was Checkmated.`;
+    } else if (reason === 'forfeit') {
+        modalTitle.innerText = "COWARD'S RETREAT";
+        modalResult.innerText = `${loserName} surrendered the match.`;
+    } else {
+        modalTitle.innerText = "STALEMATE";
+        modalResult.innerText = "Match ended in a draw.";
+    }
+
+    calculatePostGameStats();
+    recordGameStats(loserColor); // Send stats to Appwrite
+    
+    setTimeout(() => modal.classList.remove('hidden'), 1000);
+}
+
+async function recordGameStats(loserColor) {
     if (!myPlayerDocId) return;
 
     try {
-        // Fetch your current stats from the database
         const profile = await databases.getDocument(DB_ID, PLAYERS_COL, myPlayerDocId);
         let currentWins = profile.wins;
-        let currentPlayed = profile.played;
+        let currentPlayed = profile.played + 1; 
 
-        currentPlayed++; // Always add 1 to matches played
-
-        // Did you win?
-        if (game.in_checkmate()) {
-            const winnerColor = game.turn() === 'w' ? 'b' : 'w';
-            if (myColor === winnerColor) {
-                currentWins++; // Add 1 to wins if you were the winner
-                console.log("VICTORY RECORDED!");
-            }
+        // If someone lost, and it wasn't you, YOU get the point!
+        if (loserColor && loserColor !== myColor) {
+            currentWins++;
+            console.log("VICTORY RECORDED!");
         }
 
-        // Push new stats to database
         await databases.updateDocument(DB_ID, PLAYERS_COL, myPlayerDocId, {
             wins: currentWins,
             played: currentPlayed
@@ -292,8 +326,8 @@ function calculatePostGameStats() {
     const totalMoves = Math.ceil(game.history().length / 2);
     const startCounts = { p: 8, n: 2, b: 2, r: 2, q: 1 };
     const currentCounts = { w: { p: 0, n: 0, b: 0, r: 0, q: 0 }, b: { p: 0, n: 0, b: 0, r: 0, q: 0 } };
-
     const currentBoard = game.board();
+    
     for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
             if (currentBoard[i][j] && currentBoard[i][j].type !== 'k') {
@@ -301,8 +335,10 @@ function calculatePostGameStats() {
             }
         }
     }
+    
     const symbols = { w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕' }, b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛' } };
     let wCasualties = '', bCasualties = '';
+    
     for (let type in startCounts) {
         let wMissing = startCounts[type] - currentCounts.w[type];
         let bMissing = startCounts[type] - currentCounts.b[type];
@@ -319,43 +355,37 @@ function updateStatus() {
     let moveColor = game.turn() === 'b' ? 'Black' : 'White';
 
     if (game.game_over()) {
-        document.getElementById('myBoard').classList.add('game-over-flash');
         if (game.in_checkmate()) {
-            modalTitle.innerText = "CRITICAL FAILURE";
-            modalResult.innerText = `${moveColor} was checkmated.`;
+            triggerGameOver(game.turn(), 'checkmate'); // game.turn() returns the loser
         } else {
-            modalTitle.innerText = "STALEMATE";
-            modalResult.innerText = "Match ended in a draw.";
+            triggerGameOver(null, 'draw');
         }
-        
-        calculatePostGameStats();
-        recordGameStats(); // 🚀 Push stats to Appwrite Cloud
-
-        setTimeout(() => modal.classList.remove('hidden'), 1000); 
     } else {
         statusHTML = `${moveColor} to move`;
         if (game.in_check()) statusHTML += ' <span style="color: #ff4444;">(IN CHECK!)</span>';
+        statusElement.innerHTML = statusHTML;
+        updateRevertsUI();
     }
-    statusElement.innerHTML = statusHTML;
-    updateRevertsUI();
 }
 
 const config = { draggable: true, position: 'start', onDragStart: onDragStart, onDrop: onDrop, onSnapEnd: onSnapEnd, pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png' };
 const board = Chessboard('myBoard', config);
 
+// Reset game for a rematch
 function resetGame() {
     game.reset();
     board.start();
     reverts = { w: 2, b: 2 };
+    isGameOver = false; // Unlock the engine
+    
     $('.square-55d63').removeClass('highlight-square');
     document.getElementById('myBoard').classList.remove('game-over-flash');
     modal.classList.add('hidden');
     updateStatus();
+    
     if (currentMatchId) databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: game.fen() });
 }
 
-resetBtn.addEventListener('click', resetGame);
+// Ensure the new game button works
 playAgainBtn.addEventListener('click', resetGame);
-
 updateStatus();
-// Note: We removed initMultiplayer() from down here, it now waits for the Login button to be clicked!

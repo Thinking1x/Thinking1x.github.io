@@ -233,3 +233,16 @@ button:hover {
     border-color: #00E5FF;
     box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
 }
+/* ==========================================
+   RETREAT BUTTON
+   ========================================== */
+#forfeitBtn {
+    background: #ef4444; /* Danger Red */
+    color: #fff;
+}
+
+#forfeitBtn:hover {
+    background: #dc2626;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+    color: #fff;
+}
