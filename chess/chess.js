@@ -3,7 +3,7 @@
 // ==========================================
 const { Client, Databases, ID } = Appwrite;
 const client = new Client()
-    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setEndpoint('https://sgp.cloud.appwrite.io/v1')
     .setProject('6a0eba1a001e0c61b69a'); // <--- PASTE YOUR PROJECT ID HERE!
 
 const databases = new Databases(client);
