@@ -2,6 +2,14 @@ const game = new Chess();
 const statusElement = document.getElementById('status');
 const resetBtn = document.getElementById('resetBtn');
 
+// New Revert Elements
+const revertBtn = document.getElementById('revertBtn');
+const whiteRevertsEl = document.getElementById('whiteReverts');
+const blackRevertsEl = document.getElementById('blackReverts');
+
+// State trackers
+let reverts = { w: 2, b: 2 }; // White and Black start with 2 reverts
+
 // Modal Elements
 const modal = document.getElementById('gameOverModal');
 const modalTitle = document.getElementById('modalTitle');
@@ -16,6 +24,7 @@ const moveSound = new Audio('https://images.chesscomfiles.com/chess-themes/sound
 const captureSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/capture.mp3');
 const checkSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-check.mp3');
 const gameOverSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/game-end.mp3');
+const revertSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/notify.mp3'); // Sound for undo
 
 function onDragStart(source, piece) {
     if (game.game_over()) return false;
@@ -51,16 +60,52 @@ function onSnapEnd() {
 }
 
 // ==========================================
+// REVERT LOGIC
+// ==========================================
+function updateRevertsUI() {
+    whiteRevertsEl.innerText = reverts.w;
+    blackRevertsEl.innerText = reverts.b;
+
+    // You can't revert if no moves have been made
+    if (game.history().length === 0) {
+        revertBtn.disabled = true;
+        return;
+    }
+
+    // The person who just moved is the one who needs the revert
+    // (If it's Black's turn, it means White just moved)
+    const lastMoveColor = game.turn() === 'w' ? 'b' : 'w';
+
+    if (reverts[lastMoveColor] > 0 && !game.game_over()) {
+        revertBtn.disabled = false;
+    } else {
+        revertBtn.disabled = true; // Lock button if they are out of reverts
+    }
+}
+
+revertBtn.addEventListener('click', () => {
+    if (game.history().length === 0) return;
+
+    const lastMoveColor = game.turn() === 'w' ? 'b' : 'w';
+
+    if (reverts[lastMoveColor] > 0) {
+        game.undo(); // Erase the last move
+        reverts[lastMoveColor]--; // Deduct 1 revert token
+        
+        board.position(game.fen()); // Snap board back visually
+        $('.square-55d63').removeClass('highlight-square'); // Clear highlights
+        
+        revertSound.play();
+        updateStatus();
+    }
+});
+
+// ==========================================
 // THE CASUALTY CALCULATOR
 // ==========================================
 function calculatePostGameStats() {
-    // 1. Calculate Total Moves (plies / 2)
     const totalMoves = Math.ceil(game.history().length / 2);
-    
-    // 2. What pieces did we start with?
     const startCounts = { p: 8, n: 2, b: 2, r: 2, q: 1 };
-    
-    // 3. What pieces are still alive?
     const currentCounts = {
         w: { p: 0, n: 0, b: 0, r: 0, q: 0 },
         b: { p: 0, n: 0, b: 0, r: 0, q: 0 }
@@ -75,7 +120,6 @@ function calculatePostGameStats() {
         }
     }
 
-    // 4. Format the casualties into symbols
     const symbols = {
         w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕' },
         b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛' }
@@ -92,7 +136,6 @@ function calculatePostGameStats() {
         if (bMissing > 0) bCasualties += `${symbols.b[type]} x${bMissing} &nbsp;&nbsp;`;
     }
 
-    // 5. Inject the data into the HTML Modal
     moveCountEl.innerText = totalMoves;
     missingWhiteEl.innerHTML = wCasualties || 'None (Flawless)';
     missingBlackEl.innerHTML = bCasualties || 'None (Flawless)';
@@ -103,7 +146,6 @@ function updateStatus() {
     let moveColor = game.turn() === 'b' ? 'Black' : 'White';
 
     if (game.game_over()) {
-        // Trigger the red pulse effect
         document.getElementById('myBoard').classList.add('game-over-flash');
         
         if (game.in_checkmate()) {
@@ -114,9 +156,8 @@ function updateStatus() {
             modalResult.innerText = "Match ended in a draw.";
         }
         
-        // Calculate the math and show the pop-up!
         calculatePostGameStats();
-        setTimeout(() => modal.classList.remove('hidden'), 1000); // Wait 1 second for drama
+        setTimeout(() => modal.classList.remove('hidden'), 1000); 
         
     } else {
         statusHTML = `${moveColor} to move`;
@@ -124,6 +165,7 @@ function updateStatus() {
     }
 
     statusElement.innerHTML = statusHTML;
+    updateRevertsUI(); // Check if revert button should be on/off
 }
 
 const config = {
@@ -141,6 +183,10 @@ const board = Chessboard('myBoard', config);
 function resetGame() {
     game.reset();
     board.start();
+    
+    // Reset revert tokens
+    reverts = { w: 2, b: 2 };
+    
     $('.square-55d63').removeClass('highlight-square');
     document.getElementById('myBoard').classList.remove('game-over-flash');
     modal.classList.add('hidden');

@@ -44,6 +44,19 @@
             <button id="playAgainBtn" class="neon-btn">INITIALIZE NEW MATCH</button>
         </div>
     </div>
+    <div class="status-box">
+            <p>Status: <span id="status">White to move</span></p>
+            
+            <div class="revert-info">
+                <span>WHITE REVERTS: <span id="whiteReverts">2</span></span> | 
+                <span>BLACK REVERTS: <span id="blackReverts">2</span></span>
+            </div>
+
+            <div class="control-buttons">
+                <button id="revertBtn" disabled>UNDO MOVE</button>
+                <button id="resetBtn">ABORT MATCH</button>
+            </div>
+        </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>

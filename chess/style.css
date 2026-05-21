@@ -174,3 +174,42 @@ button:hover {
     from { box-shadow: 0 0 20px rgba(255, 0, 60, 0.2); }
     to { box-shadow: 0 0 60px rgba(255, 0, 60, 0.8); }
 }
+/* ==========================================
+   5. REVERT SYSTEM STYLES
+   ========================================== */
+.revert-info {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+}
+
+.revert-info span span {
+    color: #00E5FF;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.control-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+#revertBtn {
+    background: #facc15; /* Warning Yellow */
+    color: #000;
+}
+
+#revertBtn:hover:not(:disabled) {
+    background: #eab308;
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.5);
+}
+
+/* Gray out the button when they are out of reverts */
+#revertBtn:disabled {
+    background: #334155;
+    color: #64748b;
+    cursor: not-allowed;
+    box-shadow: none;
+}
