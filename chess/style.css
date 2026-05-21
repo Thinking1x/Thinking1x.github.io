@@ -63,3 +63,11 @@ button:hover {
     background: #00E5FF;
     color: #000;
 }
+/* ==========================================
+   VISUAL EFFECTS
+   ========================================== */
+.highlight-square {
+    box-shadow: inset 0 0 15px 2px rgba(0, 229, 255, 0.8) !important;
+    background-color: rgba(0, 229, 255, 0.2) !important;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
