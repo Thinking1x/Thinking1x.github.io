@@ -55,36 +55,53 @@ loginBtn.addEventListener('click', async () => {
 // ==========================================
 const bgm = new Audio();
 bgm.loop = true;
-bgm.volume = 0.3; // Default volume matching the slider
+bgm.volume = 0.3; // Default starting volume matching the slider
 
 const trackSelect = document.getElementById('trackSelect');
 const volumeSlider = document.getElementById('volumeSlider');
 
-// The Expanded Track Library
+// The Restructured Track Library (Swapped Lo-Fi to a highly reliable developer audio asset)
 const trackLibrary = {
     "": "", // Offline mode
     "chill": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3",
     "intense": "https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b32e02f9.mp3",
-    "lofi": "https://cdn.pixabay.com/download/audio/2022/03/15/audio_9273d4c688.mp3", 
+    "lofi": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", // Highly stable chill-ambient track
     "epic": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" 
 };
 
+// Tracks which style is currently active
+let currentTrackType = "";
+
 // Listen for dropdown changes
 trackSelect.addEventListener('change', (e) => {
-    const selectedUrl = trackLibrary[e.target.value];
+    currentTrackType = e.target.value;
+    const selectedUrl = trackLibrary[currentTrackType];
     
     if (!selectedUrl) {
-        bgm.pause(); // Stop music if [ OFFLINE ] is selected
+        bgm.pause(); // Shut off audio if [ OFFLINE ] is pulled
     } else {
         bgm.src = selectedUrl;
+        adjustBalancedVolume(); // Calculate safe volume boundaries before playback
         bgm.play().catch(err => console.log("Audio blocked by browser auto-play rules."));
     }
 });
 
 // Listen for volume slider changes in real-time
-volumeSlider.addEventListener('input', (e) => {
-    bgm.volume = e.target.value;
+volumeSlider.addEventListener('input', () => {
+    adjustBalancedVolume();
 });
+
+// 🚀 NEW: THE AUTOMATIC AUDIO BALANCER
+// This automatically down-scales the Epic track to 35% power so it never blasts your ears!
+function adjustBalancedVolume() {
+    const currentSliderVal = parseFloat(volumeSlider.value);
+    
+    if (currentTrackType === "epic") {
+        bgm.volume = currentSliderVal * 0.35; // Cap its maximum output safely
+    } else {
+        bgm.volume = currentSliderVal; // Full slider power for calm/lofi tracks
+    }
+}
 
 
 // ==========================================
