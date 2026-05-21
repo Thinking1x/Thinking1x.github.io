@@ -18,13 +18,13 @@
         </div>
     </div>
 
+<div id="radioControl" class="music-toggle">
+        [ AUDIO: OFFLINE ]
+    </div>
+
     <div class="container">
         <h1>CHESS // TERMINAL</h1>
         
-        <div id="playerMatchup" style="color: #00E5FF; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; text-transform: uppercase;">
-            <span id="whitePlayerDisplay">WAITING...</span> ⚔️ <span id="blackPlayerDisplay">WAITING...</span>
-        </div>
-
         <div id="multiplayer-hub" style="margin-bottom: 20px; background: #1e293b; padding: 10px; border-radius: 6px; border: 1px dashed #00E5FF;">
             <button id="createMatchBtn" class="neon-btn" style="width: auto; padding: 10px 20px;">CREATE MULTIPLAYER MATCH</button>
             <div id="inviteLinkArea" class="hidden" style="margin-top: 10px;">
@@ -39,13 +39,29 @@
                 <span>WHITE REVERTS: <span id="whiteReverts">2</span></span> | 
                 <span>BLACK REVERTS: <span id="blackReverts">2</span></span>
             </div>
-           <div class="control-buttons">
+            <div class="control-buttons">
                 <button id="revertBtn" disabled>UNDO MOVE</button>
                 <button id="forfeitBtn">RETREAT</button>
             </div>
         </div>
 
+        <div class="player-hud" id="topPlayerHUD">
+            <div class="hud-left">
+                <span class="hud-name" id="topHudName">WAITING FOR LINK...</span>
+                <span class="hud-score" id="topHudScore"></span>
+            </div>
+            <div class="hud-captured chess-symbols" id="topHudCaptured"></div>
+        </div>
+
         <div id="myBoard" class="board-container"></div>
+
+        <div class="player-hud" id="bottomPlayerHUD">
+            <div class="hud-left">
+                <span class="hud-name" id="bottomHudName">WAITING FOR LINK...</span>
+                <span class="hud-score" id="bottomHudScore"></span>
+            </div>
+            <div class="hud-captured chess-symbols" id="bottomHudCaptured"></div>
+        </div>
     </div>
 
     <div id="gameOverModal" class="modal hidden">

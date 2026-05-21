@@ -4,7 +4,7 @@
 const { Client, Databases, ID, Query } = Appwrite;
 const client = new Client()
     .setEndpoint('https://sgp.cloud.appwrite.io/v1')
-    .setProject('6a0eba1a001e0c61b69a');
+    .setProject('6a0eba1a001e0c61b69a'); 
 
 const databases = new Databases(client);
 const DB_ID = '6a0eba6b002840ded885';
@@ -18,39 +18,31 @@ let currentMatchId = new URLSearchParams(window.location.search).get('match');
 // ==========================================
 let myUsername = '';
 let myPlayerDocId = ''; 
+let whitePlayerName = 'WAITING...';
+let blackPlayerName = 'WAITING...';
 
 const loginModal = document.getElementById('loginModal');
 const usernameInput = document.getElementById('usernameInput');
 const loginBtn = document.getElementById('loginBtn');
-const whitePlayerDisplay = document.getElementById('whitePlayerDisplay');
-const blackPlayerDisplay = document.getElementById('blackPlayerDisplay');
 
 loginBtn.addEventListener('click', async () => {
     const user = usernameInput.value.trim().toUpperCase();
     if (!user) return;
     
     loginBtn.innerText = "AUTHENTICATING...";
-    
     try {
-        const search = await databases.listDocuments(DB_ID, PLAYERS_COL, [
-            Query.equal('username', user)
-        ]);
-
+        const search = await databases.listDocuments(DB_ID, PLAYERS_COL, [ Query.equal('username', user) ]);
         if (search.total > 0) {
             myPlayerDocId = search.documents[0].$id;
         } else {
             const newDoc = await databases.createDocument(DB_ID, PLAYERS_COL, ID.unique(), {
-                username: user,
-                wins: 0,
-                played: 0
+                username: user, wins: 0, played: 0
             });
             myPlayerDocId = newDoc.$id;
         }
-
         myUsername = user;
         loginModal.classList.add('hidden');
         if (currentMatchId) initMultiplayer();
-        
     } catch (error) {
         console.error("Login Error:", error);
         alert("Failed to connect to Player Database.");
@@ -59,16 +51,48 @@ loginBtn.addEventListener('click', async () => {
 });
 
 // ==========================================
-// 3. CHESS ENGINE & HTML ELEMENTS
+// 3. TERMINAL RADIO (MUSIC SYSTEM)
+// ==========================================
+const radioControl = document.getElementById('radioControl');
+const bgm = new Audio();
+bgm.loop = true;
+bgm.volume = 0.3;
+
+const tracks = [
+    { mode: 'OFFLINE', url: '' },
+    { mode: 'CHILL', url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3' }, // Ambient Lo-Fi
+    { mode: 'INTENSE', url: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b32e02f9.mp3' } // Cyberpunk Synth
+];
+let currentTrackIdx = 0;
+
+radioControl.addEventListener('click', () => {
+    currentTrackIdx = (currentTrackIdx + 1) % tracks.length;
+    const track = tracks[currentTrackIdx];
+    
+    if (track.mode === 'OFFLINE') {
+        bgm.pause();
+        radioControl.innerText = `[ AUDIO: ${track.mode} ]`;
+        radioControl.classList.remove('music-active');
+    } else {
+        bgm.src = track.url;
+        bgm.play().catch(e => console.log("Audio blocked by browser."));
+        radioControl.innerText = `[ AUDIO: ${track.mode} 🔊 ]`;
+        radioControl.classList.add('music-active');
+    }
+});
+
+
+// ==========================================
+// 4. CHESS ENGINE & ELEMENTS
 // ==========================================
 const game = new Chess();
 const statusElement = document.getElementById('status');
 const revertBtn = document.getElementById('revertBtn');
-const forfeitBtn = document.getElementById('forfeitBtn'); // 🚀 New Retreat Button
+const forfeitBtn = document.getElementById('forfeitBtn'); 
 const whiteRevertsEl = document.getElementById('whiteReverts');
 const blackRevertsEl = document.getElementById('blackReverts');
 let reverts = { w: 2, b: 2 };
-let isGameOver = false; // 🚀 Prevents double-logging stats
+let isGameOver = false; 
 
 let myColor = null; 
 const roleModal = document.getElementById('roleModal');
@@ -90,7 +114,77 @@ const gameOverSound = new Audio('https://images.chesscomfiles.com/chess-themes/s
 const revertSound = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/notify.mp3');
 
 // ==========================================
-// 4. MULTIPLAYER LOGIC
+// 5. LIVE PLAYER HUD & SCORE TRACKER
+// ==========================================
+function updateLiveHUD() {
+    // 1. Calculate Pieces on Board
+    const startCounts = { p: 8, n: 2, b: 2, r: 2, q: 1 };
+    const currentCounts = { w: { p: 0, n: 0, b: 0, r: 0, q: 0 }, b: { p: 0, n: 0, b: 0, r: 0, q: 0 } };
+    const boardState = game.board();
+    
+    for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+            if (boardState[i][j] && boardState[i][j].type !== 'k') {
+                currentCounts[boardState[i][j].color][boardState[i][j].type]++;
+            }
+        }
+    }
+
+    // 2. Determine captured pieces (What is missing from the board)
+    const symbols = { w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕' }, b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛' } };
+    let capturedByWhite = ''; // White captured black pieces
+    let capturedByBlack = ''; // Black captured white pieces
+    
+    for (let type in startCounts) {
+        let bMissing = startCounts[type] - currentCounts.b[type]; // Black pieces missing
+        let wMissing = startCounts[type] - currentCounts.w[type]; // White pieces missing
+        
+        for(let i=0; i<bMissing; i++) capturedByWhite += symbols.b[type];
+        for(let i=0; i<wMissing; i++) capturedByBlack += symbols.w[type];
+    }
+
+    // 3. Calculate Traditional Material Score (p:1, n:3, b:3, r:5, q:9)
+    const pieceValues = { p: 1, n: 3, b: 3, r: 5, q: 9 };
+    let wScore = 0, bScore = 0;
+    
+    for (let type in pieceValues) {
+        wScore += currentCounts.w[type] * pieceValues[type];
+        bScore += currentCounts.b[type] * pieceValues[type];
+    }
+
+    let wAdvantage = wScore > bScore ? `+${wScore - bScore}` : '';
+    let bAdvantage = bScore > wScore ? `+${bScore - wScore}` : '';
+
+    // 4. Update the HUD DOM based on Orientation (Top is opponent, Bottom is you)
+    const topName = document.getElementById('topHudName');
+    const topCap = document.getElementById('topHudCaptured');
+    const topScore = document.getElementById('topHudScore');
+    
+    const botName = document.getElementById('bottomHudName');
+    const botCap = document.getElementById('bottomHudCaptured');
+    const botScore = document.getElementById('bottomHudScore');
+
+    if (myColor === 'b') { // If you are black, White is on top
+        topName.innerText = whitePlayerName;
+        topCap.innerHTML = capturedByWhite;
+        topScore.innerText = wAdvantage;
+        
+        botName.innerText = blackPlayerName || myUsername;
+        botCap.innerHTML = capturedByBlack;
+        botScore.innerText = bAdvantage;
+    } else { // If you are white (or observing), Black is on top
+        topName.innerText = blackPlayerName;
+        topCap.innerHTML = capturedByBlack;
+        topScore.innerText = bAdvantage;
+        
+        botName.innerText = whitePlayerName || myUsername;
+        botCap.innerHTML = capturedByWhite;
+        botScore.innerText = wAdvantage;
+    }
+}
+
+// ==========================================
+// 6. MULTIPLAYER LOGIC
 // ==========================================
 const createMatchBtn = document.getElementById('createMatchBtn');
 const inviteLinkArea = document.getElementById('inviteLinkArea');
@@ -106,12 +200,12 @@ createMatchBtn.addEventListener('click', async () => {
     createMatchBtn.innerText = "INITIALIZING SECURE UPLINK...";
     try {
         const doc = await databases.createDocument(DB_ID, MATCHES_COL, ID.unique(), { 
-            fen: game.fen(),
-            whiteName: myUsername 
+            fen: game.fen(), whiteName: myUsername 
         });
         
         currentMatchId = doc.$id;
         myColor = 'w';
+        whitePlayerName = myUsername;
         
         roleText.innerText = "You are playing as WHITE";
         roleText.style.color = "#00E5FF";
@@ -122,6 +216,7 @@ createMatchBtn.addEventListener('click', async () => {
         
         setupMultiplayerUI(newUrl);
         subscribeToMatch();
+        updateLiveHUD();
     } catch (error) {
         console.error("Match Error:", error);
         createMatchBtn.innerText = "CREATE MULTIPLAYER MATCH";
@@ -134,17 +229,19 @@ async function initMultiplayer() {
         game.load(doc.fen);
         
         myColor = 'b';
+        blackPlayerName = myUsername;
+        whitePlayerName = doc.whiteName || "OPPONENT";
         board.orientation('black');
+        
         roleText.innerText = "You are playing as BLACK";
         roleText.style.color = "#ff003c";
         roleModal.classList.remove('hidden');
 
-        await databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, {
-            blackName: myUsername
-        });
+        await databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { blackName: myUsername });
 
         setupMultiplayerUI(window.location.href);
         subscribeToMatch();
+        updateLiveHUD();
     } catch (error) {
         console.error(error);
         alert("Match not found or expired.");
@@ -161,15 +258,12 @@ function subscribeToMatch() {
     client.subscribe(`databases.${DB_ID}.collections.${MATCHES_COL}.documents.${currentMatchId}`, response => {
         const data = response.payload;
         
-        if (data.whiteName) whitePlayerDisplay.innerText = data.whiteName;
-        if (data.blackName) blackPlayerDisplay.innerText = data.blackName;
+        if (data.whiteName) whitePlayerName = data.whiteName;
+        if (data.blackName) blackPlayerName = data.blackName;
 
         const newFen = data.fen;
-
-        // 🚀 NEW: Detect if the opponent surrendered!
         if (newFen && newFen.startsWith('FORFEIT_')) {
-            const loserColor = newFen.split('_')[1]; // Extracts 'w' or 'b'
-            triggerGameOver(loserColor, 'forfeit');
+            triggerGameOver(newFen.split('_')[1], 'forfeit');
             return;
         }
 
@@ -183,7 +277,7 @@ function subscribeToMatch() {
 }
 
 // ==========================================
-// 5. GAMEPLAY LOGIC (Drag & Drop)
+// 7. GAMEPLAY LOGIC
 // ==========================================
 function onDragStart(source, piece) {
     if (game.game_over() || isGameOver) return false;
@@ -211,25 +305,18 @@ function onDrop(source, target) {
 
     updateStatus();
 
-    if (currentMatchId) {
-        databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: game.fen() });
-    }
+    if (currentMatchId) databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: game.fen() });
 }
 
-function onSnapEnd() {
-    board.position(game.fen());
-}
+function onSnapEnd() { board.position(game.fen()); }
 
 // ==========================================
-// 6. BUTTON CONTROLS (Revert & Retreat)
+// 8. BUTTON CONTROLS
 // ==========================================
 function updateRevertsUI() {
     whiteRevertsEl.innerText = reverts.w;
     blackRevertsEl.innerText = reverts.b;
-    if (game.history().length === 0 || isGameOver) {
-        revertBtn.disabled = true;
-        return;
-    }
+    if (game.history().length === 0 || isGameOver) { revertBtn.disabled = true; return; }
     const lastMoveColor = game.turn() === 'w' ? 'b' : 'w';
     revertBtn.disabled = (reverts[lastMoveColor] > 0 && !game.game_over()) ? false : true;
 }
@@ -237,7 +324,6 @@ function updateRevertsUI() {
 revertBtn.addEventListener('click', () => {
     if (game.history().length === 0 || isGameOver) return;
     const lastMoveColor = game.turn() === 'w' ? 'b' : 'w';
-
     if (reverts[lastMoveColor] > 0) {
         game.undo();
         reverts[lastMoveColor]--;
@@ -245,41 +331,27 @@ revertBtn.addEventListener('click', () => {
         $('.square-55d63').removeClass('highlight-square');
         revertSound.play();
         updateStatus();
-        if (currentMatchId) {
-            databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: game.fen() });
-        }
+        if (currentMatchId) databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: game.fen() });
     }
 });
 
-// 🚀 NEW: The Surrender Button
 forfeitBtn.addEventListener('click', () => {
     if (isGameOver || !myColor) return;
-    
-    const areYouSure = confirm("Are you sure you want to retreat? This counts as an automatic loss.");
-    if (!areYouSure) return;
-
-    // Send the secret code to the opponent's screen
-    if (currentMatchId) {
-        databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: `FORFEIT_${myColor}` });
-    }
-
-    // Trigger local game over
+    if (!confirm("Are you sure you want to retreat? This counts as an automatic loss.")) return;
+    if (currentMatchId) databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: `FORFEIT_${myColor}` });
     triggerGameOver(myColor, 'forfeit');
 });
 
 // ==========================================
-// 7. GAME OVER & WIN TRACKER
+// 9. GAME OVER & UPDATES
 // ==========================================
-
-// 🚀 NEW: Centralizes naming and shaming the loser
 function triggerGameOver(loserColor, reason) {
-    if (isGameOver) return; // Prevent double-triggering
+    if (isGameOver) return; 
     isGameOver = true;
     gameOverSound.play();
     
     document.getElementById('myBoard').classList.add('game-over-flash');
-    
-    const loserName = loserColor === 'w' ? whitePlayerDisplay.innerText : blackPlayerDisplay.innerText;
+    const loserName = loserColor === 'w' ? whitePlayerName : blackPlayerName;
     
     if (reason === 'checkmate') {
         modalTitle.innerText = "CRITICAL FAILURE";
@@ -292,62 +364,19 @@ function triggerGameOver(loserColor, reason) {
         modalResult.innerText = "Match ended in a draw.";
     }
 
-    calculatePostGameStats();
-    recordGameStats(loserColor); // Send stats to Appwrite
-    
+    recordGameStats(loserColor); 
     setTimeout(() => modal.classList.remove('hidden'), 1000);
 }
 
 async function recordGameStats(loserColor) {
     if (!myPlayerDocId) return;
-
     try {
         const profile = await databases.getDocument(DB_ID, PLAYERS_COL, myPlayerDocId);
         let currentWins = profile.wins;
         let currentPlayed = profile.played + 1; 
-
-        // If someone lost, and it wasn't you, YOU get the point!
-        if (loserColor && loserColor !== myColor) {
-            currentWins++;
-            console.log("VICTORY RECORDED!");
-        }
-
-        await databases.updateDocument(DB_ID, PLAYERS_COL, myPlayerDocId, {
-            wins: currentWins,
-            played: currentPlayed
-        });
-
-    } catch (error) {
-        console.error("Failed to record stats", error);
-    }
-}
-
-function calculatePostGameStats() {
-    const totalMoves = Math.ceil(game.history().length / 2);
-    const startCounts = { p: 8, n: 2, b: 2, r: 2, q: 1 };
-    const currentCounts = { w: { p: 0, n: 0, b: 0, r: 0, q: 0 }, b: { p: 0, n: 0, b: 0, r: 0, q: 0 } };
-    const currentBoard = game.board();
-    
-    for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 8; j++) {
-            if (currentBoard[i][j] && currentBoard[i][j].type !== 'k') {
-                currentCounts[currentBoard[i][j].color][currentBoard[i][j].type]++;
-            }
-        }
-    }
-    
-    const symbols = { w: { p: '♙', n: '♘', b: '♗', r: '♖', q: '♕' }, b: { p: '♟', n: '♞', b: '♝', r: '♜', q: '♛' } };
-    let wCasualties = '', bCasualties = '';
-    
-    for (let type in startCounts) {
-        let wMissing = startCounts[type] - currentCounts.w[type];
-        let bMissing = startCounts[type] - currentCounts.b[type];
-        if (wMissing > 0) wCasualties += `${symbols.w[type]} x${wMissing} &nbsp;&nbsp;`;
-        if (bMissing > 0) bCasualties += `${symbols.b[type]} x${bMissing} &nbsp;&nbsp;`;
-    }
-    moveCountEl.innerText = totalMoves;
-    missingWhiteEl.innerHTML = wCasualties || 'None (Flawless)';
-    missingBlackEl.innerHTML = bCasualties || 'None (Flawless)';
+        if (loserColor && loserColor !== myColor) { currentWins++; }
+        await databases.updateDocument(DB_ID, PLAYERS_COL, myPlayerDocId, { wins: currentWins, played: currentPlayed });
+    } catch (error) { console.error("Failed to record stats", error); }
 }
 
 function updateStatus() {
@@ -355,37 +384,31 @@ function updateStatus() {
     let moveColor = game.turn() === 'b' ? 'Black' : 'White';
 
     if (game.game_over()) {
-        if (game.in_checkmate()) {
-            triggerGameOver(game.turn(), 'checkmate'); // game.turn() returns the loser
-        } else {
-            triggerGameOver(null, 'draw');
-        }
+        if (game.in_checkmate()) { triggerGameOver(game.turn(), 'checkmate'); } 
+        else { triggerGameOver(null, 'draw'); }
     } else {
         statusHTML = `${moveColor} to move`;
         if (game.in_check()) statusHTML += ' <span style="color: #ff4444;">(IN CHECK!)</span>';
         statusElement.innerHTML = statusHTML;
         updateRevertsUI();
+        updateLiveHUD(); // 🚀 Re-calculate HUD stats every move!
     }
 }
 
 const config = { draggable: true, position: 'start', onDragStart: onDragStart, onDrop: onDrop, onSnapEnd: onSnapEnd, pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png' };
 const board = Chessboard('myBoard', config);
 
-// Reset game for a rematch
 function resetGame() {
     game.reset();
     board.start();
     reverts = { w: 2, b: 2 };
-    isGameOver = false; // Unlock the engine
-    
+    isGameOver = false; 
     $('.square-55d63').removeClass('highlight-square');
     document.getElementById('myBoard').classList.remove('game-over-flash');
     modal.classList.add('hidden');
     updateStatus();
-    
     if (currentMatchId) databases.updateDocument(DB_ID, MATCHES_COL, currentMatchId, { fen: game.fen() });
 }
 
-// Ensure the new game button works
 playAgainBtn.addEventListener('click', resetGame);
 updateStatus();
