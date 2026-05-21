@@ -65,7 +65,7 @@ const trackLibrary = {
     "": "", // Offline mode
     "chill": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3",
     "intense": "https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b32e02f9.mp3",
-    "lofi": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", // Highly stable chill-ambient track
+    "chill2": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", 
     "epic": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" 
 };
 
