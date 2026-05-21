@@ -1,3 +1,6 @@
+/* ==========================================
+   1. BASE & LAYOUT STYLES
+   ========================================== */
 body {
     background-color: #0f0f0f;
     color: #f1f1f1;
@@ -9,13 +12,16 @@ body {
     margin: 0;
 }
 
+/* Upgraded container for full-screen layout */
 .container {
-    background: #1e1e1e;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    border: 1px solid #333;
+    width: 100%;
+    max-width: 1000px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 h1 {
@@ -24,17 +30,23 @@ h1 {
     letter-spacing: 2px;
 }
 
+/* Stretches the board to 75% of the screen height or width! */
 .board-container {
-    width: 400px;
+    width: 75vmin; 
     margin: 20px auto;
 }
 
+/* ==========================================
+   2. STATUS & CONTROLS
+   ========================================== */
 .status-box {
-    margin-top: 20px;
+    margin-top: 10px;
     background: #121212;
     padding: 15px;
     border-radius: 6px;
     border: 1px solid #333;
+    display: inline-block;
+    min-width: 300px;
 }
 
 p {
@@ -63,11 +75,102 @@ button:hover {
     background: #00E5FF;
     color: #000;
 }
+
 /* ==========================================
-   VISUAL EFFECTS
+   3. VISUAL EFFECTS (IN-GAME)
    ========================================== */
 .highlight-square {
     box-shadow: inset 0 0 15px 2px rgba(0, 229, 255, 0.8) !important;
     background-color: rgba(0, 229, 255, 0.2) !important;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* ==========================================
+   4. GAME OVER MODAL & EFFECTS
+   ========================================== */
+/* The dark overlay that covers the screen */
+.modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* The neon pop-up box */
+.modal-content {
+    background: #0f172a;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    border: 2px solid #00E5FF;
+    box-shadow: 0 0 40px rgba(0, 229, 255, 0.3);
+    min-width: 400px;
+}
+
+.glitch-text {
+    color: #ff003c;
+    font-size: 2.5rem;
+    margin: 0 0 10px 0;
+    text-shadow: 2px 0 #00E5FF, -2px 0 #ff003c;
+}
+
+.result-text {
+    color: #fff;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+.stats-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: #1e293b;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #334155;
+}
+
+.stat-box h3 {
+    margin: 0 0 5px 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+}
+
+.chess-symbols {
+    font-size: 1.5rem;
+    color: #00E5FF;
+}
+
+.neon-btn {
+    background: #00E5FF;
+    color: #000;
+    font-size: 1.1rem;
+    padding: 15px 30px;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+/* The dramatic red flash when Checkmate happens */
+.game-over-flash {
+    animation: criticalFlash 1.5s infinite alternate;
+}
+
+@keyframes criticalFlash {
+    from { box-shadow: 0 0 20px rgba(255, 0, 60, 0.2); }
+    to { box-shadow: 0 0 60px rgba(255, 0, 60, 0.8); }
 }

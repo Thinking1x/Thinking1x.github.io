@@ -13,18 +13,41 @@
     <div class="container">
         <h1>CHESS // TERMINAL</h1>
         
-        <div id="myBoard" class="board-container"></div>
-        
         <div class="status-box">
             <p>Status: <span id="status">White to move</span></p>
-            <button id="resetBtn">RESET BOARD</button>
+            <button id="resetBtn">ABORT MATCH</button>
+        </div>
+
+        <div id="myBoard" class="board-container"></div>
+    </div>
+
+    <div id="gameOverModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 id="modalTitle" class="glitch-text">SYSTEM OFFLINE</h2>
+            <p id="modalResult" class="result-text">Checkmate.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <h3>TOTAL MOVES</h3>
+                    <p id="moveCount">0</p>
+                </div>
+                <div class="stat-box">
+                    <h3>WHITE CASUALTIES</h3>
+                    <p id="missingWhite" class="chess-symbols">None</p>
+                </div>
+                <div class="stat-box">
+                    <h3>BLACK CASUALTIES</h3>
+                    <p id="missingBlack" class="chess-symbols">None</p>
+                </div>
+            </div>
+
+            <button id="playAgainBtn" class="neon-btn">INITIALIZE NEW MATCH</button>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-    
     <script src="chess.js"></script>
 </body>
 </html>
