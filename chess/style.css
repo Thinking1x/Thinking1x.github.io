@@ -213,3 +213,23 @@ button:hover {
     cursor: not-allowed;
     box-shadow: none;
 }
+/* Login Input Styling */
+.neon-input {
+    width: 100%;
+    padding: 12px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #00E5FF;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 6px;
+    text-align: center;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.neon-input:focus {
+    border-color: #00E5FF;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}

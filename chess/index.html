@@ -9,9 +9,22 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div id="loginModal" class="modal">
+        <div class="modal-content" style="min-width: 300px;">
+            <h2 class="glitch-text" style="color: #00E5FF;">SYSTEM LOGIN</h2>
+            <p style="color: #94a3b8; margin-bottom: 20px;">Enter your username to access the terminal.</p>
+            <input type="text" id="usernameInput" placeholder="USERNAME" class="neon-input">
+            <button id="loginBtn" class="neon-btn" style="margin-top: 15px;">AUTHENTICATE</button>
+        </div>
+    </div>
+
     <div class="container">
         <h1>CHESS // TERMINAL</h1>
         
+        <div id="playerMatchup" style="color: #00E5FF; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; text-transform: uppercase;">
+            <span id="whitePlayerDisplay">WAITING...</span> ⚔️ <span id="blackPlayerDisplay">WAITING...</span>
+        </div>
+
         <div id="multiplayer-hub" style="margin-bottom: 20px; background: #1e293b; padding: 10px; border-radius: 6px; border: 1px dashed #00E5FF;">
             <button id="createMatchBtn" class="neon-btn" style="width: auto; padding: 10px 20px;">CREATE MULTIPLAYER MATCH</button>
             <div id="inviteLinkArea" class="hidden" style="margin-top: 10px;">
@@ -22,12 +35,10 @@
         
         <div class="status-box">
             <p>Status: <span id="status">White to move</span></p>
-            
             <div class="revert-info">
                 <span>WHITE REVERTS: <span id="whiteReverts">2</span></span> | 
                 <span>BLACK REVERTS: <span id="blackReverts">2</span></span>
             </div>
-
             <div class="control-buttons">
                 <button id="revertBtn" disabled>UNDO MOVE</button>
                 <button id="resetBtn">ABORT MATCH</button>
@@ -49,6 +60,7 @@
             <button id="playAgainBtn" class="neon-btn">INITIALIZE NEW MATCH</button>
         </div>
     </div>
+
     <div id="roleModal" class="modal hidden">
         <div class="modal-content" style="min-width: 300px;">
             <h2 id="roleTitle" class="glitch-text" style="color: #00E5FF;">LINK ESTABLISHED</h2>
@@ -56,12 +68,11 @@
             <button id="closeRoleBtn" class="neon-btn">COMMENCE OPERATION</button>
         </div>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
-    
     <script src="chess.js"></script>
 </body>
 </html>
