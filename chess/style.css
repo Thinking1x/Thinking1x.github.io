@@ -247,37 +247,63 @@ button:hover {
     color: #fff;
 }
 /* ==========================================
-   TERMINAL RADIO & PLAYER HUD
+   UPGRADED AUDIO TERMINAL
    ========================================== */
-.music-toggle {
+.audio-panel {
     position: fixed;
     top: 15px;
     right: 20px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid #334155;
+    padding: 10px;
+    border-radius: 6px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 190px;
+}
+
+.radio-header {
+    color: #00E5FF;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.neon-select {
+    background: #0f172a;
+    color: #f8fafc;
+    border: 1px solid #00E5FF;
+    padding: 5px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    outline: none;
+    box-shadow: inset 0 0 5px rgba(0, 229, 255, 0.2);
+}
+
+.neon-select:focus {
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+}
+
+.volume-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     color: #94a3b8;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Styles the volume slider */
+#volumeSlider {
+    flex-grow: 1;
     cursor: pointer;
-    transition: color 0.3s;
-    z-index: 1000;
+    accent-color: #00E5FF; /* Makes the slider thumb cyan */
 }
-
-.music-toggle:hover { color: #00E5FF; }
-.music-active { color: #00E5FF; font-weight: bold; text-shadow: 0 0 8px rgba(0,229,255,0.5); }
-
-.player-hud {
-    width: 75vmin;
-    max-width: 600px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 5px;
-    box-sizing: border-box;
-    background: #0f172a;
-    border-radius: 4px;
-    margin: 5px 0;
-}
-
-.hud-left { display: flex; align-items: center; gap: 10px; }
-.hud-name { color: #f8fafc; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; }
-.hud-score { color: #22c55e; font-size: 0.9rem; font-weight: bold; }
-.hud-captured { color: #64748b; font-size: 1.2rem; letter-spacing: 2px; }

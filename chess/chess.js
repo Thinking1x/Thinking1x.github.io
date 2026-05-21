@@ -53,32 +53,37 @@ loginBtn.addEventListener('click', async () => {
 // ==========================================
 // 3. TERMINAL RADIO (MUSIC SYSTEM)
 // ==========================================
-const radioControl = document.getElementById('radioControl');
 const bgm = new Audio();
 bgm.loop = true;
-bgm.volume = 0.3;
+bgm.volume = 0.3; // Default volume matching the slider
 
-const tracks = [
-    { mode: 'OFFLINE', url: '' },
-    { mode: 'CHILL', url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3' }, // Ambient Lo-Fi
-    { mode: 'INTENSE', url: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b32e02f9.mp3' } // Cyberpunk Synth
-];
-let currentTrackIdx = 0;
+const trackSelect = document.getElementById('trackSelect');
+const volumeSlider = document.getElementById('volumeSlider');
 
-radioControl.addEventListener('click', () => {
-    currentTrackIdx = (currentTrackIdx + 1) % tracks.length;
-    const track = tracks[currentTrackIdx];
+// The Expanded Track Library
+const trackLibrary = {
+    "": "", // Offline mode
+    "chill": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3",
+    "intense": "https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b32e02f9.mp3",
+    "lofi": "https://cdn.pixabay.com/download/audio/2022/03/15/audio_9273d4c688.mp3", 
+    "epic": "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" 
+};
+
+// Listen for dropdown changes
+trackSelect.addEventListener('change', (e) => {
+    const selectedUrl = trackLibrary[e.target.value];
     
-    if (track.mode === 'OFFLINE') {
-        bgm.pause();
-        radioControl.innerText = `[ AUDIO: ${track.mode} ]`;
-        radioControl.classList.remove('music-active');
+    if (!selectedUrl) {
+        bgm.pause(); // Stop music if [ OFFLINE ] is selected
     } else {
-        bgm.src = track.url;
-        bgm.play().catch(e => console.log("Audio blocked by browser."));
-        radioControl.innerText = `[ AUDIO: ${track.mode} 🔊 ]`;
-        radioControl.classList.add('music-active');
+        bgm.src = selectedUrl;
+        bgm.play().catch(err => console.log("Audio blocked by browser auto-play rules."));
     }
+});
+
+// Listen for volume slider changes in real-time
+volumeSlider.addEventListener('input', (e) => {
+    bgm.volume = e.target.value;
 });
 
 
