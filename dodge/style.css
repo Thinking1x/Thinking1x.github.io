@@ -197,3 +197,14 @@ button:hover {
 }
 .champ-card h2 { color: #38bdf8; margin-top: 0; }
 .champ-card p { font-size: 0.9rem; color: #cbd5e1; }
+/* Add this to your existing CSS file! */
+.icon-bg {
+    width: 100%;
+    height: 100%;
+    background-color: #1e293b; /* Fallback color */
+    background-size: cover;
+    background-position: center;
+    border-radius: 4px;
+}
+.ability-slot.active { border-color: #fbbf24; box-shadow: 0 0 10px rgba(251, 191, 36, 0.5); }
+.ability-slot.locked { opacity: 0.3; pointer-events: none; }

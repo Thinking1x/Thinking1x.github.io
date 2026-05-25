@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>League of Dodging - Champion Edition</title>
+    <title>League of Dodging - Full Kit Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -31,12 +31,20 @@
                 <div class="champ-card" onclick="selectChampion('mage')">
                     <h2>THE MAGE</h2>
                     <p>Health: 100 | Speed: Normal</p>
-                    <p><b>[F] FLASH:</b> Instant blink (5s CD).</p>
+                    <p><b>Q:</b> Pulse (Clear nearby projectiles)</p>
+                    <p><b>W:</b> Barrier (2s Invulnerability)</p>
+                    <p><b>E:</b> Phase Rush (Speed boost)</p>
+                    <p><b>R:</b> Chronobreak (Clear screen)</p>
+                    <p><b>F:</b> Flash (Instant blink)</p>
                 </div>
                 <div class="champ-card" onclick="selectChampion('assassin')">
                     <h2>THE ASSASSIN</h2>
                     <p>Health: 70 | Speed: Fast</p>
-                    <p><b>[Q] DASH:</b> Fast slide (2.5s CD).</p>
+                    <p><b>Q:</b> Dash (Quick slide)</p>
+                    <p><b>W:</b> Smoke Bomb (1s Invulnerability)</p>
+                    <p><b>E:</b> Deflect (Push projectiles away)</p>
+                    <p><b>R:</b> Overdrive (No Q cooldown for 3s)</p>
+                    <p><b>F:</b> Flash (Instant blink)</p>
                 </div>
             </div>
         </div>
@@ -49,12 +57,12 @@
     </div>
 
     <div class="action-bar">
-        <div id="slotQ" class="ability-slot locked"><span class="key">Q</span><div id="cdQ" class="cooldown-mask hidden"></div></div>
-        <div class="ability-slot locked"><span class="key">W</span></div>
-        <div class="ability-slot locked"><span class="key">E</span></div>
-        <div class="ability-slot locked"><span class="key">R</span></div>
+        <div id="slotQ" class="ability-slot"><div class="icon-bg" id="iconQ"></div><span class="key">Q</span><div id="cdQ" class="cooldown-mask hidden"></div></div>
+        <div id="slotW" class="ability-slot"><div class="icon-bg" id="iconW"></div><span class="key">W</span><div id="cdW" class="cooldown-mask hidden"></div></div>
+        <div id="slotE" class="ability-slot"><div class="icon-bg" id="iconE"></div><span class="key">E</span><div id="cdE" class="cooldown-mask hidden"></div></div>
+        <div id="slotR" class="ability-slot"><div class="icon-bg" id="iconR"></div><span class="key">R</span><div id="cdR" class="cooldown-mask hidden"></div></div>
         <div class="separator"></div>
-        <div id="slotF" class="ability-slot locked"><span class="key">F</span><div id="cdF" class="cooldown-mask hidden"></div></div>
+        <div id="slotF" class="ability-slot active"><div class="icon-bg" id="iconF" style="background-color: #eab308;"></div><span class="key">F</span><div id="cdF" class="cooldown-mask hidden"></div></div>
     </div>
 
     <script src="game.js"></script>
