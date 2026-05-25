@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>League of Dodging - Definitive Edition</title>
+    <title>League of Dodging - Champion Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,11 +13,34 @@
             <span class="label">SURVIVED</span>
             <span id="timeDisplay" class="time">0.00s</span>
         </div>
+        <div class="hp-box">
+            <div class="hp-bar-bg">
+                <div id="hpFill" class="hp-bar-fill"></div>
+            </div>
+            <span id="hpText">100 / 100</span>
+        </div>
     </div>
 
     <div class="canvas-container">
         <canvas id="gameCanvas" width="900" height="650"></canvas>
+        <div class="lens-overlay"></div>
         
+        <div id="champSelectScreen" class="overlay">
+            <h1>CHOOSE YOUR CHAMPION</h1>
+            <div class="roster">
+                <div class="champ-card" onclick="selectChampion('mage')">
+                    <h2>THE MAGE</h2>
+                    <p>Health: 100 | Speed: Normal</p>
+                    <p><b>[F] FLASH:</b> Instant blink (5s CD).</p>
+                </div>
+                <div class="champ-card" onclick="selectChampion('assassin')">
+                    <h2>THE ASSASSIN</h2>
+                    <p>Health: 70 | Speed: Fast</p>
+                    <p><b>[Q] DASH:</b> Fast slide (2.5s CD).</p>
+                </div>
+            </div>
+        </div>
+
         <div id="gameOverScreen" class="overlay hidden">
             <h1>CRITICAL FAILURE</h1>
             <p>You survived for <span id="finalTime" class="highlight">0.00</span> seconds.</p>
@@ -26,16 +49,12 @@
     </div>
 
     <div class="action-bar">
-        <div class="ability-slot locked"><span class="key">Q</span></div>
+        <div id="slotQ" class="ability-slot locked"><span class="key">Q</span><div id="cdQ" class="cooldown-mask hidden"></div></div>
         <div class="ability-slot locked"><span class="key">W</span></div>
         <div class="ability-slot locked"><span class="key">E</span></div>
         <div class="ability-slot locked"><span class="key">R</span></div>
         <div class="separator"></div>
-        <div id="flashSlot" class="ability-slot active">
-            <img src="https://ddragon.leagueoflegends.com/cdn/14.5.1/img/spell/SummonerFlash.png" alt="Flash">
-            <span class="key">F</span>
-            <div id="flashCooldown" class="cooldown-mask hidden">5.0</div>
-        </div>
+        <div id="slotF" class="ability-slot locked"><span class="key">F</span><div id="cdF" class="cooldown-mask hidden"></div></div>
     </div>
 
     <script src="game.js"></script>
