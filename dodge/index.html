@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>League of Dodging - Definitive Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="top-hud">
+        <div class="timer-box">
+            <span class="label">SURVIVED</span>
+            <span id="timeDisplay" class="time">0.00s</span>
+        </div>
+    </div>
+
+    <div class="canvas-container">
+        <canvas id="gameCanvas" width="900" height="650"></canvas>
+        
+        <div id="gameOverScreen" class="overlay hidden">
+            <h1>CRITICAL FAILURE</h1>
+            <p>You survived for <span id="finalTime" class="highlight">0.00</span> seconds.</p>
+            <button id="restartBtn">RESPAWN</button>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <div class="ability-slot locked"><span class="key">Q</span></div>
+        <div class="ability-slot locked"><span class="key">W</span></div>
+        <div class="ability-slot locked"><span class="key">E</span></div>
+        <div class="ability-slot locked"><span class="key">R</span></div>
+        <div class="separator"></div>
+        <div id="flashSlot" class="ability-slot active">
+            <img src="https://ddragon.leagueoflegends.com/cdn/14.5.1/img/spell/SummonerFlash.png" alt="Flash">
+            <span class="key">F</span>
+            <div id="flashCooldown" class="cooldown-mask hidden">5.0</div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
