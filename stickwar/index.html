@@ -25,21 +25,40 @@
 
     <script>
         window.RufflePlayer = window.RufflePlayer || {};
-        window.addEventListener("load", (event) => {
+        window.addEventListener("load", async () => {
             const ruffle = window.RufflePlayer.newest();
             const player = ruffle.createPlayer();
             
-            // --- THE FIX: Ruffle Configuration ---
+            // Keep our autoplay fixes
             player.config = {
-                autoplay: "on",             // Forces the game to start without the play button
-                unmuteOverlay: "hidden",    // Hides the "Click to unmute" banner
-                splashScreen: false         // Disables the Ruffle loading screen logo
+                autoplay: "on",             
+                unmuteOverlay: "hidden",    
+                splashScreen: false         
             };
             
-            const container = document.getElementById("game-container");
-            container.appendChild(player);
+            document.getElementById("game-container").appendChild(player);
             
-            player.load("Stick_War_1.swf"); 
+            // ==========================================
+            // THE SITELOCK BYPASS (DOMAIN SPOOFING)
+            // ==========================================
+            try {
+                // 1. Fetch your local game file as raw binary data
+                // CHANGE THIS NAME if your file is named something else!
+                const response = await fetch("Stick_Empires.swf"); 
+                const rawGameData = await response.arrayBuffer();
+
+                // 2. Feed the raw data to Ruffle, but attach a fake URL
+                player.load({
+                    data: rawGameData,
+                    
+                    // 3. The Magic Lie: 
+                    // This is the URL the game's internal code will see when it checks for piracy.
+                    url: "http://www.stickpage.com/Stick_Empires.swf"
+                });
+                
+            } catch (error) {
+                console.error("Failed to load the game data:", error);
+            }
         });
     </script>
     
