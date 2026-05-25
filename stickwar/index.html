@@ -12,7 +12,6 @@
             align-items: center;
             height: 100vh;
         }
-        /* You can adjust the width and height to fit the original game */
         #game-container {
             width: 800px; 
             height: 600px;
@@ -29,11 +28,17 @@
         window.addEventListener("load", (event) => {
             const ruffle = window.RufflePlayer.newest();
             const player = ruffle.createPlayer();
-            const container = document.getElementById("game-container");
             
+            // --- THE FIX: Ruffle Configuration ---
+            player.config = {
+                autoplay: "on",             // Forces the game to start without the play button
+                unmuteOverlay: "hidden",    // Hides the "Click to unmute" banner
+                splashScreen: false         // Disables the Ruffle loading screen logo
+            };
+            
+            const container = document.getElementById("game-container");
             container.appendChild(player);
             
-            // 2. Tell Ruffle to load your SWF file
             player.load("Stick_War_1.swf"); 
         });
     </script>
