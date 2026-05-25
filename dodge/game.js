@@ -309,4 +309,61 @@ function update() {
 
         // Draw Projectile Head
         ctx.beginPath(); ctx.arc(s.x, s.y, s.radius, 0, Math.PI*2);
-        ctx.fillStyle = '#fff'; // White hot
+        ctx.fillStyle = '#fff'; // White hot core
+        ctx.shadowBlur = 20; ctx.shadowColor = s.color;
+        ctx.fill(); ctx.shadowBlur = 0;
+
+        // Collision Check (Hitbox vs Hitbox)
+        const collisionDist = Math.hypot(player.x - s.x, player.y - s.y);
+        if (collisionDist < player.radius + s.radius - 2) { 
+            spawnParticles(player.x, player.y, '#ef4444', 40); // Blood/Explosion
+            triggerGameOver();
+        }
+
+        // Garbage Collect off-screen
+        if (s.x < -100 || s.x > canvas.width + 100 || s.y < -100 || s.y > canvas.height + 100) {
+            skillshots.splice(i, 1);
+        }
+    }
+
+    // 6. Draw Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life -= 2 * dt;
+
+        if (p.life <= 0) { particles.splice(i, 1); continue; }
+
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.beginPath(); ctx.arc(p.x, p.y, 4, 0, Math.PI*2); ctx.fill();
+        ctx.globalAlpha = 1.0;
+    }
+
+    // 7. Draw Player
+    if (!isGameOver) drawChampion(ctx, player);
+
+    // 8. Update HUD & Cooldowns
+    const timeAlive = ((now - startTime) / 1000).toFixed(2);
+    timeDisplay.innerText = timeAlive + "s";
+
+    const cdRemaining = (player.flashCooldown - (now - player.lastFlash)) / 1000;
+    if (cdRemaining <= 0) {
+        flashCooldownUI.classList.add('hidden');
+    } else {
+        flashCooldownUI.classList.remove('hidden');
+        flashCooldownUI.innerText = cdRemaining.toFixed(1);
+    }
+
+    requestAnimationFrame(update);
+}
+
+function triggerGameOver() {
+    isGameOver = true;
+    document.getElementById('finalTime').innerText = timeDisplay.innerText.replace('s', '');
+    gameOverScreen.classList.remove('hidden');
+}
+
+// Start immediately
+initGame();
