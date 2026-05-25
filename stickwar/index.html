@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stick War Classic</title>
+    <style>
+        body {
+            background-color: #111;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        /* You can adjust the width and height to fit the original game */
+        #game-container {
+            width: 800px; 
+            height: 600px;
+        }
+    </style>
+    <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
+</head>
+<body>
+
+    <div id="game-container"></div>
+
+    <script>
+        window.RufflePlayer = window.RufflePlayer || {};
+        window.addEventListener("load", (event) => {
+            const ruffle = window.RufflePlayer.newest();
+            const player = ruffle.createPlayer();
+            const container = document.getElementById("game-container");
+            
+            container.appendChild(player);
+            
+            // 2. Tell Ruffle to load your SWF file
+            player.load("Stick_War_1.swf"); 
+        });
+    </script>
+    
+</body>
+</html>
