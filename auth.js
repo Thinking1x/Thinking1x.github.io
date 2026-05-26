@@ -34,6 +34,22 @@ async function login() {
         currentUserId = userDoc.$id;
         currentUploadAccess = userDoc.uploadAccessUntil; // Grab their clearance timestamp
 
+        // ==========================================
+        // NEW: INJECT PROFILE UI UPDATES HERE
+        // ==========================================
+        const nameDisplay = document.getElementById('currentUserNameDisplay');
+        const avatarImg = document.getElementById('currentUserAvatar');
+        
+        if (nameDisplay) {
+            nameDisplay.innerText = currentUser; // Update the text in the HUD
+        }
+        
+        if (avatarImg) {
+            // Generate the custom avatar matching your neon cyan theme
+            avatarImg.src = `https://ui-avatars.com/api/?name=${currentUser}&background=00e5ff&color=000&bold=true`;
+        }
+        // ==========================================
+
         btn.classList.add('btn-success');
         btn.innerHTML = '<i class="fas fa-unlock-alt"></i> ACCESS GRANTED';
 
