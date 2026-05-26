@@ -1,38 +1,55 @@
 /* ==========================================
    HUD.CSS — SoundCloud-Style Home Layout
-   Matches: flat dark, large cards, clean shelves,
-   right sidebar with tools + user lists
+   Load AFTER styles.css so these win.
+   Uses !important where needed to beat
+   09-visualizer-and-effects.css overrides.
 ========================================== */
+
+/* ==========================================
+   0. FORCE RESET — beat style.css conflicts
+========================================== */
+
+/* The main-view background and blur are set with !important in
+   09-visualizer-and-effects.css. We need !important here too,
+   but ONLY when the home view is visible. We scope it to
+   #homeView being shown so database view is unaffected. */
+
+.main-view {
+    /* Remove the dark gradient — let the page bg show through */
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 20px 24px !important;
+}
 
 /* ==========================================
    1. CORE LAYOUT — Two-column dashboard
 ========================================== */
 .hud-main-container {
     display: grid;
-    grid-template-columns: 1fr 320px;
+    grid-template-columns: 1fr 300px;
     gap: 0;
     padding-top: 0;
     box-sizing: border-box;
-    min-height: 0;
     align-items: start;
 }
 
-/* Feed (left column) */
+/* Left feed column */
 .hud-feed-canvas {
     display: flex;
     flex-direction: column;
-    gap: 40px;
-    padding: 24px 32px 24px 0;
+    gap: 36px;
+    padding: 8px 32px 24px 0;
     min-width: 0;
 }
 
-/* Right sidebar */
+/* Right sidebar column */
 .hud-right-sidebar {
     display: flex;
     flex-direction: column;
     gap: 0;
     border-left: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 24px 0 24px 24px;
+    padding: 8px 0 24px 24px;
     min-width: 0;
 }
 
@@ -40,15 +57,15 @@
    2. ANNOUNCEMENT BANNER
 ========================================== */
 .hud-promo-banner {
-    background: transparent;
-    border-left: none;
-    border-radius: 0;
-    padding: 0 0 20px 0;
+    background: transparent !important;
+    border-left: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 0 20px 0 !important;
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    margin-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
 }
 
 .banner-badge {
@@ -60,18 +77,17 @@
     border-radius: 3px;
     letter-spacing: 1.5px;
     flex-shrink: 0;
+    text-transform: uppercase;
 }
 
 .banner-text {
     margin: 0;
-    font-size: 0.9rem;
-    color: #aaa;
+    font-size: 0.88rem;
+    color: #999;
     line-height: 1.4;
 }
 
-.banner-text strong {
-    color: #fff;
-}
+.banner-text strong { color: #fff; }
 
 /* ==========================================
    3. SECTION SHELVES
@@ -79,7 +95,7 @@
 .hud-shelf {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
 }
 
 .shelf-header {
@@ -89,118 +105,118 @@
 }
 
 .shelf-header h2 {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     color: #ffffff;
     margin: 0;
     font-weight: 700;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.2px;
 }
 
 .shelf-header .view-all {
-    color: #999;
+    color: #777;
     text-decoration: none;
-    font-size: 0.82rem;
+    font-size: 0.8rem;
     font-weight: 500;
     transition: color 0.15s;
-    letter-spacing: 0.3px;
 }
 
-.shelf-header .view-all:hover {
-    color: #fff;
-}
+.shelf-header .view-all:hover { color: #fff; }
 
-/* Card grid — wraps like SoundCloud */
+/* ---- Card grid: WRAP like SoundCloud, no horizontal scroll ---- */
 .shelf-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding-bottom: 0;
-    overflow: visible;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 18px !important;
+    overflow: visible !important;       /* kill the old overflow-x: auto */
+    overflow-x: visible !important;
+    padding-bottom: 0 !important;
+    scroll-snap-type: none !important;  /* kill old snap */
+    -webkit-overflow-scrolling: auto !important;
 }
 
 /* ==========================================
    4. MUSIC CARDS
 ========================================== */
 .music-card {
-    flex: 0 0 175px;
+    flex: 0 0 160px !important;
+    width: 160px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 9px;
     cursor: pointer;
-    transition: opacity 0.2s;
+    transition: opacity 0.18s;
+    scroll-snap-align: none !important; /* kill old snap */
 }
 
-.music-card:hover {
-    opacity: 0.85;
-}
+.music-card:hover { opacity: 0.82; }
 
 .card-cover-wrapper {
     position: relative;
-    width: 175px;
-    height: 175px;
-    border-radius: 4px;         /* SoundCloud uses very slight radius */
+    width: 160px !important;
+    height: 160px !important;
+    border-radius: 4px !important;     /* SoundCloud barely rounds corners */
     overflow: hidden;
-    background-color: #222;
-    box-shadow: none;
+    background-color: #1e1e1e;
+    box-shadow: none !important;
 }
 
 .card-cover {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform 0.28s ease;
     display: block;
 }
 
-.music-card:hover .card-cover {
-    transform: scale(1.04);
-}
+.music-card:hover .card-cover { transform: scale(1.05); }
 
-/* Floating play button — appears on hover, bottom-right like SoundCloud */
+/* Play button — dark circle bottom-right, reveals on hover */
 .card-play-btn {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.75);
-    border: 2px solid rgba(255, 255, 255, 0.4);
-    color: #fff;
+    position: absolute !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    left: auto !important;
+    top: auto !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    background-color: rgba(0, 0, 0, 0.78) !important;
+    border: 2px solid rgba(255, 255, 255, 0.35) !important;
+    color: #fff !important;
     cursor: pointer;
     opacity: 0;
-    transform: translateY(6px);
-    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s;
-    display: flex;
+    transform: translateY(6px) !important;
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.15s !important;
+    display: flex !important;
     align-items: center;
     justify-content: center;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     backdrop-filter: blur(4px);
 }
 
 .music-card:hover .card-play-btn {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1 !important;
+    transform: translateY(0) !important;
 }
 
 .card-play-btn:hover {
     background-color: var(--accent, #00e5ff) !important;
     border-color: var(--accent, #00e5ff) !important;
     color: #000 !important;
-    transform: translateY(0) scale(1.08) !important;
+    transform: translateY(0) scale(1.1) !important;
 }
 
-/* Card text — SoundCloud style: bold title, muted subtitle */
+/* Card text */
 .card-meta {
     display: flex;
     flex-direction: column;
     gap: 4px;
-    padding: 0 2px;
+    padding: 0 1px;
 }
 
 .card-title {
     color: #fff;
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
@@ -209,8 +225,8 @@
 }
 
 .card-subtitle {
-    color: #666;
-    font-size: 0.78rem;
+    color: #666 !important;
+    font-size: 0.76rem;
     font-weight: 400;
     white-space: nowrap;
     overflow: hidden;
@@ -219,84 +235,76 @@
 }
 
 /* ==========================================
-   5. RIGHT SIDEBAR — Header
+   5. RIGHT SIDEBAR — widget headers
 ========================================== */
 .widget {
-    margin-bottom: 28px;
+    margin-bottom: 26px;
 }
 
-.widget h3,
-.widget-header h3 {
-    font-size: 0.72rem;
-    color: #777;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 0 0 14px 0;
-    font-weight: 700;
+.widget h3 {
+    font-size: 0.7rem !important;
+    color: #666 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    margin: 0 0 14px 0 !important;
+    font-weight: 700 !important;
 }
 
 /* ==========================================
-   6. USER / ACTIVITY CARD
+   6. CURRENT USER CARD
 ========================================== */
 .user-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    border-radius: 0;
-    background: transparent;
-    border: none;
-    transition: opacity 0.2s;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 8px 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    transition: opacity 0.15s !important;
     cursor: default;
 }
 
 .user-card:hover {
-    background: transparent;
-    transform: none;
+    background: transparent !important;
+    transform: none !important;
+    border-color: transparent !important;
     opacity: 0.8;
 }
 
 #currentUserAvatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    border: none;
-    box-shadow: none;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    border: none !important;
+    box-shadow: none !important;
     object-fit: cover;
     flex-shrink: 0;
 }
 
-/* Online indicator dot */
 .user-card div > div:nth-child(2) {
-    display: inline-block;
-    position: relative;
-    padding-left: 14px;
     color: #00c853;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
+    padding-left: 14px;
 }
 
 .user-card div > div:nth-child(2)::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
     width: 7px;
     height: 7px;
     background-color: #00c853;
-    border-radius: 50%;
-    box-shadow: none;
+    box-shadow: none !important;
 }
 
 /* ==========================================
-   7. TOOLS GRID — SoundCloud "Artist Tools" style
+   7. SERVER TERMINAL / TOOLS GRID
 ========================================== */
 .sidebar-widget {
-    background: transparent;
-    border-radius: 0;
-    padding: 0;
-    border: none;
-    margin-bottom: 28px;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin-bottom: 26px;
 }
 
 .widget-header {
@@ -306,265 +314,94 @@
     margin-bottom: 14px;
 }
 
-/* 4-column tool grid matching SoundCloud */
+.widget-header h3 {
+    font-size: 0.7rem !important;
+    color: #666 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    margin: 0 !important;
+    font-weight: 700 !important;
+}
+
+/* 4-column grid = SoundCloud "Artist Tools" */
 .tools-icon-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
 }
 
 .tool-tile {
-    background-color: #1e1e1e;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    color: #ccc;
-    padding: 14px 6px 10px;
-    border-radius: 6px;
+    background-color: #1c1c1c !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    color: #bbb !important;
+    padding: 14px 6px 10px !important;
+    border-radius: 6px !important;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.72rem;
-    font-weight: 600;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 7px !important;
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
     letter-spacing: 0.2px;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.18s, color 0.18s !important;
 }
 
 .tool-tile .tile-icon {
-    font-size: 1.3rem;
-    color: #aaa;
+    font-size: 1.25rem !important;
+    color: #888 !important;
     line-height: 1;
-    transition: color 0.2s;
+    transition: color 0.18s;
 }
 
 .tool-tile:hover {
-    background-color: #2a2a2a;
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.12);
+    background-color: #252525 !important;
+    color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
 }
 
 .tool-tile:hover .tile-icon {
-    color: var(--accent, #00e5ff);
+    color: var(--accent, #00e5ff) !important;
 }
 
 /* ==========================================
-   8. FOLLOW LIST (Artists You Should Follow style)
-========================================== */
-.follow-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    margin-bottom: 28px;
-}
-
-.follow-list-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-}
-
-.follow-list-header h3 {
-    font-size: 0.72rem;
-    color: #777;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 0;
-    font-weight: 700;
-}
-
-.follow-list-header .refresh-link {
-    font-size: 0.75rem;
-    color: #666;
-    text-decoration: none;
-    transition: color 0.15s;
-}
-
-.follow-list-header .refresh-link:hover {
-    color: #fff;
-}
-
-.follow-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.follow-row:last-child {
-    border-bottom: none;
-}
-
-.follow-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: #333;
-}
-
-.follow-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.follow-name {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #fff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.follow-stats {
-    font-size: 0.72rem;
-    color: #666;
-    margin-top: 2px;
-}
-
-.follow-btn {
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.3);
-    color: #fff;
-    padding: 5px 14px;
-    border-radius: 3px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s;
-    flex-shrink: 0;
-    letter-spacing: 0.3px;
-}
-
-.follow-btn:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.6);
-}
-
-/* ==========================================
-   9. ACTIVITY MINI-FEED (Likes/Recent)
-========================================== */
-.activity-section {
-    margin-bottom: 20px;
-}
-
-.activity-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-}
-
-.activity-header h3 {
-    font-size: 0.72rem;
-    color: #777;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin: 0;
-    font-weight: 700;
-}
-
-.activity-header .view-all-link {
-    font-size: 0.75rem;
-    color: #666;
-    text-decoration: none;
-    transition: color 0.15s;
-}
-
-.activity-header .view-all-link:hover { color: #fff; }
-
-.activity-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    cursor: pointer;
-    transition: opacity 0.15s;
-}
-
-.activity-item:last-child { border-bottom: none; }
-.activity-item:hover { opacity: 0.75; }
-
-.activity-thumb {
-    width: 42px;
-    height: 42px;
-    border-radius: 3px;
-    object-fit: cover;
-    flex-shrink: 0;
-    background: #222;
-}
-
-.activity-text {
-    flex: 1;
-    min-width: 0;
-}
-
-.activity-artist {
-    font-size: 0.72rem;
-    color: #777;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.activity-title {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: #ddd;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: 2px;
-}
-
-.activity-meta {
-    font-size: 0.68rem;
-    color: #555;
-    margin-top: 3px;
-}
-
-/* ==========================================
-   10. MOSAIC COVER (Playlist art)
+   8. MOSAIC COVER
 ========================================== */
 .mosaic-cover {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    width: 100%;
-    height: 100%;
-    background-color: #222;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: 1fr 1fr !important;
+    width: 100% !important;
+    height: 100% !important;
+    background-color: #1e1e1e;
 }
 
 .mosaic-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
 }
 
 /* ==========================================
-   11. DYNAMIC SHELF ANIMATION
+   9. DYNAMIC SHELF ANIMATION
 ========================================== */
-@keyframes slideUpFade {
-    from { opacity: 0; transform: translateY(16px); }
+@keyframes scShelfIn {
+    from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 .dynamic-shelf {
-    animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: scShelfIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.dynamic-shelf:nth-child(1) { animation-delay: 0.05s; }
-.dynamic-shelf:nth-child(2) { animation-delay: 0.12s; }
-.dynamic-shelf:nth-child(3) { animation-delay: 0.19s; }
-.dynamic-shelf:nth-child(4) { animation-delay: 0.26s; }
+.dynamic-shelf:nth-child(1) { animation-delay: 0.04s; }
+.dynamic-shelf:nth-child(2) { animation-delay: 0.10s; }
+.dynamic-shelf:nth-child(3) { animation-delay: 0.16s; }
+.dynamic-shelf:nth-child(4) { animation-delay: 0.22s; }
 
 /* ==========================================
-   12. RESPONSIVE
+   10. RESPONSIVE
 ========================================== */
 @media (max-width: 1100px) {
     .hud-main-container {
@@ -578,32 +415,13 @@
     .hud-feed-canvas {
         padding-right: 0;
     }
-    .tools-icon-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
 }
 
 @media (max-width: 600px) {
-    .hud-feed-canvas {
-        gap: 28px;
-        padding: 16px 0 16px 0;
-    }
-    .shelf-header h2 {
-        font-size: 1.1rem;
-    }
-    .music-card {
-        flex: 0 0 140px;
-    }
-    .card-cover-wrapper {
-        width: 140px;
-        height: 140px;
-    }
-    .tools-icon-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 6px;
-    }
-    .tool-tile {
-        padding: 10px 4px 8px;
-        font-size: 0.65rem;
-    }
+    .hud-feed-canvas { gap: 26px; padding: 8px 0 16px 0; }
+    .shelf-header h2  { font-size: 1.05rem; }
+    .music-card       { flex: 0 0 130px !important; width: 130px; }
+    .card-cover-wrapper { width: 130px !important; height: 130px !important; }
+    .tools-icon-grid  { gap: 6px !important; }
+    .tool-tile        { padding: 10px 4px 8px !important; font-size: 0.62rem !important; }
 }
