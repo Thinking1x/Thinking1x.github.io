@@ -253,44 +253,56 @@ async function handleGrantAccess(userId, btnElement) {
     btnElement.style.borderColor = "var(--success)";
 }
 // ==========================================
-// DYNAMIC GENRE SHELVES
+// DYNAMIC GENRE SHELVES (UPGRADED)
 // ==========================================
 function renderGenreShelves() {
-    // 1. Find the main canvas where shelves live
     const canvas = document.querySelector('.hud-feed-canvas');
     if (!canvas) return;
 
-    // 2. Clear out any old dynamic shelves first (so they don't duplicate)
+    // Remove old dynamic shelves
     document.querySelectorAll('.dynamic-shelf').forEach(shelf => shelf.remove());
 
-    // 3. Define the categories you want to generate shelves for
-    const targetGenres = ['J-POP', 'US-UK', 'OST', 'Other'];
+    if (!allTracks || allTracks.length === 0) {
+        console.log("No tracks available to build shelves.");
+        return;
+    }
 
-    targetGenres.forEach(genre => {
-        // Filter tracks that match this specific genre
-        const genreTracks = allTracks.filter(track => track.genre === genre);
+    // 1. Automatically find all unique genres that actually exist in your database!
+    const uniqueGenres = [...new Set(allTracks.map(track => {
+        // Standardize the text: make it uppercase and handle empty genres
+        return track.genre ? track.genre.trim().toUpperCase() : 'UNCATEGORIZED';
+    }))];
+
+    console.log("Detected Genres in Database:", uniqueGenres);
+
+    // 2. Build a shelf for every genre found
+    uniqueGenres.forEach(genre => {
         
-        // If there are no songs in this category yet, skip building the shelf
+        // Filter tracks matching this genre (case-insensitive)
+        const genreTracks = allTracks.filter(track => {
+            const trackG = track.genre ? track.genre.trim().toUpperCase() : 'UNCATEGORIZED';
+            return trackG === genre;
+        });
+        
         if (genreTracks.length === 0) return;
 
-        // Build the shelf HTML
         const shelf = document.createElement('section');
-        shelf.className = 'hud-shelf dynamic-shelf'; // Tagged as dynamic
+        shelf.className = 'hud-shelf dynamic-shelf';
         
         let cardsHTML = '';
         
-        // Build a card for each track in this genre
         genreTracks.forEach(track => {
-            // Find the global index so the play button works
             const globalIndex = allTracks.findIndex(t => t.id === track.id);
             
-            // Fallback image if track doesn't have a specific cover
-            const coverArt = track.coverUrl || `https://via.placeholder.com/180/1a1b26/00e5ff?text=${encodeURIComponent(track.name.substring(0, 3))}`;
+            // Bulletproof Cover Art Fallback
+            const coverArtHTML = track.cover && !track.cover.includes('placeholder')
+                ? `<img src="${track.cover}" alt="Cover" class="card-cover">`
+                : `<div class="card-cover" style="display:flex; justify-content:center; align-items:center; background:#1a1b26; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-music" style="font-size:2rem; color:rgba(255,255,255,0.2);"></i></div>`;
 
             cardsHTML += `
                 <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
                     <div class="card-cover-wrapper">
-                        <img src="${coverArt}" alt="Cover" class="card-cover">
+                        ${coverArtHTML}
                         <button class="card-play-btn"><i class="fas fa-play"></i></button>
                     </div>
                     <div class="card-meta">
@@ -304,7 +316,7 @@ function renderGenreShelves() {
         shelf.innerHTML = `
             <div class="shelf-header">
                 <h2>${genre} Signals</h2>
-                <a href="#" class="view-all" onclick="showAllTracks()">View All</a>
+                <a href="#" class="view-all" onclick="showAllTracks()">View Database</a>
             </div>
             <div class="shelf-grid">
                 ${cardsHTML}
