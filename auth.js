@@ -217,3 +217,11 @@ async function adminActionRevoke(targetUserId) {
         alert("Failed to revoke clearance.");
     }
 }
+// Grab the variable your system already uses!
+const loggedInUsername = currentUser; 
+
+// Update the text on the HUD
+document.getElementById('currentUserNameDisplay').innerText = loggedInUsername;
+
+// Generate the avatar
+document.getElementById('currentUserAvatar').src = `https://ui-avatars.com/api/?name=${loggedInUsername}&background=00e5ff&color=000&bold=true`;

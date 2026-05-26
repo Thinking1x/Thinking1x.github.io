@@ -252,3 +252,88 @@ async function handleGrantAccess(userId, btnElement) {
     btnElement.style.color = "#fff";
     btnElement.style.borderColor = "var(--success)";
 }
+// ==========================================
+// DYNAMIC GENRE SHELVES
+// ==========================================
+function renderGenreShelves() {
+    // 1. Find the main canvas where shelves live
+    const canvas = document.querySelector('.hud-feed-canvas');
+    if (!canvas) return;
+
+    // 2. Clear out any old dynamic shelves first (so they don't duplicate)
+    document.querySelectorAll('.dynamic-shelf').forEach(shelf => shelf.remove());
+
+    // 3. Define the categories you want to generate shelves for
+    const targetGenres = ['J-POP', 'US-UK', 'OST', 'Other'];
+
+    targetGenres.forEach(genre => {
+        // Filter tracks that match this specific genre
+        const genreTracks = allTracks.filter(track => track.genre === genre);
+        
+        // If there are no songs in this category yet, skip building the shelf
+        if (genreTracks.length === 0) return;
+
+        // Build the shelf HTML
+        const shelf = document.createElement('section');
+        shelf.className = 'hud-shelf dynamic-shelf'; // Tagged as dynamic
+        
+        let cardsHTML = '';
+        
+        // Build a card for each track in this genre
+        genreTracks.forEach(track => {
+            // Find the global index so the play button works
+            const globalIndex = allTracks.findIndex(t => t.id === track.id);
+            
+            // Fallback image if track doesn't have a specific cover
+            const coverArt = track.coverUrl || `https://via.placeholder.com/180/1a1b26/00e5ff?text=${encodeURIComponent(track.name.substring(0, 3))}`;
+
+            cardsHTML += `
+                <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
+                    <div class="card-cover-wrapper">
+                        <img src="${coverArt}" alt="Cover" class="card-cover">
+                        <button class="card-play-btn"><i class="fas fa-play"></i></button>
+                    </div>
+                    <div class="card-meta">
+                        <span class="card-title">${track.name}</span>
+                        <span class="card-subtitle">${track.artist}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        shelf.innerHTML = `
+            <div class="shelf-header">
+                <h2>${genre} Signals</h2>
+                <a href="#" class="view-all" onclick="showAllTracks()">View All</a>
+            </div>
+            <div class="shelf-grid">
+                ${cardsHTML}
+            </div>
+        `;
+
+        canvas.appendChild(shelf);
+    });
+}
+// Example logic for your renderPlaylists() function:
+function getPlaylistCover(playlist) {
+    // Get the actual track objects for this playlist
+    const plTracks = allTracks.filter(track => playlist.ids.includes(track.id));
+    
+    if (plTracks.length >= 4) {
+        // Build the iTunes-style 4-image mosaic
+        return `
+            <div class="mosaic-cover">
+                <img src="${plTracks[0].coverUrl || 'https://via.placeholder.com/80/1a1b26/00e5ff?text=1'}">
+                <img src="${plTracks[1].coverUrl || 'https://via.placeholder.com/80/1a1b26/00e5ff?text=2'}">
+                <img src="${plTracks[2].coverUrl || 'https://via.placeholder.com/80/1a1b26/00e5ff?text=3'}">
+                <img src="${plTracks[3].coverUrl || 'https://via.placeholder.com/80/1a1b26/00e5ff?text=4'}">
+            </div>
+        `;
+    } else if (plTracks.length > 0) {
+        // Just use the first song's cover if less than 4
+        return `<img src="${plTracks[0].coverUrl || 'https://via.placeholder.com/160/1a1b26/00e5ff?text=Mix'}" class="card-cover">`;
+    } else {
+        // Empty playlist cover
+        return `<img src="https://via.placeholder.com/160/1a1b26/333?text=Empty" class="card-cover">`;
+    }
+}
