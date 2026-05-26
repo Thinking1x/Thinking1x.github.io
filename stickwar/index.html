@@ -23,44 +23,49 @@
 
     <div id="game-container"></div>
 
-    <script>
-        window.RufflePlayer = window.RufflePlayer || {};
-        window.addEventListener("load", async () => {
-            const ruffle = window.RufflePlayer.newest();
-            const player = ruffle.createPlayer();
+<script>
+    window.RufflePlayer = window.RufflePlayer || {};
+    window.addEventListener("load", async () => {
+        const ruffle = window.RufflePlayer.newest();
+        const player = ruffle.createPlayer();
+        
+        player.config = {
+            autoplay: "on",             
+            unmuteOverlay: "hidden",    
+            splashScreen: false         
+        };
+        
+        document.getElementById("game-container").appendChild(player);
+        
+        // ==========================================
+        // THE SITELOCK BYPASS (WITH DEBUGGING)
+        // ==========================================
+        try {
+            console.log("1. Attempting to fetch the SWF file from GitHub Pages...");
             
-            // Keep our autoplay fixes
-            player.config = {
-                autoplay: "on",             
-                unmuteOverlay: "hidden",    
-                splashScreen: false         
-            };
+            // Using the ABSOLUTE URL to guarantee we hit the right server
+            const response = await fetch("https://thinking1x.github.io/stickwar/Stick_Empires.swf"); 
             
-            document.getElementById("game-container").appendChild(player);
-            
-            // ==========================================
-            // THE SITELOCK BYPASS (DOMAIN SPOOFING)
-            // ==========================================
-            try {
-                // 1. Fetch your local game file as raw binary data
-                // CHANGE THIS NAME if your file is named something else!
-                const response = await fetch("Stick_Empires.swf"); 
-                const rawGameData = await response.arrayBuffer();
-
-                // 2. Feed the raw data to Ruffle, but attach a fake URL
-                player.load({
-                    data: rawGameData,
-                    
-                    // 3. The Magic Lie: 
-                    // This is the URL the game's internal code will see when it checks for piracy.
-                    url: "http://www.stickpage.com/Stick_Empires.swf"
-                });
-                
-            } catch (error) {
-                console.error("Failed to load the game data:", error);
+            // If GitHub throws a 404, this stops Ruffle from eating the error page
+            if (!response.ok) {
+                throw new Error(`GitHub returned a ${response.status} error. The file path or name is incorrect.`);
             }
-        });
-    </script>
+
+            console.log("2. File found! Converting to binary data...");
+            const rawGameData = await response.arrayBuffer();
+
+            console.log("3. Feeding data to Ruffle and spoofing the domain...");
+            player.load({
+                data: rawGameData,
+                url: "http://www.stickpage.com/Stick_Empires.swf"
+            });
+            
+        } catch (error) {
+            // This will print the exact failure reason in bright red in your F12 console
+            console.error("CRITICAL FETCH ERROR:", error.message);
+        }
+    });
+</script>
     
 </body>
 </html>
