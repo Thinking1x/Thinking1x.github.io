@@ -315,25 +315,65 @@ function renderGenreShelves() {
     });
 }
 // Example logic for your renderPlaylists() function:
+// Add this helper function to ui.js
 function getPlaylistCover(playlist) {
     // Get the actual track objects for this playlist
     const plTracks = allTracks.filter(track => playlist.ids.includes(track.id));
     
     if (plTracks.length >= 4) {
-        // Build the iTunes-style 4-image mosaic
+        // Build the iTunes-style 4-image mosaic using placehold.co as fallbacks
         return `
-            <div class="mosaic-cover">
-                <img src="${plTracks[0].coverUrl || 'https://via.placeholder.com/80/1a1b26/00e5ff?text=1'}">
-                <img src="${plTracks[1].coverUrl || 'https://via.placeholder.com/80/1a1b26/00e5ff?text=2'}">
-                <img src="${plTracks[2].coverUrl || 'https://via.placeholder.com/80/1a1b26/00e5ff?text=3'}">
-                <img src="${plTracks[3].coverUrl || 'https://via.placeholder.com/80/1a1b26/00e5ff?text=4'}">
+            <div class="mosaic-cover" style="width:40px; height:40px; border-radius:4px; overflow:hidden;">
+                <img src="${plTracks[0].cover || 'https://placehold.co/80x80/1a1b26/00e5ff?text=1'}">
+                <img src="${plTracks[1].cover || 'https://placehold.co/80x80/1a1b26/00e5ff?text=2'}">
+                <img src="${plTracks[2].cover || 'https://placehold.co/80x80/1a1b26/00e5ff?text=3'}">
+                <img src="${plTracks[3].cover || 'https://placehold.co/80x80/1a1b26/00e5ff?text=4'}">
             </div>
         `;
     } else if (plTracks.length > 0) {
         // Just use the first song's cover if less than 4
-        return `<img src="${plTracks[0].coverUrl || 'https://via.placeholder.com/160/1a1b26/00e5ff?text=Mix'}" class="card-cover">`;
+        return `<img src="${plTracks[0].cover || 'https://placehold.co/160x160/1a1b26/00e5ff?text=Mix'}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;">`;
     } else {
         // Empty playlist cover
-        return `<img src="https://via.placeholder.com/160/1a1b26/333?text=Empty" class="card-cover">`;
+        return `<img src="https://placehold.co/160x160/1a1b26/333?text=Empty" style="width:40px; height:40px; border-radius:4px; object-fit:cover;">`;
     }
+}
+
+// Update your existing renderPlaylists in ui.js
+function renderPlaylists() {
+    const container = document.getElementById('playlists');
+    if (!container) return;
+    container.innerHTML = '';
+
+    userPlaylists.forEach((pl, index) => {
+        const div = document.createElement('div');
+        div.className = `playlist-item ${currentViewPlaylistIndex === index ? 'active' : ''}`;
+        
+        // Generate the dynamic cover art!
+        const coverArtHTML = getPlaylistCover(pl);
+
+        const isMine = (pl.owner === currentUser);
+
+        if (isMine) {
+            // Using Flexbox to align the cover art and the playlist name
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                    ${coverArtHTML}
+                    <span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${pl.name}</span>
+                </div>
+            `;
+        } else {
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                     ${coverArtHTML}
+                    <i class="fas fa-lock" style="color: var(--error); font-size: 0.85rem;"></i> 
+                    <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pl.name}</span>
+                    <span style="font-size: 0.7rem; color: var(--text-sub); font-weight: bold; text-transform: uppercase;">${pl.owner}</span>
+                </div>
+            `;
+        }
+
+        div.onclick = () => loadPlaylist(index);
+        container.appendChild(div);
+    });
 }
