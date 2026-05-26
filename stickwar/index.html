@@ -44,7 +44,7 @@
             console.log("1. Attempting to fetch the SWF file from GitHub Pages...");
             
             // Using the ABSOLUTE URL to guarantee we hit the right server
-            const response = await fetch("https://thinking1x.github.io/stickwar/Stick_Empires.swf"); 
+            const response = await fetch("https://thinking1x.github.io/stickwar/Stick_War_1.swf"); 
             
             // If GitHub throws a 404, this stops Ruffle from eating the error page
             if (!response.ok) {
@@ -57,7 +57,7 @@
             console.log("3. Feeding data to Ruffle and spoofing the domain...");
             player.load({
                 data: rawGameData,
-                url: "http://www.stickpage.com/Stick_Empires.swf"
+                url: "http://www.stickpage.com/Stick_War_1.swf"
             });
             
         } catch (error) {
