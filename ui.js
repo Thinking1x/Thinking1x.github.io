@@ -293,27 +293,27 @@ function renderGenreShelves() {
         
         let cardsHTML = '';
         
-        genreTracks.forEach(track => {
-            const globalIndex = allTracks.findIndex(t => t.id === track.id);
-            
-            // Bulletproof Cover Art Fallback
-            const coverArtHTML = track.cover && !track.cover.includes('placeholder')
-                ? `<img src="${track.cover}" alt="Cover" class="card-cover">`
-                : `<div class="card-cover" style="display:flex; justify-content:center; align-items:center; background:#1a1b26; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-music" style="font-size:2rem; color:rgba(255,255,255,0.2);"></i></div>`;
+genreTracks.forEach(track => {
+    const globalIndex = allTracks.findIndex(t => t.id === track.id);
+    
+    // Your bulletproof cover art logic is great, keep this!
+    const coverArtHTML = track.cover && !track.cover.includes('placeholder')
+        ? `<img src="${track.cover}" alt="Cover" class="card-cover">`
+        : `<div class="card-cover" style="display:flex; justify-content:center; align-items:center; background:#1a1b26; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-music" style="font-size:2rem; color:rgba(255,255,255,0.2);"></i></div>`;
 
-            cardsHTML += `
-                <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
-                    <div class="card-cover-wrapper">
-                        https://ui-avatars.com/api/?name=User&background=00e5ff&color=000
-                        <button class="card-play-btn"><i class="fas fa-play"></i></button>
-                    </div>
-                    <div class="card-meta">
-                        <span class="card-title">${track.name}</span>
-                        <span class="card-subtitle">${track.artist}</span>
-                    </div>
-                </div>
-            `;
-        });
+    cardsHTML += `
+        <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
+            <div class="card-cover-wrapper">
+                ${coverArtHTML}
+                <button class="card-play-btn"><i class="fas fa-play"></i></button>
+            </div>
+            <div class="card-meta">
+                <span class="card-title">${track.name}</span>
+                <span class="card-subtitle">${track.artist}</span>
+            </div>
+        </div>
+    `;
+});
 
         shelf.innerHTML = `
             <div class="shelf-header">
