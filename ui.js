@@ -332,7 +332,7 @@ function getPlaylistCover(playlist) {
     const plTracks = allTracks.filter(track => playlist.ids.includes(track.id));
     
     const fallback = (letter) => 
-        `https://via.placeholder.com/80x80/0f172a/00ffcc?text=${letter}`;
+        `https://i.ebayimg.com/images/g/JKAAAeSwqtZpbYnr/s-l1200.jpg`;
 
     if (plTracks.length >= 4) {
         const imgs = plTracks.slice(0, 4).map((t, i) => 
