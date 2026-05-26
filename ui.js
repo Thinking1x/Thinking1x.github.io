@@ -252,3 +252,36 @@ const adminDeleteBtn = (currentUserRole === 'admin')
        </button>` 
     : '';
 
+function switchView(viewName) {
+    const homeView = document.getElementById('homeView');
+    const databaseView = document.getElementById('databaseView');
+    const viewTitle = document.getElementById('viewTitle');
+    
+    // 1. Remove the "active" highlight from all sidebar navigation items
+    document.getElementById('navHome').classList.remove('active');
+    document.getElementById('navAllTracks').classList.remove('active');
+
+    if (viewName === 'home') {
+        // 2a. Show Home, Hide Database
+        homeView.style.display = 'block';
+        databaseView.style.display = 'none';
+        
+        // Highlight the Home button and update the header text
+        document.getElementById('navHome').classList.add('active');
+        viewTitle.innerText = "Discover Signals"; 
+        
+    } else if (viewName === 'database') {
+        // 2b. Show Database, Hide Home
+        homeView.style.display = 'none';
+        databaseView.style.display = 'block';
+        
+        // Highlight the Database button and update the header text
+        document.getElementById('navAllTracks').classList.add('active');
+        viewTitle.innerText = "All Tracks";
+        
+        // Trigger your existing function to render the track list!
+        if (typeof showAllTracks === 'function') {
+            showAllTracks(); 
+        }
+    }
+}
