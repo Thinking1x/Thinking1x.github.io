@@ -1,20 +1,24 @@
 /* =============================================
-   DESIGN TOKENS
+   DESIGN TOKENS — SoundCloud-inspired
 ============================================= */
 :root {
-  --bg-base:       #050510;
-  --bg-elevated:   #0d0d20;
-  --bg-highlight:  #1a1a36;
-  --accent:        #00E5FF;
-  --accent-hover:  #00b3cc;
-  --success:       #00ff66;
+  --bg-base:       #111111;
+  --bg-elevated:   #1a1a1a;
+  --bg-highlight:  #232323;
+  --bg-card:       #1e1e1e;
+  --accent:        #ff5500;
+  --accent-hover:  #ff7700;
+  --accent-light:  rgba(255, 85, 0, 0.12);
+  --success:       #19d472;
   --error:         #ff3366;
-  --text-main:     #E0E0FF;
-  --text-sub:      #8B8BAE;
+  --text-main:     #ffffff;
+  --text-sub:      #999999;
+  --text-muted:    #555555;
+  --border:        rgba(255,255,255,0.08);
+  --border-hover:  rgba(255,255,255,0.15);
 
-  /* Layout tokens — easy to override per breakpoint */
-  --sidebar-width: 280px;
-  --player-height: 90px;
+  --sidebar-width: 240px;
+  --player-height: 72px;
 }
 
 /* =============================================
@@ -22,14 +26,17 @@
 ============================================= */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-base);
   color: var(--text-main);
   height: 100vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  -webkit-font-smoothing: antialiased;
 }
 
 .hidden { display: none !important; }
@@ -39,21 +46,24 @@ body {
 ============================================= */
 @keyframes fadeOutUp {
   0%   { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.05); visibility: hidden; }
+  100% { opacity: 0; transform: scale(1.03); visibility: hidden; }
 }
 @keyframes fadeInUp {
-  0%   { opacity: 0; transform: translateY(30px); }
+  0%   { opacity: 0; transform: translateY(20px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  20%, 60%  { transform: translateX(-5px); }
-  40%, 80%  { transform: translateX(5px); }
+  20%, 60%  { transform: translateX(-4px); }
+  40%, 80%  { transform: translateX(4px); }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.animate-out  { animation: fadeOutUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.animate-in   { animation: fadeInUp  0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.shake-error  { animation: shake 0.4s ease-in-out; }
+.animate-out  { animation: fadeOutUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-in   { animation: fadeInUp  0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.shake-error  { animation: shake 0.35s ease-in-out; }
 
 /* =============================================
    LOGIN PAGE
@@ -63,20 +73,19 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #050510 0%, #00e5ff22 100%);
+  gap: 40px;
+  background: #111111;
   position: fixed;
   inset: 0;
   z-index: 1000;
-  transition: opacity 0.5s;
 }
 .login-box {
-  background: var(--bg-elevated);
-  padding: 2.5rem;
-  border-radius: 12px;
-  width: min(340px, 90vw);
+  background: #1a1a1a;
+  padding: 2rem;
+  border-radius: 4px;
+  width: min(320px, 90vw);
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 229, 255, 0.15);
-  border: 1px solid rgba(0, 229, 255, 0.1);
+  border: 1px solid var(--border);
 }
 .login-box h2 {
   margin-bottom: 1.5rem;
@@ -84,88 +93,95 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
 }
 .login-box h2 i { color: var(--accent); }
 .login-box input {
   width: 100%;
-  padding: 14px;
-  margin: 8px 0;
-  border: 1px solid transparent;
+  padding: 12px 14px;
+  margin: 6px 0;
+  border: 1px solid var(--border);
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   color: white;
-  transition: border 0.3s, background 0.3s;
   font-family: inherit;
+  font-size: 0.9rem;
+  transition: border 0.2s;
 }
 .login-box input:focus {
   outline: none;
-  border: 1px solid var(--accent);
-  background: rgba(0, 229, 255, 0.05);
+  border-color: var(--accent);
+  background: rgba(255, 85, 0, 0.04);
 }
 #loginBtn {
   width: 100%;
-  padding: 14px;
-  margin-top: 16px;
+  padding: 12px;
+  margin-top: 14px;
   border: none;
-  border-radius: 500px;
+  border-radius: 4px;
   background: var(--accent);
-  color: #000;
-  font-weight: bold;
-  font-size: 1rem;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background 0.2s, transform 0.1s;
+  letter-spacing: 0.3px;
 }
-#loginBtn:hover      { background: var(--accent-hover); transform: scale(1.02); box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); }
-#loginBtn.btn-success { background: var(--success); box-shadow: 0 0 20px rgba(0, 255, 102, 0.5); }
-#loginBtn.btn-error   { background: var(--error); color: white; box-shadow: 0 0 20px rgba(255, 51, 102, 0.5); }
+#loginBtn:hover      { background: var(--accent-hover); transform: translateY(-1px); }
+#loginBtn:active     { transform: translateY(0); }
+#loginBtn.btn-success { background: var(--success); }
+#loginBtn.btn-error   { background: var(--error); }
+
+/* =============================================
+   TOP CONTROL BAR (toggles)
+============================================= */
+#mainPage > div:first-of-type {
+  background: #0a0a0a !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.5px;
+}
 
 /* =============================================
    APP SHELL
 ============================================= */
 #mainPage {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    
-    position: relative;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
 }
 .background-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* CHANGED: Made the shadows much lighter (0.4 at top, 0.7 at bottom) */
-    background: linear-gradient(to bottom, rgba(15, 23, 42, 0.4), rgba(15, 23, 42, 0.7));
-    z-index: -1;
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.5), rgba(0,0,0,0.8));
+  z-index: -1;
 }
 
-/* Mobile menu toggle — hidden on desktop */
 #mobileMenuBtn {
   display: none;
   background: none;
   border: none;
-  color: var(--accent);
-  font-size: 1.4rem;
+  color: var(--text-main);
+  font-size: 1.3rem;
   cursor: pointer;
   padding: 4px 8px;
   flex-shrink: 0;
 }
 
-/* Overlay for sidebar on mobile */
 #sidebarOverlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 5, 0.7);
+  background: rgba(0, 0, 0, 0.7);
   z-index: 999;
 }
 #sidebarOverlay.active { display: block; }
 
-/* Main content area (sidebar + view) */
 #app-container {
   display: flex;
   flex: 1;
@@ -173,183 +189,241 @@ body {
 }
 
 /* =============================================
-   SIDEBAR
+   SIDEBAR — SoundCloud style
 ============================================= */
 .sidebar {
   width: var(--sidebar-width);
-  background: #020208;
+  background: #0a0a0a;
   display: flex;
   flex-direction: column;
-  padding-top: 24px;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 20px;
+  border-right: 1px solid var(--border);
   flex-shrink: 0;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s ease;
   z-index: 1000;
 }
-.nav-links { padding: 0 24px; margin-bottom: 24px; }
+.nav-links { padding: 0 16px; margin-bottom: 20px; }
+
+/* SC Logo area */
+.nav-links::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: var(--border);
+  margin: 8px 0 16px;
+}
+
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   color: var(--text-sub);
-  font-weight: 600;
-  padding: 10px 0;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 9px 10px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color 0.15s, background 0.15s;
   user-select: none;
 }
-.nav-item:hover, .nav-item.active { color: var(--text-main); }
+.nav-item:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+.nav-item.active { color: var(--text-main); background: rgba(255,255,255,0.07); }
 .nav-item.active i { color: var(--accent); }
-.nav-item i { font-size: 1.2rem; width: 24px; text-align: center; }
+.nav-item i { font-size: 1rem; width: 20px; text-align: center; }
 
 .library-section {
   flex: 1;
-  background: #050510;
-  margin: 0 8px;
-  border-radius: 8px;
   padding: 16px;
   overflow-y: auto;
+  border-top: 1px solid var(--border);
 }
 .library-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: var(--text-sub);
-  font-weight: bold;
-  margin-bottom: 16px;
-  font-size: 0.9rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
-.library-header i.fa-plus { transition: color 0.2s; padding: 4px; cursor: pointer; }
+.library-header i.fa-plus {
+  cursor: pointer;
+  color: var(--text-sub);
+  padding: 4px;
+  transition: color 0.15s;
+}
 .library-header i.fa-plus:hover { color: var(--accent); }
 
 .playlist-item {
-  padding: 8px;
-  border-radius: 4px;
+  padding: 8px 6px;
+  border-radius: 3px;
   color: var(--text-sub);
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 12px;
-  transition: all 0.2s;
+  gap: 10px;
+  transition: color 0.15s, background 0.15s;
+  font-size: 0.85rem;
 }
-.playlist-item:hover { background: var(--bg-elevated); color: var(--text-main); transform: translateX(4px); }
-.playlist-item.active { background: rgba(0, 229, 255, 0.1); color: var(--accent); }
+.playlist-item:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+.playlist-item.active { color: var(--accent); background: rgba(255,85,0,0.08); }
 
 /* =============================================
    MAIN VIEW
 ============================================= */
 .main-view {
   flex: 1;
-  background: linear-gradient(180deg, #11112b 0%, #050510 100%);
-  padding: 24px;
+  background: var(--bg-base) !important;
+  padding: 24px !important;
   overflow-y: auto;
-  min-width: 0; /* prevent flex blowout */
+  min-width: 0;
 }
 
 .view-header-container {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 24px;
+  align-items: center;
+  margin-bottom: 20px;
   gap: 12px;
 }
 .view-header {
-  font-size: 2.5rem;
-  font-weight: 800;
-  letter-spacing: -1px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
   margin: 0;
   line-height: 1;
 }
 
 .btn-edit-playlist {
-  background: rgba(255,255,255,0.05);
-  color: var(--text-main);
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 8px 16px;
-  border-radius: 500px;
+  background: transparent;
+  color: var(--text-sub);
+  border: 1px solid var(--border);
+  padding: 7px 14px;
+  border-radius: 4px;
   cursor: pointer;
-  font-weight: bold;
-  transition: all 0.2s;
+  font-weight: 500;
+  font-size: 0.82rem;
+  font-family: inherit;
+  transition: all 0.15s;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   white-space: nowrap;
-  flex-shrink: 0;
 }
-.btn-edit-playlist:hover { background: rgba(0, 229, 255, 0.1); border-color: var(--accent); color: var(--accent); }
+.btn-edit-playlist:hover { border-color: var(--accent); color: var(--accent); }
 
-/* Track list */
-.track-list-header,
+/* =============================================
+   TRACK LIST — SoundCloud waveform style
+============================================= */
+.track-list-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 100px;
+  align-items: center;
+  padding: 0 12px 10px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
 .track {
   display: grid;
   grid-template-columns: 40px 1fr 100px;
   align-items: center;
-  padding: 8px 16px;
-}
-
-.track-list-header {
-  color: var(--text-sub);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  margin-bottom: 12px;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.track {
-  border-radius: 6px;
+  padding: 10px 12px;
+  border-radius: 3px;
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
+  transition: background 0.15s;
   position: relative;
 }
 
-.track:hover { 
-  background: rgba(0, 229, 255, 0.15) !important;  /* bumped way up from 0.05 */
-  box-shadow: inset 3px 0 0 var(--accent) !important;
+.track:hover {
+  background: rgba(255,255,255,0.04) !important;
 }
+.track:hover .track-num { display: none; }
+.track:hover .track-play-hover { display: flex !important; }
 
-.track.active { 
-  background: rgba(0, 229, 255, 0.2) !important;   /* bumped up from 0.1 */
-  box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(0, 229, 255, 0.15) !important;
+.track.active {
+  background: rgba(255, 85, 0, 0.07) !important;
 }
-
-.track.active .track-title { 
+.track.active .track-title {
   color: var(--accent) !important;
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.4) !important;
 }
-
 .track.active .track-num {
   color: var(--accent) !important;
 }
 
-.track-num  { color: var(--text-sub); font-size: 0.9rem; }
-.track-info { display: flex; flex-direction: column; overflow: hidden; }
-.track-title { font-weight: 500; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.track-meta  { font-size: 0.85rem; color: var(--text-sub); margin-top: 4px; }
+/* Play icon that appears on hover */
+.track-play-hover {
+  display: none !important;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  font-size: 0.8rem;
+}
+
+.track-num  { color: var(--text-muted); font-size: 0.85rem; }
+.track-info { display: flex; flex-direction: column; gap: 3px; overflow: hidden; padding-left: 2px; }
+.track-title {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.track-meta {
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.track-meta a { color: var(--accent); text-decoration: none; }
+.track-meta a:hover { text-decoration: underline; }
+
 .track-genre {
+  display: inline-block;
   color: var(--accent);
   font-weight: 600;
-  font-size: 0.75rem;
-  border: 1px solid rgba(0,229,255,0.3);
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-left: 8px;
+  font-size: 0.68rem;
+  border: 1px solid rgba(255,85,0,0.3);
+  padding: 1px 5px;
+  border-radius: 2px;
+  margin-left: 6px;
+  vertical-align: middle;
 }
 .track-action {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  gap: 6px;
 }
 
+/* Like / action buttons on track */
+.track-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 2px;
+  transition: color 0.15s;
+}
+.track-btn:hover { color: var(--accent); }
+
 /* =============================================
-   PLAYER BAR
+   PLAYER BAR — SoundCloud style (top)
 ============================================= */
 .player {
   height: var(--player-height);
-  background: var(--bg-elevated);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: #181818;
+  border-top: 1px solid var(--border);
   display: grid;
   grid-template-columns: 30% 40% 30%;
   padding: 0 16px;
@@ -358,52 +432,85 @@ body {
   flex-shrink: 0;
 }
 
-.now-playing { display: flex; align-items: center; gap: 14px; overflow: hidden; }
+.now-playing { display: flex; align-items: center; gap: 12px; overflow: hidden; }
 .album-art {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, var(--bg-highlight), #050510);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 6px;
+  width: 48px;
+  height: 48px;
+  background: var(--bg-highlight);
+  border: none;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-sub);
   flex-shrink: 0;
+  overflow: hidden;
 }
-.np-info { display: flex; flex-direction: column; overflow: hidden; }
-.np-title  { font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); }
-.np-artist { font-size: 0.8rem; color: var(--text-sub); }
+.np-info { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+.np-title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-main);
+}
+.np-artist {
+  font-size: 0.75rem;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-.player-controls { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.buttons { display: flex; align-items: center; gap: 24px; }
+/* Heart/like button in now playing */
+.np-like {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 4px;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.np-like:hover { color: var(--error); }
+
+.player-controls { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.buttons { display: flex; align-items: center; gap: 20px; }
 
 .ctrl-btn {
   background: none;
   border: none;
   color: var(--text-sub);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: color 0.2s, transform 0.1s;
-  position: relative; /* for repeat-one badge */
+  transition: color 0.15s, transform 0.1s;
+  position: relative;
 }
-.ctrl-btn:hover        { color: var(--accent); transform: scale(1.1); }
-.ctrl-btn.active       { color: var(--accent); text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); }
+.ctrl-btn:hover { color: var(--text-main); transform: scale(1.08); }
+.ctrl-btn.active { color: var(--accent); }
 
 .play-btn {
-  background: var(--text-main);
-  color: #050510;
+  background: transparent;
+  color: var(--text-main);
   width: 36px;
   height: 36px;
   border-radius: 50%;
+  border: 2px solid var(--text-main);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
-  transition: all 0.2s;
+  font-size: 0.85rem;
+  transition: all 0.15s;
 }
-.play-btn:hover { transform: scale(1.05); background: var(--accent); box-shadow: 0 0 10px rgba(0, 229, 255, 0.5); }
+.play-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.06);
+}
 
+/* Progress bar — SC style orange waveform */
 .progress-container {
   display: flex;
   align-items: center;
@@ -411,16 +518,30 @@ body {
   width: 100%;
   max-width: 600px;
 }
-.time { font-size: 0.75rem; color: var(--text-sub); min-width: 40px; text-align: center; }
+.time {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  min-width: 36px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
 
 input[type=range] {
   -webkit-appearance: none;
   width: 100%;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
+  height: 3px;
+  background: var(--text-muted);
+  border-radius: 0;
   outline: none;
   cursor: pointer;
+  transition: height 0.1s;
+}
+input[type=range]:hover { height: 4px; }
+
+input[type=range]::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, var(--accent) var(--progress, 0%), var(--text-muted) var(--progress, 0%));
+  height: 3px;
+  border-radius: 0;
 }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -430,12 +551,18 @@ input[type=range]::-webkit-slider-thumb {
   background: var(--accent);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.2s, transform 0.1s;
+  transition: opacity 0.15s;
+  margin-top: -4.5px;
 }
-input[type=range]:hover::-webkit-slider-thumb { opacity: 1; transform: scale(1.2); }
+input[type=range]:hover::-webkit-slider-thumb { opacity: 1; }
 
-.right-controls { display: flex; justify-content: flex-end; align-items: center; gap: 12px; }
-.volume-bar { width: 100px; }
+.right-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+}
+.volume-bar { width: 80px; }
 
 /* Repeat-one badge */
 #repeatBtn[data-repeat-one="true"]::after {
@@ -443,18 +570,52 @@ input[type=range]:hover::-webkit-slider-thumb { opacity: 1; transform: scale(1.2
   position: absolute;
   top: -2px;
   right: -5px;
-  font-size: 10px;
-  font-weight: 800;
+  font-size: 9px;
+  font-weight: 700;
   background: var(--bg-base);
   color: var(--success);
   border: 1px solid var(--success);
   border-radius: 50%;
-  width: 14px;
-  height: 14px;
+  width: 13px;
+  height: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
+/* =============================================
+   SEARCH BAR
+============================================= */
+.search-container {
+  position: relative;
+  margin: 0 0 20px;
+  display: flex;
+  align-items: center;
+}
+.search-container i {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+#searchInput {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid var(--border);
+  color: #fff;
+  padding: 10px 14px 10px 36px;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+#searchInput:focus {
+  border-color: var(--accent);
+  background: #1e1e1e;
+}
+#searchInput::placeholder { color: var(--text-muted); }
 
 /* =============================================
    MODALS
@@ -462,8 +623,8 @@ input[type=range]:hover::-webkit-slider-thumb { opacity: 1; transform: scale(1.2
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 5, 0.85);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(2px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -471,38 +632,45 @@ input[type=range]:hover::-webkit-slider-thumb { opacity: 1; transform: scale(1.2
   padding: 16px;
 }
 .modal-content {
-  background: var(--bg-elevated);
+  background: #1a1a1a;
   padding: 24px;
-  border-radius: 12px;
-  width: min(450px, 100%);
+  border-radius: 4px;
+  width: min(440px, 100%);
   max-height: 85vh;
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+  border: 1px solid var(--border);
   overflow-y: auto;
 }
-.modal-content h3 { margin-bottom: 16px; color: var(--accent); letter-spacing: 1px; flex-shrink: 0; }
+.modal-content h3 {
+  margin-bottom: 16px;
+  color: var(--text-main);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
 
 .modal-content input[type="text"],
 .modal-content select,
 .modal-content input[type="file"] {
   width: 100%;
-  padding: 12px;
-  margin-bottom: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid transparent;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
   color: white;
-  border-radius: 6px;
+  border-radius: 4px;
   outline: none;
   font-family: inherit;
+  font-size: 0.875rem;
 }
 .modal-content input[type="text"]:focus,
-.modal-content select:focus { border: 1px solid var(--accent); }
-.modal-content select option { background: var(--bg-elevated); color: white; }
+.modal-content select:focus { border-color: var(--accent); }
+.modal-content select option { background: #1a1a1a; color: white; }
 .modal-content label {
-  font-size: 0.8rem;
-  color: var(--text-sub);
+  font-size: 0.72rem;
+  color: var(--text-muted);
   margin-bottom: 4px;
   display: block;
   text-transform: uppercase;
@@ -512,713 +680,309 @@ input[type=range]:hover::-webkit-slider-thumb { opacity: 1; transform: scale(1.2
 .track-selection-area {
   flex: 1;
   overflow-y: auto;
-  margin-bottom: 16px;
-  background: #050510;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 14px;
+  background: #111;
+  padding: 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
   min-height: 100px;
-  max-height: 260px;
+  max-height: 240px;
 }
 .track-checkbox-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px;
+  padding: 9px 10px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 3px;
   color: var(--text-sub);
-  transition: background 0.2s;
+  font-size: 0.875rem;
+  transition: background 0.15s, color 0.15s;
 }
-.track-checkbox-item:hover { background: rgba(0, 229, 255, 0.05); color: var(--text-main); }
-.track-checkbox-item input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; width: 16px; height: 16px; }
+.track-checkbox-item:hover { background: rgba(255,85,0,0.06); color: var(--text-main); }
+.track-checkbox-item input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
 
-.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; flex-shrink: 0; }
-.modal-actions button { padding: 10px 20px; border: none; border-radius: 500px; cursor: pointer; font-weight: bold; transition: all 0.2s; }
-.btn-cancel { background: transparent; color: var(--text-sub); border: 1px solid rgba(255,255,255,0.1); }
-.btn-cancel:hover { background: rgba(255,255,255,0.05); color: white; }
-.btn-save { background: var(--accent); color: #000; box-shadow: 0 0 10px rgba(0, 229, 255, 0.2); }
-.btn-save:hover { background: var(--accent-hover); box-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
-.status-text { font-size: 0.85rem; text-align: center; margin-bottom: 12px; font-weight: bold; }
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+  flex-shrink: 0;
+}
+.modal-actions button {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-cancel {
+  background: transparent;
+  color: var(--text-sub);
+  border: 1px solid var(--border);
+}
+.btn-cancel:hover { background: rgba(255,255,255,0.05); color: var(--text-main); }
+.btn-save {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-save:hover { background: var(--accent-hover); }
+.status-text { font-size: 0.82rem; text-align: center; margin-bottom: 10px; font-weight: 500; }
 
 /* Drag & Drop */
 .drop-zone {
-  border: 2px dashed rgba(255,255,255,0.2);
-  border-radius: 8px;
-  padding: 32px 16px;
+  border: 2px dashed var(--border);
+  border-radius: 4px;
+  padding: 28px 16px;
   text-align: center;
   background: rgba(255, 255, 255, 0.02);
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 16px;
+  transition: all 0.2s;
+  margin-bottom: 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 8px;
 }
 .drop-zone.dragover,
-.drop-zone:hover { border-color: var(--accent); background: rgba(0, 229, 255, 0.05); }
-.drop-zone i { font-size: 2rem; color: var(--text-sub); transition: color 0.2s; }
+.drop-zone:hover { border-color: var(--accent); background: rgba(255,85,0,0.04); }
+.drop-zone i { font-size: 1.8rem; color: var(--text-muted); transition: color 0.15s; }
 .drop-zone.dragover i,
 .drop-zone:hover i { color: var(--accent); }
-#fileNameDisplay { font-size: 0.85rem; color: var(--success); font-weight: bold; word-break: break-all; text-align: center; }
+#fileNameDisplay { font-size: 0.82rem; color: var(--success); font-weight: 500; word-break: break-all; }
 
-/* Album art image in player */
+/* Player album art */
 #npCover {
-  width: 56px;
-  height: 56px;
-  border-radius: 6px;
+  width: 48px;
+  height: 48px;
+  border-radius: 2px;
   object-fit: cover;
-  border: 1px solid rgba(255,255,255,0.1);
   flex-shrink: 0;
 }
 
-/* ==========================================
-   SEARCH BAR STYLING
-   ========================================== */
-.search-container {
-    position: relative;
-    margin: 0 0 20px 0; 
-    display: flex;
-    align-items: center;
-    width: 100%; 
-}
-
-.search-container i {
-    position: absolute;
-    left: 15px;
-    color: var(--text-sub, #8892b0);
-    font-size: 0.9rem;
-    pointer-events: none; 
-}
-
-#searchInput {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(0, 255, 204, 0.2); 
-    color: #ffffff;
-    padding: 12px 15px 12px 40px; 
-    border-radius: 6px;
-    font-family: inherit;
-    font-size: 0.9rem;
-    outline: none;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-}
-
-#searchInput:focus {
-    border-color: var(--accent, #00ffcc);
-    box-shadow: 0 0 12px rgba(0, 255, 204, 0.15);
-    background: rgba(0, 255, 204, 0.05);
-}
-/* ==========================================
-   ADMIN PANEL STYLING
-   ========================================== */
+/* =============================================
+   ADMIN PANEL
+============================================= */
 .user-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
 }
-.user-row:last-child {
-    border-bottom: none;
-}
-.user-info-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.user-info-stack .username {
-    color: #fff;
-    font-size: 0.95rem;
-    font-weight: bold;
-}
+.user-row:last-child { border-bottom: none; }
+.user-info-stack { display: flex; flex-direction: column; gap: 3px; }
+.user-info-stack .username { color: #fff; font-size: 0.9rem; font-weight: 500; }
 .btn-grant {
-    background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: 0.2s;
-    font-weight: bold;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: inherit;
+  transition: 0.15s;
+  font-weight: 500;
 }
-.btn-grant:hover:not(:disabled) {
-    background: var(--accent);
-    color: #000;
-}
-/*
-/* ==========================================
-   CHANGE PASSWORD MODAL STYLING
-   ========================================== */
+.btn-grant:hover:not(:disabled) { background: var(--accent); color: #fff; }
 
+/* =============================================
+   CHANGE PASSWORD MODAL
+============================================= */
 #changePasswordModal .modal-content {
-  background-color: #1a1a2e; /* Sleek dark panel */
-  border: 1px solid rgba(0, 255, 204, 0.2);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  padding: 30px;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 400px;
-  text-align: left; 
+  background: #1a1a1a;
+  border: 1px solid var(--border);
 }
-
-#changePasswordModal h3 {
-  color: var(--accent, #00ffcc);
-  font-size: 1.2rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  text-align: center;
-  margin-top: 0;
-  margin-bottom: 25px;
-}
-
-#changePasswordModal label {
-  display: block;
-  color: var(--text-sub, rgba(255, 255, 255, 0.7));
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: 15px;
-  margin-bottom: 5px;
-}
-
+#changePasswordModal h3 { color: var(--text-main); }
 #changePasswordModal input[type="password"] {
   width: 100%;
-  padding: 12px 15px;
-  background-color: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
   border-radius: 4px;
   color: #fff;
   font-family: inherit;
-  font-size: 0.95rem;
-  box-sizing: border-box;
+  font-size: 0.875rem;
   outline: none;
-  transition: all 0.2s ease;
+  transition: border-color 0.15s;
+  margin-bottom: 12px;
 }
-
-#changePasswordModal input[type="password"]:focus {
-  border-color: var(--accent, #00ffcc);
-  background-color: rgba(0, 255, 204, 0.05);
-  box-shadow: 0 0 8px rgba(0, 255, 204, 0.2);
-}
-
-#changePasswordModal .modal-actions {
-  margin-top: 25px;
-}
-
+#changePasswordModal input[type="password"]:focus { border-color: var(--accent); }
 #changePasswordModal .btn-save {
   width: 100%;
-  padding: 12px;
-  background-color: transparent;
-  border: 2px solid var(--accent, #00ffcc);
-  color: var(--accent, #00ffcc);
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  background: var(--accent);
+  color: #fff;
 }
+#changePasswordModal .btn-save:hover { background: var(--accent-hover); }
 
-#changePasswordModal .btn-save:hover {
-  background-color: var(--accent, #00ffcc);
-  color: #000;
-  box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
-}
-/* ==========================================
-   REACTIVE AUDIO BACKGROUND & SNOW ENGINE
-   ========================================== */
+/* =============================================
+   BACKGROUND VISUALIZER
+============================================= */
+html, body { background: #111111 !important; }
 
-/* 1. Ensure the absolute bottom layer is solid dark! */
-html, body {
-    background: #0d0d1e !important; 
-}
-
-/* 2. The Glow Overlay (Now Centered for the RGB Shift) */
-/* ==========================================
-   REACTIVE AUDIO BACKGROUND (Edge Vignette Glow)
-   ========================================== */
-/* 2. The Glow Overlay (Synced for Edge Glow) */
 #reactive-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 0; 
-    pointer-events: none;
-    
-    /* THE FIX: Changed from 'background' to 'box-shadow' so it matches the JS math! */
-    box-shadow: inset 0 0 var(--visualizer-size, 50px) var(--visualizer-spread, 10px) var(--visualizer-color, transparent);
-    transition: box-shadow 0.05s linear;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 var(--visualizer-size, 50px) var(--visualizer-spread, 10px) var(--visualizer-color, transparent);
+  transition: box-shadow 0.05s linear;
 }
 
-/* Ensure the canvas still sits properly */
 #snow-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1; 
-    pointer-events: none;
-    transition: opacity 0.5s ease-in-out; 
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 1;
+  pointer-events: none;
+  transition: opacity 0.5s ease-in-out;
 }
 
-/* 4. The Tracklist Frosted Glass */
-/* Make sure the wrapping containers don't accidentally block the visualizer */
-#mainPage, #app-container {
-    background: transparent !important;
-}
+#mainPage, #app-container { background: transparent !important; }
 
-/* Add the frosted glass tint to the main view area */
 .main-view {
-    background: rgba(13, 13, 30, 0.4) !important; /* Slight dark tint */
-    backdrop-filter: blur(8px); /* Blurs the glow behind the text */
-    position: relative;
-    z-index: 2; /* Keeps text safely above the snow and glow */
+  background: rgba(17, 17, 17, 0.92) !important;
+  backdrop-filter: blur(6px);
+  position: relative;
+  z-index: 2;
 }
-
-/* 5. The Sidebar */
 .sidebar {
-    background: rgba(13, 13, 30, 0.85) !important;
-    backdrop-filter: blur(10px);
-    position: relative;
-    z-index: 5;
+  background: rgba(10, 10, 10, 0.95) !important;
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 5;
 }
 
+/* =============================================
+   SCROLLBAR
+============================================= */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-/* ==========================================
-   CUSTOM SLEEK SCROLLBAR (Fixes the weird drag)
-   ========================================== */
-
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2); 
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 204, 0.3); /* Dim cyan */
-    border-radius: 10px;
-    transition: background 0.3s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 204, 0.8); /* Bright cyan on drag */
-}
-/* ==========================================
-   iOS VISUALIZER TOGGLE SWITCH
-   ========================================== */
-.visualizer-toggle-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    width: 100%;
-    margin-top: 15px; /* Pushes it below the timeline */
-    padding-bottom: 10px;
-}
-
-.switch-label {
-    color: var(--text-sub);
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 1px;
-}
-
-/* The actual switch */
+/* =============================================
+   iOS TOGGLE SWITCH
+============================================= */
 .ios-switch {
-    position: relative;
-    display: inline-block;
-    width: 46px;
-    height: 24px;
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
 }
-
-/* Hide default HTML checkbox */
-.ios-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-/* The sliding track */
+.ios-switch input { opacity: 0; width: 0; height: 0; }
 .ios-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(255, 255, 255, 0.15); /* Dim gray when off */
-    transition: 0.3s;
-    border-radius: 34px;
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255, 255, 255, 0.12);
+  transition: 0.25s;
+  border-radius: 22px;
 }
-
-/* The sliding white circle */
 .ios-slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.3s;
-    border-radius: 50%;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  position: absolute;
+  content: "";
+  height: 16px; width: 16px;
+  left: 3px; bottom: 3px;
+  background-color: white;
+  transition: 0.25s;
+  border-radius: 50%;
 }
-
-/* When Checked (ON) */
-.ios-switch input:checked + .ios-slider {
-    background-color: var(--accent, #00ffcc); /* Your neon cyan color */
-}
-
-/* Move the circle to the right when ON */
-.ios-switch input:checked + .ios-slider:before {
-    transform: translateX(22px);
-}
-#navAdminPanel:hover {
-    color: #ff6b6b !important;
-    text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-    background: rgba(239, 68, 68, 0.08);
-    border-radius: 6px;
-    padding-left: 4px;
-    transition: all 0.2s;
-}
-/* =============================================
-   TABLET (≤ 900px)
-============================================= */
-@media (max-width: 900px) {
-  :root {
-    --sidebar-width: 220px;
-    --player-height: 80px;
-  }
-
-  .view-header     { font-size: 2rem; }
-  .track-genre     { display: none; }
-  .volume-bar      { width: 80px; }
-}
+.ios-switch input:checked + .ios-slider { background-color: var(--accent); }
+.ios-switch input:checked + .ios-slider:before { transform: translateX(18px); }
 
 /* =============================================
-   MOBILE (≤ 600px) — Android & iOS
+   BEAT / LAUNCHPAD EFFECTS
 ============================================= */
-@media (max-width: 600px) {
-  :root {
-    --player-height: 110px;
-  }
-
-  /* Prevent horizontal scroll */
-  html, body {
-    overflow-x: hidden;
-    width: 100%;
-    height: 100%;
-  }
-
-  /* Show mobile menu button */
-  #mobileMenuBtn { display: flex; align-items: center; }
-  #mobileMenuBtnTop { display: block !important; }
-
-  /* ---- SIDEBAR (slide-in drawer) ---- */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: var(--player-height);
-    width: 80vw;
-    max-width: 300px;
-    transform: translateX(-100%);
-    box-shadow: 6px 0 30px rgba(0,0,0,0.6);
-    padding-top: 16px;
-    z-index: 1000;
-  }
-  .sidebar.mobile-open { transform: translateX(0); }
-
-  /* ---- MAIN VIEW ---- */
-  .main-view {
-    padding: 12px !important;
-    padding-bottom: calc(var(--player-height) + 20px) !important;
-    overflow-y: auto;
-    height: calc(100vh - var(--player-height));
-  }
-
-  /* ---- VIEW HEADER ---- */
-  .view-header-container {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 16px;
-    gap: 8px;
-  }
-  .view-header { font-size: 1.6rem; }
-  .btn-edit-playlist { width: 100%; justify-content: center; padding: 10px; }
-
-  /* ---- TRACK LIST ---- */
-  .track-list-header,
-  .track { 
-    grid-template-columns: 32px 1fr;
-    padding: 8px 10px;
-  }
-  .track-list-header > :last-child,
-  .track > :last-child { display: none; }
-
-  .track-title { font-size: 0.9rem; }
-  .track-meta  { font-size: 0.75rem; }
-  .track-genre { display: none; }
-
-  /* ---- BOTTOM PLAYER ---- */
-  .player {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    height: var(--player-height);
-    padding: 8px 12px 4px;
-    gap: 4px 8px;
-    align-content: center;
-  }
-
-  .now-playing { 
-    grid-column: 1; 
-    grid-row: 1;
-    min-width: 0;
-  }
-  .album-art { width: 40px; height: 40px; }
-  #npCover   { width: 40px; height: 40px; }
-  .np-title  { font-size: 0.85rem; }
-  .np-artist { font-size: 0.72rem; }
-
-  .player-controls {
-    grid-column: 2;
-    grid-row: 1;
-    flex-direction: row;
-    align-items: center;
-  }
-  .buttons { gap: 16px; }
-  .ctrl-btn { font-size: 1rem; }
-
-  /* Hide shuffle/repeat on mobile to save space */
-  #shuffleBtn, #repeatBtn { display: none; }
-
-  /* Progress bar spans full width */
-  .progress-container {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    gap: 6px;
-  }
-  .time { font-size: 0.7rem; min-width: 32px; }
-  input[type=range] { height: 3px; }
-
-  /* Hide volume on mobile */
-  .right-controls { display: none; }
-
-  /* ---- VISUALIZER TOGGLE ---- */
-  .visualizer-toggle-container {
-    margin-top: 8px;
-    padding-bottom: 6px;
-    gap: 8px;
-  }
-  .switch-label { font-size: 0.7rem; }
-
-  /* ---- MODALS ---- */
-  .modal-content {
-    padding: 16px;
-    width: 100%;
-    max-height: 90vh;
-    border-radius: 12px 12px 0 0;
-  }
-  .modal-overlay {
-    align-items: flex-end;
-    padding: 0;
-  }
-
-  /* ---- SEARCH ---- */
-  #searchInput { font-size: 0.85rem; padding: 10px 10px 10px 36px; }
-}
-
-/* =============================================
-   SMALL PHONES (≤ 380px) — iPhone SE etc.
-============================================= */
-@media (max-width: 380px) {
-  .view-header  { font-size: 1.4rem; }
-  .buttons      { gap: 12px; }
-  .ctrl-btn     { font-size: 0.9rem; }
-  .np-title     { font-size: 0.8rem; }
-  .album-art, #npCover { width: 36px; height: 36px; }
-}
-
-/* =============================================
-   iOS SAFE AREA (iPhone X+ notch/home bar)
-============================================= */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .player {
-    padding-bottom: calc(8px + env(safe-area-inset-bottom));
-    height: calc(var(--player-height) + env(safe-area-inset-bottom));
-  }
-@media (max-width: 600px) {
-
-  /* Fix the broken track grid with trash icon */
-  .track {
-    grid-template-columns: 32px 1fr 40px !important;
-    padding: 10px 8px !important;
-    gap: 0;
-  }
-
-  /* Hide the duration, show the trash instead */
-  .track-duration { display: none !important; }
-
-  /* Make trash button fit neatly in the grid */
-  .track button {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Tighten up spacing between tracks */
-  #trackList { gap: 2px; display: flex; flex-direction: column; }
-
-  /* Fix broken image — give it a fallback background */
-  #npCover {
-    background: var(--bg-highlight);
-    object-fit: cover;
-  }
-
-  /* Tighten track list header */
-  .track-list-header {
-    grid-template-columns: 32px 1fr 40px !important;
-    padding: 6px 8px !important;
-    margin-bottom: 6px;
-  }
-}
-
-}
-/* ==========================================
-   TARGETED VIBE & LAUNCHPAD UI
-   ========================================== */
-
-/* 1. ONLY the Play/Pause Icon Glows (No more square boxes!) */
-/* Using drop-shadow perfectly hugs the shape of the font-awesome icon */
 #playIcon {
-    filter: drop-shadow(0 0 var(--beat-glow-spread, 0px) hsla(var(--beat-hue, 180), 100%, 60%, var(--beat-glow-alpha, 0)));
-    transition: filter 0.05s linear;
+  filter: drop-shadow(0 0 var(--beat-glow-spread, 0px) hsla(var(--beat-hue, 25), 100%, 60%, var(--beat-glow-alpha, 0)));
+  transition: filter 0.05s linear;
 }
-
-/* 2. Subwoofer Album Art Pulse (Kept from last time) */
 .album-art {
-    transform: scale(var(--cover-scale, 1));
-    transition: transform 0.05s linear;
+  transform: scale(var(--cover-scale, 1));
+  transition: transform 0.05s linear;
 }
+.track.active { background-color: rgba(255, 85, 0, 0.08) !important; }
+.track { transition: background-color 0.2s ease; }
 
-/* 3. Launchpad Track Effects (Kept from last time) */
-.track.active { 
-    background-color: rgba(0, 255, 204, 0.2) !important;
-    border-left: 4px solid var(--accent) !important; 
-}
-.track {
-    transition: background-color 0.3s ease, box-shadow 0.3s ease; 
-}
 .launchpad-flash {
-    background-color: hsla(var(--beat-hue, 180), 100%, 60%, 0.4) !important;
-    box-shadow: inset 0 0 20px hsla(var(--beat-hue, 180), 100%, 60%, 0.6);
-    border-radius: 4px;
-    transition: background-color 0s, box-shadow 0s; /* Instant ON */
-}
-/* ==========================================
-   TRANSPARENT (FLAT) MODE - CLEAN ROLLBACK
-   ========================================== */
-html, body.glass-mode {
-    /* Safe dark baseline fallback so your screen is never grey */
-    background: #09090e !important; 
+  background-color: hsla(var(--beat-hue, 25), 100%, 60%, 0.3) !important;
+  box-shadow: inset 0 0 16px hsla(var(--beat-hue, 25), 100%, 60%, 0.5);
+  border-radius: 3px;
+  transition: background-color 0s, box-shadow 0s;
 }
 
-/* Clear the panels so they float beautifully and pulse to the bass */
+/* =============================================
+   GLASS / TRANSPARENT MODE
+============================================= */
+html, body.glass-mode { background: #090909 !important; }
+
 body.glass-mode .sidebar,
 body.glass-mode .main-content,
 body.glass-mode .player-bar {
-    background: rgba(0, 0, 0, var(--track-beat-alpha, 0.15)) !important; 
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-color: rgba(255, 255, 255, 0.05);
-    transition: background 0s !important; 
+  background: rgba(0,0,0,var(--track-beat-alpha, 0.15)) !important;
+  backdrop-filter: none !important;
+  border-color: rgba(255,255,255,0.04);
+  transition: background 0s !important;
 }
+body.glass-mode #mainPage { background: transparent !important; }
 
-body.glass-mode #mainPage {
-    background: transparent !important; 
-}
-
-/* The Background Cover Container */
 .background-cover {
-    display: none !important; 
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: -999 !important; 
-    pointer-events: none;
+  display: none !important;
+  position: fixed !important;
+  top: 0; left: 0;
+  width: 100vw !important; height: 100vh !important;
+  z-index: -999 !important;
+  pointer-events: none;
 }
+body.glass-mode .background-cover { display: block !important; }
 
-body.glass-mode .background-cover {
-    display: block !important; 
-}
-
-/* The Image Configuration */
 #cover-bg-image {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important; 
-    opacity: 0.4 !important; 
-    filter: blur(12px) !important; 
-    transform: scale(1.1) !important;
-    transition: opacity 0.3s ease;
+  width: 100% !important; height: 100% !important;
+  object-fit: cover !important;
+  opacity: 0.3 !important;
+  filter: blur(14px) !important;
+  transform: scale(1.1) !important;
+  transition: opacity 0.3s ease;
 }
 
-/* ==========================================
-   HYPER-GLOW LAUNCHPAD EFFECT (Subtle)
-   ========================================== */
+/* =============================================
+   HYPER-GLOW
+============================================= */
 .launchpad-flash.hyper-glow {
-    background-color: hsla(var(--beat-hue, 180), 100%, 75%, 0.8) !important;
-    box-shadow: 0 0 35px hsla(var(--beat-hue, 180), 100%, 60%, 0.9),
-                inset 0 0 15px hsla(var(--beat-hue, 180), 100%, 90%, 1) !important;
-    transform: scale(1.01); /* Kept your 1.01 for the less intense shake! */
-    border-radius: 4px;
-    z-index: 6;
-    position: relative;
-    transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275), 
-                box-shadow 0s, 
-                background-color 0s !important; 
+  background-color: hsla(var(--beat-hue, 25), 100%, 70%, 0.7) !important;
+  box-shadow: 0 0 28px hsla(var(--beat-hue, 25), 100%, 60%, 0.8),
+              inset 0 0 12px hsla(var(--beat-hue, 25), 100%, 90%, 1) !important;
+  transform: scale(1.01);
+  z-index: 6;
+  position: relative;
+  transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0s, background-color 0s !important;
 }
-/* ==========================================
-   KEYBOARD LAUNCHPAD (Independent Split Mode)
-   ========================================== */
+
+/* =============================================
+   KEYBOARD LAUNCHPAD
+============================================= */
 .keyboard-flash {
-    /* Uses a separate kb-hue variable so the audio visualizer can't touch it */
-    background-color: hsla(var(--kb-hue, 180), 100%, 75%, 0.8) !important;
-    
-    /* Massive outer neon bloom + intense inner shadow */
-    box-shadow: 0 0 35px hsla(var(--kb-hue, 180), 100%, 60%, 0.9),
-                inset 0 0 15px hsla(var(--kb-hue, 180), 100%, 90%, 1) !important;
-                
-    border-radius: 4px;
-    z-index: 10;
-    position: relative;
-    
-    /* Forces the glow to be instant with zero delay */
-    transition: none !important; 
-    transform: none !important;
-    animation: none !important;
+  background-color: hsla(var(--kb-hue, 25), 100%, 70%, 0.7) !important;
+  box-shadow: 0 0 28px hsla(var(--kb-hue, 25), 100%, 60%, 0.8),
+              inset 0 0 12px hsla(var(--kb-hue, 25), 100%, 90%, 1) !important;
+  border-radius: 3px;
+  z-index: 10;
+  position: relative;
+  transition: none !important;
+  transform: none !important;
+  animation: none !important;
 }
-/* ==========================================
-   RHYTHM GAME INDICATORS (Beat-Synced Hints)
-   ========================================== */
-/* 1. Assign the correct letter to the first 8 rows */
+
+/* =============================================
+   LAUNCHPAD KEY HINTS
+============================================= */
 .track:nth-child(1)::after { content: "A"; }
 .track:nth-child(2)::after { content: "S"; }
 .track:nth-child(3)::after { content: "D"; }
@@ -1228,79 +992,181 @@ body.glass-mode .background-cover {
 .track:nth-child(7)::after { content: "L"; }
 .track:nth-child(8)::after { content: ";"; }
 
-/* 2. Style the letters and animate them to the beat! */
 .track:nth-child(-n+8)::after {
-    position: absolute;
-    right: 60px; /* Keeps it safely away from your trash can icon */
-    top: 50%;
-    transform: translateY(-50%);
-    
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: rgba(255, 255, 255, 0.8);
-    text-shadow: 0 0 15px #00E5FF, 0 0 30px #00E5FF;
-    pointer-events: none;
-    
-    /* 🎵 THE MAGIC: Fades in and out exactly with the kick drum! */
-    opacity: var(--track-beat-alpha, 0.1); 
-    transition: opacity 0.05s ease;
+  position: absolute;
+  right: 56px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: rgba(255,255,255,0.7);
+  text-shadow: 0 0 10px var(--accent);
+  pointer-events: none;
+  opacity: var(--track-beat-alpha, 0.08);
+  transition: opacity 0.05s ease;
 }
-
-/* 3. When you successfully press the key, make the letter explode with light */
 .track.keyboard-flash::after {
-    opacity: 1 !important;
-    color: #ffffff;
-    text-shadow: 0 0 20px #ffffff, 0 0 40px #ffffff;
-    transform: translateY(-50%) scale(1.3);
-    transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  opacity: 1 !important;
+  text-shadow: 0 0 16px #fff, 0 0 32px #fff;
+  transform: translateY(-50%) scale(1.25);
+  transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
-/* The main container for the announcement */
+
+/* =============================================
+   ADMIN NAV ITEM
+============================================= */
+#navAdminPanel:hover {
+  color: #ff6b6b !important;
+  background: rgba(239, 68, 68, 0.07);
+  border-radius: 4px;
+}
+
+/* =============================================
+   TESTER INFO CARD
+============================================= */
 .tester-info-card {
-    background: rgba(15, 23, 42, 0.6); /* Deep dark blue, slightly transparent */
-    backdrop-filter: blur(8px); /* Modern glass blur effect */
-    border-left: 4px solid #00e5ff; /* Neon cyan accent line */
-    border-radius: 8px;
-    padding: 18px 24px;
-    color: #cbd5e1; /* Soft slate text color */
-    font-family: sans-serif;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    max-width: 320px;
-    
-    /* If you are using Flexbox on the parent to put them side-by-side, 
-       you might want a margin-left here. E.g., margin-left: 30px; */
+  background: rgba(255, 85, 0, 0.06);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 16px 20px;
+  color: #ccc;
+  font-family: inherit;
+  max-width: 300px;
 }
-
-/* Title styling */
 .tester-info-card .info-title {
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-top: 0;
-    margin-bottom: 12px;
-    letter-spacing: 0.5px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin: 0 0 10px;
 }
-
-/* Aligning the labels and the code */
 .tester-info-card .credentials p {
-    margin: 8px 0;
-    font-size: 0.9rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  margin: 6px 0;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
-
-/* Dimmer text for "Username:" and "Password:" */
-.tester-info-card .label {
-    color: #94a3b8;
-}
-
-/* Styling the actual credentials to make them pop */
+.tester-info-card .label { color: var(--text-muted); }
 .tester-info-card .highlight {
-    background: rgba(0, 229, 255, 0.1); /* Faint cyan background */
-    color: #00e5ff; /* Neon cyan text */
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-family: monospace; /* Typewriter font for data */
-    font-weight: bold;
-    letter-spacing: 1px;
+  background: rgba(255,85,0,0.15);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+}
+
+/* =============================================
+   TABLET (≤ 900px)
+============================================= */
+@media (max-width: 900px) {
+  :root { --sidebar-width: 200px; }
+  .view-header { font-size: 1.4rem; }
+  .track-genre { display: none; }
+  .volume-bar { width: 64px; }
+}
+
+/* =============================================
+   MOBILE (≤ 600px)
+============================================= */
+@media (max-width: 600px) {
+  :root { --player-height: 100px; }
+
+  html, body { overflow-x: hidden; width: 100%; height: 100%; }
+
+  #mobileMenuBtn { display: flex; align-items: center; }
+  #mobileMenuBtnTop { display: block !important; }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    bottom: var(--player-height);
+    width: 80vw;
+    max-width: 280px;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+    padding-top: 16px;
+    z-index: 1000;
+  }
+  .sidebar.mobile-open { transform: translateX(0); }
+
+  .main-view {
+    padding: 12px !important;
+    padding-bottom: calc(var(--player-height) + 20px) !important;
+    overflow-y: auto;
+    height: calc(100vh - var(--player-height));
+  }
+
+  .view-header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+  .view-header { font-size: 1.4rem; }
+  .btn-edit-playlist { width: 100%; justify-content: center; }
+
+  .track-list-header,
+  .track {
+    grid-template-columns: 32px 1fr;
+    padding: 9px 8px;
+  }
+  .track-list-header > :last-child,
+  .track > :last-child { display: none; }
+  .track-genre { display: none; }
+
+  .player {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    height: var(--player-height);
+    padding: 8px 12px 4px;
+    gap: 4px 8px;
+    align-content: center;
+  }
+  .now-playing { grid-column: 1; grid-row: 1; min-width: 0; }
+  .album-art { width: 38px; height: 38px; }
+  #npCover { width: 38px; height: 38px; }
+  .np-title { font-size: 0.8rem; }
+  .np-artist { font-size: 0.7rem; }
+  .player-controls { grid-column: 2; grid-row: 1; flex-direction: row; align-items: center; }
+  .buttons { gap: 14px; }
+  .ctrl-btn { font-size: 0.9rem; }
+  #shuffleBtn, #repeatBtn { display: none; }
+  .progress-container { grid-column: 1 / -1; grid-row: 2; gap: 6px; }
+  .time { font-size: 0.66rem; min-width: 28px; }
+  .right-controls { display: none; }
+
+  .modal-content { padding: 16px; width: 100%; max-height: 90vh; border-radius: 8px 8px 0 0; }
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  #searchInput { font-size: 0.82rem; padding: 9px 9px 9px 32px; }
+
+  .track {
+    grid-template-columns: 32px 1fr 40px !important;
+    padding: 10px 8px !important;
+  }
+  .track-duration { display: none !important; }
+  .track button { padding: 0 !important; margin: 0 !important; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+  #trackList { gap: 2px; display: flex; flex-direction: column; }
+  #npCover { background: var(--bg-highlight); object-fit: cover; }
+  .track-list-header { grid-template-columns: 32px 1fr 40px !important; padding: 6px 8px !important; margin-bottom: 6px; }
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .player {
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+    height: calc(var(--player-height) + env(safe-area-inset-bottom));
+  }
+}
+
+/* =============================================
+   SMALL PHONES (≤ 380px)
+============================================= */
+@media (max-width: 380px) {
+  .view-header { font-size: 1.2rem; }
+  .buttons { gap: 10px; }
+  .ctrl-btn { font-size: 0.85rem; }
+  .album-art, #npCover { width: 34px; height: 34px; }
 }
