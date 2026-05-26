@@ -329,25 +329,37 @@ function renderGenreShelves() {
 // Example logic for your renderPlaylists() function:
 // Add this helper function to ui.js
 function getPlaylistCover(playlist) {
-    // Get the actual track objects for this playlist
     const plTracks = allTracks.filter(track => playlist.ids.includes(track.id));
     
+    const fallback = (letter) => 
+        `https://via.placeholder.com/80x80/0f172a/00ffcc?text=${letter}`;
+
     if (plTracks.length >= 4) {
-        // Build the iTunes-style 4-image mosaic using placehold.co as fallbacks
+        const imgs = plTracks.slice(0, 4).map((t, i) => 
+            `<img src="${t.cover || fallback(i+1)}" 
+                  style="width:20px; height:20px; object-fit:cover; display:block;"
+                  onerror="this.src='${fallback(i+1)}'">` 
+        ).join('');
+        
         return `
-            <div class="mosaic-cover" style="width:40px; height:40px; border-radius:4px; overflow:hidden;">
-                <img src="${plTracks[0].cover || 'https://placehold.co/80x80/1a1b26/00e5ff?text=1'}">
-                <img src="${plTracks[1].cover || 'https://placehold.co/80x80/1a1b26/00e5ff?text=2'}">
-                <img src="${plTracks[2].cover || 'https://placehold.co/80x80/1a1b26/00e5ff?text=3'}">
-                <img src="${plTracks[3].cover || 'https://placehold.co/80x80/1a1b26/00e5ff?text=4'}">
-            </div>
-        `;
+            <div style="
+                display:grid; 
+                grid-template-columns:1fr 1fr; 
+                width:40px; height:40px; 
+                border-radius:4px; 
+                overflow:hidden; 
+                flex-shrink:0;">
+                ${imgs}
+            </div>`;
+
     } else if (plTracks.length > 0) {
-        // Just use the first song's cover if less than 4
-        return `<img src="${plTracks[0].cover || 'https://placehold.co/160x160/1a1b26/00e5ff?text=Mix'}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;">`;
+        const cover = plTracks[0].cover || fallback('♪');
+        return `<img src="${cover}" 
+                     style="width:40px; height:40px; border-radius:4px; object-fit:cover; flex-shrink:0;"
+                     onerror="this.src='${fallback('♪')}'">`;
     } else {
-        // Empty playlist cover
-        return `<img src="https://placehold.co/160x160/1a1b26/333?text=Empty" style="width:40px; height:40px; border-radius:4px; object-fit:cover;">`;
+        return `<img src="${fallback('?')}" 
+                     style="width:40px; height:40px; border-radius:4px; object-fit:cover; flex-shrink:0;">`;
     }
 }
 
