@@ -108,7 +108,6 @@ function grantAccess() {
         }
 
         fetchTracks();
-        fetchPlaylists();
     }, 600);
 }
 

@@ -12,13 +12,12 @@
 
 async function fetchTracks() {
     try {
-        // Try to get JWT but don't crash if it fails
         let jwtToken = '';
         try {
             const jwt = await account.createJWT();
             jwtToken = jwt.jwt;
         } catch (jwtError) {
-            console.warn('JWT generation failed, trying without:', jwtError.message);
+            console.warn('JWT generation failed:', jwtError.message);
         }
 
         const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
@@ -31,7 +30,6 @@ async function fetchTracks() {
             name: doc.name,
             artist: doc.artist,
             genre: doc.genre,
-            // Only append JWT if we got one
             file: jwtToken ? `${doc.fileUrl}&jwt=${jwtToken}` : doc.fileUrl,
             cover: doc.coverUrl || "https://via.placeholder.com/600x600/0f172a/00ffcc?text=NO+COVER"
         }));
@@ -47,11 +45,17 @@ async function fetchTracks() {
         }
 
         if (typeof renderTrackList === 'function') renderTrackList();
+
+        // ✅ NOW render genre shelves — tracks are ready
+        if (typeof renderGenreShelves === 'function') renderGenreShelves();
+
+        // ✅ NOW fetch playlists — allTracks is populated so covers will work
+        await fetchPlaylists();
+
     } catch (error) {
         console.error("Appwrite Fetch Error:", error);
     }
 }
-
 async function fetchPlaylists() {
     try {
         let queries = [];
