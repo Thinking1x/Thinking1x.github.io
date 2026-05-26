@@ -282,3 +282,90 @@
     height: 100%;
     object-fit: cover;
 }
+/* ==========================================
+   PREMIUM HUD ENHANCEMENTS
+========================================== */
+
+/* 1. App-Like Smooth Swiping (Scroll Snapping) */
+.shelf-grid {
+    /* Add scroll-snapping to your existing shelf-grid */
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    padding-bottom: 20px; 
+}
+
+.music-card {
+    /* Forces the scrollbar to "lock" onto the start of a card */
+    scroll-snap-align: start;
+    scroll-margin-left: 5px;
+}
+
+/* 2. Loading Animation for Dynamic Shelves */
+@keyframes slideUpFade {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+.dynamic-shelf {
+    animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Add a slight delay to each subsequent shelf so they cascade in */
+.dynamic-shelf:nth-child(1) { animation-delay: 0.1s; }
+.dynamic-shelf:nth-child(2) { animation-delay: 0.2s; }
+.dynamic-shelf:nth-child(3) { animation-delay: 0.3s; }
+.dynamic-shelf:nth-child(4) { animation-delay: 0.4s; }
+
+/* 3. User Profile Card Styling (Right Sidebar) */
+.user-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.02);
+    transition: background 0.2s, transform 0.2s;
+    cursor: default;
+}
+
+.user-card:hover {
+    background: rgba(0, 229, 255, 0.05);
+    border-color: rgba(0, 229, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+#currentUserAvatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid var(--accent, #00e5ff);
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.3); /* Neon glow around avatar */
+    object-fit: cover;
+}
+
+/* Make the "Online" status glow */
+.user-card div > div:nth-child(2) {
+    display: inline-block;
+    position: relative;
+    padding-left: 14px;
+}
+
+.user-card div > div:nth-child(2)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background-color: #00ffcc;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #00ffcc;
+}
