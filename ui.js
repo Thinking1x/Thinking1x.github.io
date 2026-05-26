@@ -4,16 +4,51 @@
 // Depends on: config.js, data.js (fetchPlaylists), player.js (loadTrack)
 
 // ==========================================
-// UI — VIEWS
+// UI — VIEWS & NAVIGATION
 // ==========================================
+
+window.switchView = function(viewName) {
+    const homeView = document.getElementById('homeView');
+    const databaseView = document.getElementById('databaseView');
+    const viewTitle = document.getElementById('viewTitle');
+    const navHome = document.getElementById('navHome');
+    const navAllTracks = document.getElementById('navAllTracks');
+
+    // Failsafe checks
+    if (!homeView || !databaseView) return;
+
+    // Remove active classes
+    if (navHome) navHome.classList.remove('active');
+    if (navAllTracks) navAllTracks.classList.remove('active');
+
+    if (viewName === 'home') {
+        // Show Home HUD
+        homeView.style.display = 'block';
+        databaseView.style.display = 'none';
+        
+        if (navHome) navHome.classList.add('active');
+        if (viewTitle) viewTitle.innerText = "Discover Signals"; 
+        
+    } else if (viewName === 'database') {
+        // Show Database List
+        homeView.style.display = 'none';
+        databaseView.style.display = 'block';
+        
+        // Only highlight the main database button if we aren't looking at a specific playlist
+        if (currentViewPlaylistIndex === -1 && navAllTracks) {
+            navAllTracks.classList.add('active');
+            if (viewTitle) viewTitle.innerText = "All Tracks";
+        }
+    }
+};
 
 function renderPlaylists() {
     const container = document.getElementById('playlists');
+    if (!container) return;
     container.innerHTML = '';
 
     userPlaylists.forEach((pl, index) => {
         const div = document.createElement('div');
-        div.className = 'track';
         div.className = `playlist-item ${currentViewPlaylistIndex === index ? 'active' : ''}`;
 
         const isMine = (pl.owner === currentUser);
@@ -22,10 +57,10 @@ function renderPlaylists() {
             div.innerHTML = `<i class="fas fa-folder-open"></i> ${pl.name}`;
         } else {
             div.innerHTML = `
-        <i class="fas fa-lock" style="color: var(--error); font-size: 0.85rem;"></i> 
-        <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pl.name}</span>
-        <span style="font-size: 0.7rem; color: var(--text-sub); font-weight: bold; text-transform: uppercase;">${pl.owner}</span>
-      `;
+                <i class="fas fa-lock" style="color: var(--error); font-size: 0.85rem;"></i> 
+                <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pl.name}</span>
+                <span style="font-size: 0.7rem; color: var(--text-sub); font-weight: bold; text-transform: uppercase;">${pl.owner}</span>
+            `;
         }
 
         div.onclick = () => loadPlaylist(index);
@@ -35,9 +70,13 @@ function renderPlaylists() {
 
 function showAllTracks() {
     currentViewPlaylistIndex = -1;
-    document.getElementById('navAllTracks').classList.add('active');
-    document.getElementById('viewTitle').innerText = "All Tracks";
-    document.getElementById('editPlaylistBtn').classList.add('hidden');
+    
+    // Force the view to switch to the database screen
+    switchView('database');
+    
+    const editBtn = document.getElementById('editPlaylistBtn');
+    if (editBtn) editBtn.classList.add('hidden');
+    
     currentPlaylistTracks = [...allTracks];
     renderPlaylists();
     renderTrackList();
@@ -45,14 +84,21 @@ function showAllTracks() {
 
 function loadPlaylist(index) {
     currentViewPlaylistIndex = index;
-    document.getElementById('navAllTracks').classList.remove('active');
     const pl = userPlaylists[index];
-    document.getElementById('viewTitle').innerText = pl.name;
+    
+    // Force the view to switch to the database screen
+    switchView('database');
+    
+    const viewTitle = document.getElementById('viewTitle');
+    if (viewTitle) viewTitle.innerText = pl.name;
 
-    if (pl.owner === currentUser) {
-        document.getElementById('editPlaylistBtn').classList.remove('hidden');
-    } else {
-        document.getElementById('editPlaylistBtn').classList.add('hidden');
+    const editBtn = document.getElementById('editPlaylistBtn');
+    if (editBtn) {
+        if (pl.owner === currentUser) {
+            editBtn.classList.remove('hidden');
+        } else {
+            editBtn.classList.add('hidden');
+        }
     }
 
     currentPlaylistTracks = allTracks.filter(track => pl.ids.includes(track.id));
@@ -78,6 +124,7 @@ function renderTrackList() {
         const isPlaying = allTracks[currentTrackIndex] && allTracks[currentTrackIndex].id === track.id;
         if (isPlaying) div.classList.add('active');
 
+        // Note: The adminDeleteBtn code safely lives HERE inside the loop where "track" exists!
         const adminDeleteBtn = (currentUserRole === 'admin')
             ? `<button onclick="event.stopPropagation(); deleteTrack('${track.id}', '${track.name}')"
                        style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px; margin-left:10px;"
@@ -86,16 +133,16 @@ function renderTrackList() {
                </button>`
             : '';
 
-div.innerHTML = `
-    <div class="track-num">${isPlaying ? '<i class="fas fa-volume-up"></i>' : index + 1}</div>
-    <div class="track-info">
-        <span class="track-title">${track.name}</span>
-        <span class="track-meta">${track.artist}</span>
-    </div>
-    <div class="track-action">
-        ${adminDeleteBtn}
-    </div>
-`;
+        div.innerHTML = `
+            <div class="track-num">${isPlaying ? '<i class="fas fa-volume-up"></i>' : index + 1}</div>
+            <div class="track-info">
+                <span class="track-title">${track.name}</span>
+                <span class="track-meta">${track.artist}</span>
+            </div>
+            <div class="track-action">
+                ${adminDeleteBtn}
+            </div>
+        `;
 
         const originalIndex = allTracks.findIndex(t => t.id === track.id);
         div.onclick = () => loadTrack(originalIndex, true);
@@ -107,43 +154,6 @@ div.innerHTML = `
 // INSTANT SEARCH ENGINE
 // ==========================================
 
-const searchInput = document.getElementById('searchInput');
-
-if (searchInput) {
-    searchInput.addEventListener('input', function (e) {
-        const query = e.target.value.toLowerCase().trim();
-
-        if (query === "") {
-            showAllTracks();
-            return;
-        }
-
-        currentViewPlaylistIndex = -1;
-
-        const navAll = document.getElementById('navAllTracks');
-        if (navAll) navAll.classList.add('active');
-
-        const viewTitle = document.getElementById('viewTitle');
-        if (viewTitle) viewTitle.innerText = `Search Results: "${query}"`;
-
-        const editBtn = document.getElementById('editPlaylistBtn');
-        if (editBtn) editBtn.classList.add('hidden');
-
-        currentPlaylistTracks = allTracks.filter(track => {
-            const matchName = track.name.toLowerCase().includes(query);
-            const matchArtist = track.artist.toLowerCase().includes(query);
-            return matchName || matchArtist;
-        });
-
-        renderPlaylists();
-        renderTrackList();
-    });
-}
-// ==========================================
-// INSTANT SEARCH ENGINE
-// ==========================================
-
-// We wrap it in an event listener to ensure the HTML loads before the JS looks for the search bar
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
 
@@ -152,15 +162,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const query = e.target.value.toLowerCase().trim();
 
             if (query === "") {
-                if (typeof showAllTracks === "function") showAllTracks(); 
+                showAllTracks(); 
                 return;
             }
 
-            // Force the view to global search
+            // Force the view to global search database
             currentViewPlaylistIndex = -1;
-            
-            const navAll = document.getElementById('navAllTracks');
-            if (navAll) navAll.classList.add('active');
+            switchView('database');
             
             const viewTitle = document.getElementById('viewTitle');
             if (viewTitle) viewTitle.innerText = `Search Results: "${query}"`;
@@ -176,11 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Re-render the UI
-            if (typeof renderPlaylists === "function") renderPlaylists(); 
-            if (typeof renderTrackList === "function") renderTrackList(); 
+            renderPlaylists(); 
+            renderTrackList(); 
         });
     }
 });
+
 // ==========================================
 // ADMIN PANEL UI LOGIC
 // ==========================================
@@ -242,46 +251,4 @@ async function handleGrantAccess(userId, btnElement) {
     btnElement.style.background = "var(--success)";
     btnElement.style.color = "#fff";
     btnElement.style.borderColor = "var(--success)";
-}
-// Check if the user is an admin. If they are, generate a red trash can button!
-const adminDeleteBtn = (currentUserRole === 'admin') 
-    ? `<button onclick="event.stopPropagation(); deleteTrack('${track.id}', '${track.name}')" 
-               style="background:none; border:none; color:#ef4444; cursor:pointer; padding: 5px; margin-left: 10px;" 
-               title="Permanently Delete Signal">
-           <i class="fas fa-trash-alt"></i>
-       </button>` 
-    : '';
-
-function switchView(viewName) {
-    const homeView = document.getElementById('homeView');
-    const databaseView = document.getElementById('databaseView');
-    const viewTitle = document.getElementById('viewTitle');
-    
-    // 1. Remove the "active" highlight from all sidebar navigation items
-    document.getElementById('navHome').classList.remove('active');
-    document.getElementById('navAllTracks').classList.remove('active');
-
-    if (viewName === 'home') {
-        // 2a. Show Home, Hide Database
-        homeView.style.display = 'block';
-        databaseView.style.display = 'none';
-        
-        // Highlight the Home button and update the header text
-        document.getElementById('navHome').classList.add('active');
-        viewTitle.innerText = "Discover Signals"; 
-        
-    } else if (viewName === 'database') {
-        // 2b. Show Database, Hide Home
-        homeView.style.display = 'none';
-        databaseView.style.display = 'block';
-        
-        // Highlight the Database button and update the header text
-        document.getElementById('navAllTracks').classList.add('active');
-        viewTitle.innerText = "All Tracks";
-        
-        // Trigger your existing function to render the track list!
-        if (typeof showAllTracks === 'function') {
-            showAllTracks(); 
-        }
-    }
 }
