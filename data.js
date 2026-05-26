@@ -2,13 +2,7 @@
 // DATA.JS — Appwrite Fetching, Playlists, Upload & Admin
 // ==========================================
 
-// ==========================================
-// APPWRITE — FETCHING
-// ==========================================
 
-// ==========================================
-// APPWRITE — FETCHING
-// ==========================================
 
 async function fetchTracks() {
     try {
@@ -55,6 +49,8 @@ async function fetchTracks() {
     } catch (error) {
         console.error("Appwrite Fetch Error:", error);
     }
+if (typeof renderGenreShelves === 'function') renderGenreShelves();
+await fetchPlaylists();
 }
 async function fetchPlaylists() {
     try {

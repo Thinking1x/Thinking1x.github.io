@@ -256,7 +256,9 @@ async function handleGrantAccess(userId, btnElement) {
 // DYNAMIC GENRE SHELVES (UPGRADED)
 // ==========================================
 function renderGenreShelves() {
+     console.log('renderGenreShelves called, tracks:', allTracks?.length); // ADD THIS
     const canvas = document.querySelector('.hud-feed-canvas');
+    if (!canvas) { console.log('canvas not found!'); return; } // ADD THIS
     if (!canvas) return;
 
     // Remove old dynamic shelves
