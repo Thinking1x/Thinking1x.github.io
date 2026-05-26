@@ -17,11 +17,15 @@
     <input id="password" type="password" placeholder="Password" onkeypress="handleKeyPress(event)">
     <button id="loginBtn" onclick="login()">Enter System</button>
   </div>
-  <div>
-    <p> The default account for tester from universities:</p>
-    <p>Username: university1</p>
-    <p>Password: 123456</p>
+ <div class="tester-info-card">
+  <p class="info-title">
+    <i class="fas fa-info-circle"></i> Default Tester Account
+  </p>
+  <div class="credentials">
+    <p><span class="label">Username:</span> <code class="highlight">university1</code></p>
+    <p><span class="label">Password:</span> <code class="highlight">123456</code></p>
   </div>
+</div>
 </div>
 
 <div id="mainPage" class="hidden">
