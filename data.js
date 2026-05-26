@@ -31,7 +31,7 @@ async function fetchTracks() {
             artist: doc.artist,
             genre: doc.genre,
             file: jwtToken ? `${doc.fileUrl}&jwt=${jwtToken}` : doc.fileUrl,
-            cover: doc.coverUrl || "https://via.placeholder.com/600x600/0f172a/00ffcc?text=NO+COVER"
+            cover: doc.coverUrl || "https://i.ebayimg.com/images/g/JKAAAeSwqtZpbYnr/s-l1200.jpg"
         }));
 
         if (allTracks.length > 0 && !audio.src) {
