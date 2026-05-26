@@ -1,0 +1,269 @@
+/* ==========================================
+   THINKING'S MEDIA SERVER HUD STYLES
+========================================== */
+
+/* Core Dashboard Layout */
+.hud-main-container {
+    display: grid;
+    grid-template-columns: 1fr 300px; 
+    gap: 30px;
+    padding-top: 15px;
+    box-sizing: border-box;
+}
+
+/* Responsive adjustment for smaller screens */
+@media (max-width: 1024px) {
+    .hud-main-container {
+        grid-template-columns: 1fr; 
+    }
+    .hud-right-sidebar {
+        border-left: none !important;
+        padding-left: 0 !important;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        padding-top: 24px;
+    }
+}
+
+/* Feed Canvas Elements */
+.hud-feed-canvas {
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+}
+
+/* Top Banner Announcement */
+.hud-promo-banner {
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.15) 0%, rgba(0, 0, 0, 0.4) 100%);
+    border-left: 4px solid var(--accent, #00e5ff);
+    border-radius: 8px;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.banner-badge {
+    background-color: var(--accent, #00e5ff);
+    color: #000;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    border-radius: 4px;
+    letter-spacing: 1px;
+}
+
+.banner-text {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+}
+
+/* Horizontal Card Sliders Layout */
+.hud-shelf {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.shelf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.shelf-header h2 {
+    font-size: 1.3rem;
+    color: #ffffff;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.shelf-header .view-all {
+    color: var(--accent, #00e5ff);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.shelf-header .view-all:hover {
+    opacity: 1;
+}
+
+.shelf-grid {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 15px;
+    scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar for Shelves */
+.shelf-grid::-webkit-scrollbar {
+    height: 6px;
+}
+.shelf-grid::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+}
+.shelf-grid::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+.shelf-grid::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255,255,255,0.2);
+}
+
+/* Modular Music Cards */
+.music-card {
+    flex: 0 0 160px; 
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.card-cover-wrapper {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #1a1b23;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.card-cover {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.music-card:hover .card-cover {
+    transform: scale(1.05);
+}
+
+/* Floating Interactive Play Button */
+.card-play-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-color: var(--accent, #00e5ff);
+    border: none;
+    color: #000;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.music-card:hover .card-play-btn {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.card-play-btn:hover {
+    transform: translateY(0) scale(1.1) !important;
+}
+
+/* Card Text */
+.card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.card-title {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-subtitle {
+    color: var(--text-sub, #8b8bae);
+    font-size: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Right Dashboard Column */
+.hud-right-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    padding-left: 24px;
+}
+
+.sidebar-widget {
+    background: rgba(15, 23, 42, 0.3);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.02);
+}
+
+.widget-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.widget-header h3 {
+    font-size: 0.85rem;
+    color: var(--text-sub, #8b8bae);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+    font-weight: 700;
+}
+
+/* 2x2 Tool Tiles */
+.tools-icon-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.tool-tile {
+    background-color: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.05);
+    color: #ccc;
+    padding: 16px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.tool-tile .tile-icon {
+    font-size: 1.2rem;
+    color: var(--accent, #00e5ff);
+}
+
+.tool-tile:hover {
+    background-color: rgba(0, 229, 255, 0.1);
+    color: #fff;
+    border-color: rgba(0, 229, 255, 0.3);
+}
