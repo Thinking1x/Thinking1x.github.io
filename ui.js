@@ -302,7 +302,7 @@ function renderGenreShelves() {
             cardsHTML += `
                 <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
                     <div class="card-cover-wrapper">
-                        ${coverArtHTML}
+                        https://ui-avatars.com/api/?name=User&background=00e5ff&color=000
                         <button class="card-play-btn"><i class="fas fa-play"></i></button>
                     </div>
                     <div class="card-meta">
