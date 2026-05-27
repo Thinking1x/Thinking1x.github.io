@@ -46,7 +46,6 @@ window.switchView = function(viewName) {
 // PLAYLIST RENDERING & COVERS
 // ==========================================
 
-function getPlaylistCover(playlist) {
 // ==========================================
 // PLAYLIST RENDERING & COVERS
 // ==========================================
