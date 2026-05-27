@@ -339,9 +339,30 @@ async function triggerUpload() {
 // iTUNES API ARTWORK MATCHER
 // ==========================================
 
+// ==========================================
+// iTUNES API ARTWORK MATCHER (SMART VERSION)
+// ==========================================
+
 async function fetchCoverArt(trackName, artistName) {
     try {
-        const query = encodeURIComponent(`${trackName} ${artistName}`);
+        // 1. Scrub the Artist Name
+        // If the artist is "Unknown", don't send it to Apple!
+        let searchArtist = artistName.toLowerCase().includes('unknown') ? '' : artistName;
+
+        // 2. Scrub the Track Name
+        // Remove anything inside parentheses or brackets like (slowed), (lyrics), [official]
+        let searchTrack = trackName.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '');
+        
+        // Remove weird YouTube ID numbers (e.g., -6289699)
+        searchTrack = searchTrack.replace(/-\d+/g, '').trim();
+
+        // 3. Combine the clean track and artist
+        const rawQuery = `${searchTrack} ${searchArtist}`.trim();
+        const query = encodeURIComponent(rawQuery);
+        
+        // This will print the "cleaned" search term in your console so you can watch it work!
+        console.log(`🔍 Asking iTunes for: "${rawQuery}"`); 
+
         const response = await fetch(`https://itunes.apple.com/search?term=${query}&entity=song&limit=1`);
         const data = await response.json();
 
