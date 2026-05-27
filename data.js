@@ -335,13 +335,6 @@ async function triggerUpload() {
     }
 }
 
-// ==========================================
-// iTUNES API ARTWORK MATCHER
-// ==========================================
-
-// ==========================================
-// iTUNES API ARTWORK MATCHER (SMART VERSION)
-// ==========================================
 
 // ==========================================
 // iTUNES API ARTWORK MATCHER (SUPER SMART VERSION)
