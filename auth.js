@@ -45,8 +45,6 @@ async function login() {
         }
         
         if (avatarImg) {
-            // Generate the custom avatar matching your neon cyan theme
-            avatarImg.src = `https://ui-avatars.com/api/?name=${currentUser}&background=00e5ff&color=000&bold=true`;
         }
         // ==========================================
 
