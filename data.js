@@ -340,11 +340,25 @@ async function triggerUpload() {
 // iTUNES API ARTWORK MATCHER (SUPER SMART VERSION)
 // ==========================================
 
+// ==========================================
+// iTUNES API ARTWORK MATCHER (ULTIMATE SCRUBBER)
+// ==========================================
+
 async function fetchCoverArt(trackName, artistName) {
     try {
-        // 1. Basic Scrubbing
         let searchArtist = artistName.toLowerCase().includes('unknown') ? '' : artistName;
-        let searchTrack = trackName.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/-\d+/g, '').trim();
+        
+        // AGGRESSIVE SCRUBBING: Remove file extensions, YT ripper tags, and underscores
+        let searchTrack = trackName
+            .replace(/\.[^/.]+$/, "") // Removes .mp3, .wav, etc.
+            .replace(/_Audio_.*/ig, '') // Removes _Audio_128k
+            .replace(/_Official.*/ig, '') // Removes _Official Music Video
+            .replace(/_Visualizer.*/ig, '') // Removes _Visualizer
+            .replace(/_/g, ' ') // Turns underscores into spaces
+            .replace(/\(.*?\)/g, '') // Removes (slowed)
+            .replace(/\[.*?\]/g, '') // Removes [lyrics]
+            .replace(/-\d+/g, '') // Removes random ID numbers
+            .trim();
 
         // --- ATTEMPT 1: Exact Match ---
         let rawQuery1 = `${searchTrack} ${searchArtist}`.trim();
@@ -358,10 +372,8 @@ async function fetchCoverArt(trackName, artistName) {
         }
 
         // --- ATTEMPT 2: Relaxed Match (Drop the feature artists) ---
-        // Apple HATES "&", "feat.", or "x". Let's grab just the primary artist.
         let primaryArtist = searchArtist.split(/&|feat\.?|ft\.?| x |,/i)[0].trim();
         
-        // Only try again if chopping the artist name actually changed something
         if (primaryArtist !== searchArtist && primaryArtist.length > 0) {
             let rawQuery2 = `${searchTrack} ${primaryArtist}`.trim();
             console.log(`⚠️ Attempt 1 failed. iTunes Attempt 2 (Relaxed): "${rawQuery2}"`);
@@ -374,7 +386,7 @@ async function fetchCoverArt(trackName, artistName) {
             }
         }
 
-        return null; // iTunes officially doesn't have it
+        return null; 
     } catch (error) {
         console.error("iTunes Match Failed:", error);
         return null;
@@ -437,50 +449,50 @@ async function getFileUrl(fileId) {
     return `https://sgp.cloud.appwrite.io/v1/storage/buckets/6a05cdb0000bc961b45f/files/${fileId}/view?project=6a05cc27002debbf6591&jwt=${jwt.jwt}`;
 }
 // ==========================================
-// ONE-TIME ITUNES AUTO-PATCHER
+// ONE-TIME ITUNES AUTO-PATCHER (FORCE OVERRIDE)
 // ==========================================
 async function patchMissingCovers() {
-    // 1. Security check
-    if (currentUserRole !== 'admin') {
-        return alert("Security Clearance Required.");
-    }
+    if (currentUserRole !== 'admin') return alert("Security Clearance Required.");
 
-    console.log("🚀 Starting iTunes Auto-Patcher...");
-    let successCount = 0;
+    console.log("🚀 Starting iTunes Auto-Patcher (FORCE MODE)...");
 
-    for (let i = 0; i < allTracks.length; i++) {
-        let track = allTracks[i];
+    try {
+        const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
+            Appwrite.Query.limit(500)
+        ]);
+        const rawTracks = response.documents;
+        let successCount = 0;
 
-        // 2. Look for tracks with broken placeholder images
-        if (!track.cover || track.cover.includes('placeholder')) {
-            console.log(`Searching iTunes for [${i+1}/${allTracks.length}]: ${track.name} by ${track.artist}`);
+        for (let i = 0; i < rawTracks.length; i++) {
+            let doc = rawTracks[i];
+            let rawCover = doc.coverUrl;
 
-            // 3. Ask iTunes for the cover art
-            let newCover = await fetchCoverArt(track.name, track.artist);
+            // FORCE CHECK: If it's missing, is a placeholder, OR if it's NOT an official Apple/iTunes image
+            if (!rawCover || !rawCover.includes('mzstatic.com')) {
+                console.log(`[${i+1}/${rawTracks.length}] Checking: ${doc.name}`);
 
-            if (newCover) {
-                console.log(`✅ Found! Saving to database...`);
-                try {
-                    // 4. Permanently update the document in Appwrite
-                    await databases.updateDocument(DATABASE_ID, COLLECTION_ID, track.id, {
+                let newCover = await fetchCoverArt(doc.name, doc.artist);
+
+                if (newCover) {
+                    console.log(`✅ Match found! Overwriting Appwrite database...`);
+                    await databases.updateDocument(DATABASE_ID, COLLECTION_ID, doc.$id, {
                         coverUrl: newCover
                     });
                     successCount++;
-                } catch (error) {
-                    console.error("Failed to save to Appwrite:", error);
+                } else {
+                    console.log(`❌ No official iTunes art exists for this track.`);
                 }
-            } else {
-                console.log(`❌ No artwork found on iTunes for this track.`);
+
+                // Wait 2.5 seconds to keep Apple happy
+                await new Promise(resolve => setTimeout(resolve, 2500));
             }
-
-            // 5. CRITICAL: Wait 2 seconds before the next search so Apple doesn't block us!
-            await new Promise(resolve => setTimeout(resolve, 2000));
         }
-    }
 
-    console.log(`🎉 Auto-Patcher Finished! Successfully fixed ${successCount} signals.`);
-    alert(`Patcher finished. Fixed ${successCount} signals. Refreshing database...`);
-    
-    // Refresh the screen to show the new artwork
-    fetchTracks(); 
+        console.log(`🎉 Auto-Patcher Finished! Permanently fixed ${successCount} signals.`);
+        alert(`Patcher finished. Fixed ${successCount} signals. Refreshing...`);
+        fetchTracks(); 
+
+    } catch (error) {
+        console.error("Patcher Error:", error);
+    }
 }
