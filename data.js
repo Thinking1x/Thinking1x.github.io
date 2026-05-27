@@ -411,3 +411,51 @@ async function getFileUrl(fileId) {
     const jwt = await account.createJWT();
     return `https://sgp.cloud.appwrite.io/v1/storage/buckets/6a05cdb0000bc961b45f/files/${fileId}/view?project=6a05cc27002debbf6591&jwt=${jwt.jwt}`;
 }
+// ==========================================
+// ONE-TIME ITUNES AUTO-PATCHER
+// ==========================================
+async function patchMissingCovers() {
+    // 1. Security check
+    if (currentUserRole !== 'admin') {
+        return alert("Security Clearance Required.");
+    }
+
+    console.log("🚀 Starting iTunes Auto-Patcher...");
+    let successCount = 0;
+
+    for (let i = 0; i < allTracks.length; i++) {
+        let track = allTracks[i];
+
+        // 2. Look for tracks with broken placeholder images
+        if (!track.cover || track.cover.includes('placeholder')) {
+            console.log(`Searching iTunes for [${i+1}/${allTracks.length}]: ${track.name} by ${track.artist}`);
+
+            // 3. Ask iTunes for the cover art
+            let newCover = await fetchCoverArt(track.name, track.artist);
+
+            if (newCover) {
+                console.log(`✅ Found! Saving to database...`);
+                try {
+                    // 4. Permanently update the document in Appwrite
+                    await databases.updateDocument(DATABASE_ID, COLLECTION_ID, track.id, {
+                        coverUrl: newCover
+                    });
+                    successCount++;
+                } catch (error) {
+                    console.error("Failed to save to Appwrite:", error);
+                }
+            } else {
+                console.log(`❌ No artwork found on iTunes for this track.`);
+            }
+
+            // 5. CRITICAL: Wait 2 seconds before the next search so Apple doesn't block us!
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+    }
+
+    console.log(`🎉 Auto-Patcher Finished! Successfully fixed ${successCount} signals.`);
+    alert(`Patcher finished. Fixed ${successCount} signals. Refreshing database...`);
+    
+    // Refresh the screen to show the new artwork
+    fetchTracks(); 
+}
