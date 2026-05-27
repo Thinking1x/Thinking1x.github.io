@@ -47,32 +47,25 @@ window.switchView = function(viewName) {
 // ==========================================
 
 function getPlaylistCover(playlist) {
+// ==========================================
+// PLAYLIST RENDERING & COVERS
+// ==========================================
+
+function getPlaylistCover(playlist) {
     const plTracks = allTracks.filter(track => playlist.ids.includes(track.id));
     
-    // ========================================================
-    // PASTE YOUR DEFAULT BACKUP IMAGE LINK HERE:
+    // Your default backup image link
     const defaultImg = "https://i.imgur.com/YourCustomImage.png"; 
-    // ========================================================
 
-    if (plTracks.length >= 4) {
-        // Build the iTunes-style 4-image mosaic using your custom backup image
-        return `
-            <div class="mosaic-cover" style="width:40px; height:40px; border-radius:4px; overflow:hidden; flex-shrink:0;">
-                <img src="${plTracks[0].cover && !plTracks[0].cover.includes('placeholder') ? plTracks[0].cover : defaultImg}">
-                <img src="${plTracks[1].cover && !plTracks[1].cover.includes('placeholder') ? plTracks[1].cover : defaultImg}">
-                <img src="${plTracks[2].cover && !plTracks[2].cover.includes('placeholder') ? plTracks[2].cover : defaultImg}">
-                <img src="${plTracks[3].cover && !plTracks[3].cover.includes('placeholder') ? plTracks[3].cover : defaultImg}">
-            </div>
-        `;
-    } else if (plTracks.length > 0) {
-        // Just use the first song's cover if less than 4
+    if (plTracks.length > 0) {
+        // Just use the first song's cover, scaled down perfectly for the sidebar!
         const singleCover = plTracks[0].cover && !plTracks[0].cover.includes('placeholder') ? plTracks[0].cover : defaultImg;
-        return `<img src="${singleCover}" style="width:40px; height:40px; border-radius:4px; object-fit:cover; flex-shrink:0;">`;
+        return `<img src="${singleCover}" style="width:24px; height:24px; border-radius:4px; object-fit:cover; flex-shrink:0;">`;
     } else {
-        // Empty playlist cover (UNBREAKABLE CSS ICON)
+        // Empty playlist cover (Small CSS Icon)
         return `
-            <div style="width:40px; height:40px; border-radius:4px; background:#1a1b26; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.05); flex-shrink:0;">
-                <i class="fas fa-folder-open" style="color:var(--text-sub); font-size: 1rem;"></i>
+            <div style="width:24px; height:24px; border-radius:4px; background:#1a1b26; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.05); flex-shrink:0;">
+                <i class="fas fa-music" style="color:var(--text-sub); font-size: 0.7rem;"></i>
             </div>
         `;
     }
