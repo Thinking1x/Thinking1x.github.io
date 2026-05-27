@@ -343,34 +343,45 @@ async function triggerUpload() {
 // iTUNES API ARTWORK MATCHER (SMART VERSION)
 // ==========================================
 
+// ==========================================
+// iTUNES API ARTWORK MATCHER (SUPER SMART VERSION)
+// ==========================================
+
 async function fetchCoverArt(trackName, artistName) {
     try {
-        // 1. Scrub the Artist Name
-        // If the artist is "Unknown", don't send it to Apple!
+        // 1. Basic Scrubbing
         let searchArtist = artistName.toLowerCase().includes('unknown') ? '' : artistName;
+        let searchTrack = trackName.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '').replace(/-\d+/g, '').trim();
 
-        // 2. Scrub the Track Name
-        // Remove anything inside parentheses or brackets like (slowed), (lyrics), [official]
-        let searchTrack = trackName.replace(/\(.*?\)/g, '').replace(/\[.*?\]/g, '');
+        // --- ATTEMPT 1: Exact Match ---
+        let rawQuery1 = `${searchTrack} ${searchArtist}`.trim();
+        console.log(`🔍 iTunes Attempt 1: "${rawQuery1}"`); 
         
-        // Remove weird YouTube ID numbers (e.g., -6289699)
-        searchTrack = searchTrack.replace(/-\d+/g, '').trim();
+        let res1 = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(rawQuery1)}&entity=song&limit=1`);
+        let data1 = await res1.json();
 
-        // 3. Combine the clean track and artist
-        const rawQuery = `${searchTrack} ${searchArtist}`.trim();
-        const query = encodeURIComponent(rawQuery);
-        
-        // This will print the "cleaned" search term in your console so you can watch it work!
-        console.log(`🔍 Asking iTunes for: "${rawQuery}"`); 
-
-        const response = await fetch(`https://itunes.apple.com/search?term=${query}&entity=song&limit=1`);
-        const data = await response.json();
-
-        if (data.results && data.results.length > 0) {
-            const lowResUrl = data.results[0].artworkUrl100;
-            return lowResUrl.replace('100x100bb.jpg', '600x600bb.jpg');
+        if (data1.results && data1.results.length > 0) {
+            return data1.results[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
         }
-        return null;
+
+        // --- ATTEMPT 2: Relaxed Match (Drop the feature artists) ---
+        // Apple HATES "&", "feat.", or "x". Let's grab just the primary artist.
+        let primaryArtist = searchArtist.split(/&|feat\.?|ft\.?| x |,/i)[0].trim();
+        
+        // Only try again if chopping the artist name actually changed something
+        if (primaryArtist !== searchArtist && primaryArtist.length > 0) {
+            let rawQuery2 = `${searchTrack} ${primaryArtist}`.trim();
+            console.log(`⚠️ Attempt 1 failed. iTunes Attempt 2 (Relaxed): "${rawQuery2}"`);
+            
+            let res2 = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(rawQuery2)}&entity=song&limit=1`);
+            let data2 = await res2.json();
+
+            if (data2.results && data2.results.length > 0) {
+                return data2.results[0].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+            }
+        }
+
+        return null; // iTunes officially doesn't have it
     } catch (error) {
         console.error("iTunes Match Failed:", error);
         return null;
