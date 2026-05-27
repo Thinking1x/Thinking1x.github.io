@@ -42,6 +42,42 @@ window.switchView = function(viewName) {
     }
 };
 
+// ==========================================
+// PLAYLIST RENDERING & COVERS
+// ==========================================
+
+function getPlaylistCover(playlist) {
+    const plTracks = allTracks.filter(track => playlist.ids.includes(track.id));
+    
+    // ========================================================
+    // PASTE YOUR DEFAULT BACKUP IMAGE LINK HERE:
+    const defaultImg = "https://i.imgur.com/YourCustomImage.png"; 
+    // ========================================================
+
+    if (plTracks.length >= 4) {
+        // Build the iTunes-style 4-image mosaic using your custom backup image
+        return `
+            <div class="mosaic-cover" style="width:40px; height:40px; border-radius:4px; overflow:hidden; flex-shrink:0;">
+                <img src="${plTracks[0].cover && !plTracks[0].cover.includes('placeholder') ? plTracks[0].cover : defaultImg}">
+                <img src="${plTracks[1].cover && !plTracks[1].cover.includes('placeholder') ? plTracks[1].cover : defaultImg}">
+                <img src="${plTracks[2].cover && !plTracks[2].cover.includes('placeholder') ? plTracks[2].cover : defaultImg}">
+                <img src="${plTracks[3].cover && !plTracks[3].cover.includes('placeholder') ? plTracks[3].cover : defaultImg}">
+            </div>
+        `;
+    } else if (plTracks.length > 0) {
+        // Just use the first song's cover if less than 4
+        const singleCover = plTracks[0].cover && !plTracks[0].cover.includes('placeholder') ? plTracks[0].cover : defaultImg;
+        return `<img src="${singleCover}" style="width:40px; height:40px; border-radius:4px; object-fit:cover; flex-shrink:0;">`;
+    } else {
+        // Empty playlist cover (UNBREAKABLE CSS ICON)
+        return `
+            <div style="width:40px; height:40px; border-radius:4px; background:#1a1b26; display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.05); flex-shrink:0;">
+                <i class="fas fa-folder-open" style="color:var(--text-sub); font-size: 1rem;"></i>
+            </div>
+        `;
+    }
+}
+
 function renderPlaylists() {
     const container = document.getElementById('playlists');
     if (!container) return;
@@ -50,16 +86,26 @@ function renderPlaylists() {
     userPlaylists.forEach((pl, index) => {
         const div = document.createElement('div');
         div.className = `playlist-item ${currentViewPlaylistIndex === index ? 'active' : ''}`;
-
+        
+        // Generate the dynamic cover art
+        const coverArtHTML = getPlaylistCover(pl);
         const isMine = (pl.owner === currentUser);
 
         if (isMine) {
-            div.innerHTML = `<i class="fas fa-folder-open"></i> ${pl.name}`;
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                    ${coverArtHTML}
+                    <span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${pl.name}</span>
+                </div>
+            `;
         } else {
             div.innerHTML = `
-                <i class="fas fa-lock" style="color: var(--error); font-size: 0.85rem;"></i> 
-                <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pl.name}</span>
-                <span style="font-size: 0.7rem; color: var(--text-sub); font-weight: bold; text-transform: uppercase;">${pl.owner}</span>
+                <div style="display:flex; align-items:center; gap:10px; width:100%;">
+                     ${coverArtHTML}
+                    <i class="fas fa-lock" style="color: var(--error); font-size: 0.85rem;"></i> 
+                    <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pl.name}</span>
+                    <span style="font-size: 0.7rem; color: var(--text-sub); font-weight: bold; text-transform: uppercase;">${pl.owner}</span>
+                </div>
             `;
         }
 
@@ -67,6 +113,10 @@ function renderPlaylists() {
         container.appendChild(div);
     });
 }
+
+// ==========================================
+// TRACK LIST RENDERING
+// ==========================================
 
 function showAllTracks() {
     currentViewPlaylistIndex = -1;
@@ -124,7 +174,6 @@ function renderTrackList() {
         const isPlaying = allTracks[currentTrackIndex] && allTracks[currentTrackIndex].id === track.id;
         if (isPlaying) div.classList.add('active');
 
-        // Note: The adminDeleteBtn code safely lives HERE inside the loop where "track" exists!
         const adminDeleteBtn = (currentUserRole === 'admin')
             ? `<button onclick="event.stopPropagation(); deleteTrack('${track.id}', '${track.name}')"
                        style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px; margin-left:10px;"
@@ -147,6 +196,75 @@ function renderTrackList() {
         const originalIndex = allTracks.findIndex(t => t.id === track.id);
         div.onclick = () => loadTrack(originalIndex, true);
         list.appendChild(div);
+    });
+}
+
+// ==========================================
+// DYNAMIC GENRE SHELVES (HUD)
+// ==========================================
+
+function renderGenreShelves() {
+    const canvas = document.querySelector('.hud-feed-canvas');
+    if (!canvas) return;
+
+    // Remove old dynamic shelves
+    document.querySelectorAll('.dynamic-shelf').forEach(shelf => shelf.remove());
+
+    if (!allTracks || allTracks.length === 0) return;
+
+    // 1. Automatically find all unique genres that actually exist in your database!
+    const uniqueGenres = [...new Set(allTracks.map(track => {
+        // Standardize the text: make it uppercase and handle empty genres
+        return track.genre ? track.genre.trim().toUpperCase() : 'UNCATEGORIZED';
+    }))];
+
+    // 2. Build a shelf for every genre found
+    uniqueGenres.forEach(genre => {
+        // Filter tracks matching this genre (case-insensitive)
+        const genreTracks = allTracks.filter(track => {
+            const trackG = track.genre ? track.genre.trim().toUpperCase() : 'UNCATEGORIZED';
+            return trackG === genre;
+        });
+        
+        if (genreTracks.length === 0) return;
+
+        const shelf = document.createElement('section');
+        shelf.className = 'hud-shelf dynamic-shelf';
+        
+        let cardsHTML = '';
+        
+        genreTracks.forEach(track => {
+            const globalIndex = allTracks.findIndex(t => t.id === track.id);
+            
+            const coverArtHTML = track.cover && !track.cover.includes('placeholder')
+                ? `<img src="${track.cover}" alt="Cover" class="card-cover">`
+                : `<div class="card-cover" style="display:flex; justify-content:center; align-items:center; background:#1a1b26; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-music" style="font-size:2rem; color:rgba(255,255,255,0.2);"></i></div>`;
+
+            cardsHTML += `
+                <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
+                    <div class="card-cover-wrapper">
+                        ${coverArtHTML}
+                        <button class="card-play-btn"><i class="fas fa-play"></i></button>
+                    </div>
+                    <div class="card-meta">
+                        <span class="card-title">${track.name}</span>
+                        <span class="card-subtitle">${track.artist}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        shelf.innerHTML = `
+            <div class="shelf-header">
+                <h2>${genre} Signals</h2>
+                <a href="#" class="view-all" onclick="showAllTracks()">View Database</a>
+            </div>
+            <div class="shelf-grid">
+                ${cardsHTML}
+            </div>
+        `;
+
+        canvas.appendChild(shelf);
     });
 }
 
@@ -251,155 +369,4 @@ async function handleGrantAccess(userId, btnElement) {
     btnElement.style.background = "var(--success)";
     btnElement.style.color = "#fff";
     btnElement.style.borderColor = "var(--success)";
-}
-// ==========================================
-// DYNAMIC GENRE SHELVES (UPGRADED)
-// ==========================================
-function renderGenreShelves() {
-     console.log('renderGenreShelves called, tracks:', allTracks?.length); // ADD THIS
-    const canvas = document.querySelector('.hud-feed-canvas');
-    if (!canvas) { console.log('canvas not found!'); return; } // ADD THIS
-    if (!canvas) return;
-
-    // Remove old dynamic shelves
-    document.querySelectorAll('.dynamic-shelf').forEach(shelf => shelf.remove());
-
-    if (!allTracks || allTracks.length === 0) {
-        console.log("No tracks available to build shelves.");
-        return;
-    }
-
-    // 1. Automatically find all unique genres that actually exist in your database!
-    const uniqueGenres = [...new Set(allTracks.map(track => {
-        // Standardize the text: make it uppercase and handle empty genres
-        return track.genre ? track.genre.trim().toUpperCase() : 'UNCATEGORIZED';
-    }))];
-
-    console.log("Detected Genres in Database:", uniqueGenres);
-
-    // 2. Build a shelf for every genre found
-    uniqueGenres.forEach(genre => {
-        
-        // Filter tracks matching this genre (case-insensitive)
-        const genreTracks = allTracks.filter(track => {
-            const trackG = track.genre ? track.genre.trim().toUpperCase() : 'UNCATEGORIZED';
-            return trackG === genre;
-        });
-        
-        if (genreTracks.length === 0) return;
-
-        const shelf = document.createElement('section');
-        shelf.className = 'hud-shelf dynamic-shelf';
-        
-        let cardsHTML = '';
-        
-genreTracks.forEach(track => {
-    const globalIndex = allTracks.findIndex(t => t.id === track.id);
-    
-    // Your bulletproof cover art logic is great, keep this!
-    const coverArtHTML = track.cover && !track.cover.includes('placeholder')
-        ? `<img src="${track.cover}" alt="Cover" class="card-cover">`
-        : `<div class="card-cover" style="display:flex; justify-content:center; align-items:center; background:#1a1b26; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-music" style="font-size:2rem; color:rgba(255,255,255,0.2);"></i></div>`;
-
-    cardsHTML += `
-        <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
-            <div class="card-cover-wrapper">
-                ${coverArtHTML}
-                <button class="card-play-btn"><i class="fas fa-play"></i></button>
-            </div>
-            <div class="card-meta">
-                <span class="card-title">${track.name}</span>
-                <span class="card-subtitle">${track.artist}</span>
-            </div>
-        </div>
-    `;
-});
-
-        shelf.innerHTML = `
-            <div class="shelf-header">
-                <h2>${genre} Signals</h2>
-                <a href="#" class="view-all" onclick="showAllTracks()">View Database</a>
-            </div>
-            <div class="shelf-grid">
-                ${cardsHTML}
-            </div>
-        `;
-
-        canvas.appendChild(shelf);
-    });
-}
-// Example logic for your renderPlaylists() function:
-// Add this helper function to ui.js
-function getPlaylistCover(playlist) {
-    const plTracks = allTracks.filter(track => playlist.ids.includes(track.id));
-    
-    const fallback = (letter) => 
-        `https://i.ebayimg.com/images/g/JKAAAeSwqtZpbYnr/s-l1200.jpg`;
-
-    if (plTracks.length >= 4) {
-        const imgs = plTracks.slice(0, 4).map((t, i) => 
-            `<img src="${t.cover || fallback(i+1)}" 
-                  style="width:20px; height:20px; object-fit:cover; display:block;"
-                  onerror="this.src='${fallback(i+1)}'">` 
-        ).join('');
-        
-        return `
-            <div style="
-                display:grid; 
-                grid-template-columns:1fr 1fr; 
-                width:40px; height:40px; 
-                border-radius:4px; 
-                overflow:hidden; 
-                flex-shrink:0;">
-                ${imgs}
-            </div>`;
-
-    } else if (plTracks.length > 0) {
-        const cover = plTracks[0].cover || fallback('♪');
-        return `<img src="${cover}" 
-                     style="width:40px; height:40px; border-radius:4px; object-fit:cover; flex-shrink:0;"
-                     onerror="this.src='${fallback('♪')}'">`;
-    } else {
-        return `<img src="${fallback('?')}" 
-                     style="width:40px; height:40px; border-radius:4px; object-fit:cover; flex-shrink:0;">`;
-    }
-}
-
-// Update your existing renderPlaylists in ui.js
-function renderPlaylists() {
-    const container = document.getElementById('playlists');
-    if (!container) return;
-    container.innerHTML = '';
-
-    userPlaylists.forEach((pl, index) => {
-        const div = document.createElement('div');
-        div.className = `playlist-item ${currentViewPlaylistIndex === index ? 'active' : ''}`;
-        
-        // Generate the dynamic cover art!
-        const coverArtHTML = getPlaylistCover(pl);
-
-        const isMine = (pl.owner === currentUser);
-
-        if (isMine) {
-            // Using Flexbox to align the cover art and the playlist name
-            div.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px; width:100%;">
-                    ${coverArtHTML}
-                    <span style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${pl.name}</span>
-                </div>
-            `;
-        } else {
-            div.innerHTML = `
-                <div style="display:flex; align-items:center; gap:10px; width:100%;">
-                     ${coverArtHTML}
-                    <i class="fas fa-lock" style="color: var(--error); font-size: 0.85rem;"></i> 
-                    <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pl.name}</span>
-                    <span style="font-size: 0.7rem; color: var(--text-sub); font-weight: bold; text-transform: uppercase;">${pl.owner}</span>
-                </div>
-            `;
-        }
-
-        div.onclick = () => loadPlaylist(index);
-        container.appendChild(div);
-    });
 }
