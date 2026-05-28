@@ -20,9 +20,14 @@
     <input id="password" type="password" placeholder="Password" onkeypress="handleKeyPress(event)">
     <button id="loginBtn" onclick="login()">Enter System</button>
   </div>
-  <div class="tester-info-card">
+
+  <button class="tester-toggle-btn" onclick="document.getElementById('testerCard').classList.toggle('show-tester')">
+    <i class="fas fa-info-circle"></i> Tester Account
+  </button>
+
+  <div id="testerCard" class="tester-info-card">
     <p class="info-title">
-      <i class="fas fa-info-circle"></i> Default Tester Account
+      <i class="fas fa-user-shield"></i> Default Tester Account
     </p>
     <div class="credentials">
       <p><span class="label">Username:</span> <code class="highlight">university1</code></p>
