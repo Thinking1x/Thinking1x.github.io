@@ -20,14 +20,9 @@
     <input id="password" type="password" placeholder="Password" onkeypress="handleKeyPress(event)">
     <button id="loginBtn" onclick="login()">Enter System</button>
   </div>
-
-  <button class="tester-toggle-btn" onclick="document.getElementById('testerCard').classList.toggle('show-tester')">
-    <i class="fas fa-info-circle"></i> Tester Account
-  </button>
-
-  <div id="testerCard" class="tester-info-card">
+  <div class="tester-info-card">
     <p class="info-title">
-      <i class="fas fa-user-shield"></i> Default Tester Account
+      <i class="fas fa-info-circle"></i> Default Tester Account
     </p>
     <div class="credentials">
       <p><span class="label">Username:</span> <code class="highlight">university1</code></p>
@@ -36,48 +31,50 @@
   </div>
 </div>
 
-<div id="full-cover-bg" class="background-cover">
+<div id="mainPage" class="hidden">
+  <div id="full-cover-bg" class="background-cover">
       <img src="https://placehold.co/1000x1000/0f172a/00ffcc?text=COVER+ART" id="cover-bg-image" />
       <div class="background-overlay"></div>
   </div>
   
-  <div class="top-toggles-bar">
-      <div class="toggle-item">
-          <span>BACKGROUND</span>
-          <label class="ios-switch">
+  <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; flex-wrap: wrap; gap: 25px; padding: 8px 15px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px;">BACKGROUND</span>
+          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
               <input type="checkbox" id="visualizerToggleInput" onchange="toggleVisualizerMode()">
               <span class="ios-slider"></span>
           </label>
       </div>
-      <div class="toggle-item">
-          <span>COLOR LAUNCHPAD</span>
-          <label class="ios-switch">
+      <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px;">Color Launchpad</span>
+          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
               <input type="checkbox" id="uiGlowToggleInput" onchange="toggleUIGlowMode()">
               <span class="ios-slider"></span>
           </label>
       </div>
-      <div class="toggle-item">
-          <span>LAUNCHPAD</span>
-          <label class="ios-switch">
+      <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px;">LAUNCHPAD</span>
+          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
               <input type="checkbox" id="launchpadToggleInput" onchange="toggleLaunchpadMode()">
               <span class="ios-slider"></span>
           </label>
       </div>
-      <div class="toggle-item divider">
-          <span>COVER ART & TRANSPARENT</span>
-          <label class="ios-switch">
+      <div style="display: flex; align-items: center; gap: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 25px;">
+          <span style="color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px;">COVER ART & TRANSPARENT</span>
+          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
               <input type="checkbox" id="transparentToggleInput" onchange="toggleTransparentMode()">
               <span class="ios-slider"></span>
           </label>
       </div>
-      <div class="toggle-item">
-          <span class="accent-text">HYPER-GLOW</span>
-          <label class="ios-switch">
+      <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="color: var(--accent); font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 0 5px var(--accent);">HYPER-GLOW</span>
+          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
               <input type="checkbox" id="hyperGlowToggleInput" onchange="toggleHyperGlowMode()">
               <span class="ios-slider"></span>
           </label>
       </div>
   </div>
+
   <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 
   <div id="app-container">
@@ -245,8 +242,10 @@
   </div>
 
   <div class="player">
-   <div class="now-playing">
-      <img id="npCover" class="album-art" src="https://upload.wikimedia.org/wikipedia/commons/3/3c/CD-ROM.png" alt="Cover Art" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/3/3c/CD-ROM.png'">
+    <div class="now-playing">
+      <div id="npCover" class="album-art" style="background:#1a1b26; border:1px solid rgba(255,255,255,0.05); display:flex; justify-content:center; align-items:center;">
+          <i class="fas fa-music" style="color:rgba(255,255,255,0.2); font-size: 1.2rem;"></i>
+      </div>
       <div class="np-info">
         <span class="np-title"  id="npTitle">System Idle</span>
         <span class="np-artist" id="npArtist">--</span>

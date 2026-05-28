@@ -55,32 +55,28 @@ body {
 .shake-error  { animation: shake 0.4s ease-in-out; }
 
 /* =============================================
-   LOGIN PAGE (FULL RESTORE)
+   LOGIN PAGE
 ============================================= */
 #loginPage {
   height: 100vh;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: var(--bg-base); 
+  background: var(--bg-base); /* Flat, professional dark background instead of a gradient */
   position: fixed;
   inset: 0;
   z-index: 1000;
   transition: opacity 0.5s;
 }
-
 .login-box {
   background: var(--bg-elevated);
   padding: 2.5rem;
-  border-radius: 8px;
+  border-radius: 8px; /* Slightly sharper corners */
   width: min(340px, 90vw);
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-sizing: border-box;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); /* Deep, neutral drop shadow (no neon) */
+  border: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle gray border */
 }
-
 .login-box h2 {
   margin-bottom: 1.5rem;
   display: flex;
@@ -89,13 +85,8 @@ body {
   gap: 10px;
   letter-spacing: 1px;
   text-transform: uppercase;
-  color: var(--text-main);
 }
-
-.login-box h2 i { 
-  color: var(--accent); 
-}
-
+.login-box h2 i { color: var(--accent); }
 .login-box input {
   width: 100%;
   padding: 14px;
@@ -106,100 +97,33 @@ body {
   color: white;
   transition: border 0.2s, background 0.2s;
   font-family: inherit;
-  box-sizing: border-box;
 }
-
 .login-box input:focus {
   outline: none;
   border: 1px solid var(--accent);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08); /* Clean, brightened gray instead of tinted */
 }
-
 #loginBtn {
   width: 100%;
   padding: 14px;
   margin-top: 16px;
   border: none;
-  border-radius: 4px;
+  border-radius: 4px; /* Modern, app-style button instead of a pill */
   background: var(--accent);
-  color: #fff;
+  color: #fff; /* White text looks much sharper on orange */
   font-weight: bold;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-sizing: border-box;
 }
-
 #loginBtn:hover { 
   background: var(--accent-hover); 
   transform: translateY(-1px); 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Natural depth shadow, no glow */
 }
-
 #loginBtn.btn-success { background: var(--success); }
 #loginBtn.btn-error   { background: var(--error); color: white; }
 
-/* ==========================================
-   TESTER INFO CARD (Responsive & Themed)
-========================================== */
-.tester-toggle-btn {
-    background: transparent;
-    border: none;
-    color: var(--text-sub);
-    font-size: 0.8rem;
-    cursor: pointer;
-    padding: 8px 16px;
-    margin-top: 20px;
-    border-radius: 4px;
-    transition: color 0.2s, background 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.tester-toggle-btn:hover {
-    color: var(--text-main);
-    background: rgba(255,255,255,0.05);
-}
-
-.tester-info-card {
-    background: var(--bg-elevated);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-left: 3px solid var(--accent); 
-    border-radius: 4px;
-    padding: 16px 20px;
-    color: var(--text-sub);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    max-width: 300px;
-    width: 100%;
-    display: none; 
-    margin-top: 15px;
-    box-sizing: border-box;
-}
-
-.tester-info-card.show-tester {
-    display: block;
-    animation: fadeInUp 0.3s ease-out forwards;
-}
-
-.tester-info-card .info-title {
-    color: var(--text-main);
-    font-weight: 600;
-    font-size: 0.9rem;
-    margin-top: 0;
-    margin-bottom: 12px;
-}
-
-.tester-info-card .credentials p {
-    margin: 6px 0;
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.tester-info-card .highlight {
-    background: rgba(255, 255, 255
 /* =============================================
    APP SHELL
 ============================================= */
@@ -1314,63 +1238,4 @@ body.glass-mode .background-cover {
     font-family: monospace; /* Typewriter font for data */
     font-weight: bold;
     letter-spacing: 1px;
-}
-
-/* ==========================================
-   TOP TOGGLES BAR (Swipeable on Mobile)
-========================================== */
-.top-toggles-bar {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    padding: 12px 15px;
-    background: var(--bg-elevated); /* Matches the dark professional theme */
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-}
-
-.toggle-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-sub);
-    font-weight: 600;
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
-    white-space: nowrap; /* CRITICAL: Stops text from wrapping/squishing */
-}
-
-.toggle-item.divider {
-    border-left: 1px solid rgba(255,255,255,0.1);
-    padding-left: 20px;
-}
-
-.toggle-item .accent-text {
-    color: var(--accent); /* Clean Orange */
-    font-weight: 800;
-}
-
-.toggle-item .ios-switch {
-    transform: scale(0.8);
-    margin: 0;
-}
-
-/* --- MOBILE SWIPE OVERRIDE --- */
-@media (max-width: 768px) {
-    .top-toggles-bar {
-        justify-content: flex-start;
-        overflow-x: auto; /* Allows smooth horizontal scrolling */
-        -webkit-overflow-scrolling: touch;
-        padding-bottom: 14px; /* Breathing room for the scroll area */
-    }
-    
-    .top-toggles-bar::-webkit-scrollbar {
-        display: none; /* Hides ugly scrollbar on phones */
-    }
-    
-    .toggle-item.divider {
-        border-left: none; /* Removes the divider line on mobile to save space */
-        padding-left: 0;
-    }
 }
