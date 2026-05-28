@@ -55,12 +55,12 @@ body {
 .shake-error  { animation: shake 0.4s ease-in-out; }
 
 /* =============================================
-   LOGIN PAGE
+   LOGIN PAGE (FULL RESTORE)
 ============================================= */
 #loginPage {
   height: 100vh;
   display: flex;
-  flex-direction: column; /* FORCES VERTICAL STACKING TO KEEP IT CENTERED */
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background: var(--bg-base); 
@@ -70,7 +70,74 @@ body {
   transition: opacity 0.5s;
 }
 
-/* ... Keep your existing .login-box and #loginBtn CSS here ... */
+.login-box {
+  background: var(--bg-elevated);
+  padding: 2.5rem;
+  border-radius: 8px;
+  width: min(340px, 90vw);
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+}
+
+.login-box h2 {
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-main);
+}
+
+.login-box h2 i { 
+  color: var(--accent); 
+}
+
+.login-box input {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  transition: border 0.2s, background 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.login-box input:focus {
+  outline: none;
+  border: 1px solid var(--accent);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+#loginBtn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 16px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+#loginBtn:hover { 
+  background: var(--accent-hover); 
+  transform: translateY(-1px); 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+#loginBtn.btn-success { background: var(--success); }
+#loginBtn.btn-error   { background: var(--error); color: white; }
 
 /* ==========================================
    TESTER INFO CARD (Responsive & Themed)
@@ -89,6 +156,7 @@ body {
     align-items: center;
     gap: 6px;
 }
+
 .tester-toggle-btn:hover {
     color: var(--text-main);
     background: rgba(255,255,255,0.05);
@@ -97,23 +165,21 @@ body {
 .tester-info-card {
     background: var(--bg-elevated);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    border-left: 3px solid var(--accent); /* Now uses Orange instead of Cyan */
+    border-left: 3px solid var(--accent); 
     border-radius: 4px;
     padding: 16px 20px;
     color: var(--text-sub);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     max-width: 300px;
     width: 100%;
-    
-    /* Hide it by default! */
     display: none; 
     margin-top: 15px;
+    box-sizing: border-box;
 }
 
-/* This class is added when the button is clicked */
 .tester-info-card.show-tester {
     display: block;
-    animation: fadeInUp 0.3s ease-out forwards; /* Smooth pop-up animation */
+    animation: fadeInUp 0.3s ease-out forwards;
 }
 
 .tester-info-card .info-title {
@@ -133,13 +199,7 @@ body {
 }
 
 .tester-info-card .highlight {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--accent); /* Crisp orange text */
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-family: monospace;
-    font-weight: bold;
-}
+    background: rgba(255, 255, 255
 /* =============================================
    APP SHELL
 ============================================= */
