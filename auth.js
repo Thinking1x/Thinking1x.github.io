@@ -1,7 +1,47 @@
 // ==========================================
-// AUTH.JS — Authentication & Session
+// AUTH.JS — Authentication & Session (2-Hour Persistence)
 // ==========================================
-// Depends on: config.js, ui.js (grantAccess calls fetchTracks/fetchPlaylists)
+
+// 1. AUTO-LOGIN CHECK ON PAGE LOAD
+window.addEventListener('DOMContentLoaded', () => {
+    const sessionData = localStorage.getItem('w41it_session');
+    
+    if (sessionData) {
+        try {
+            const session = JSON.parse(sessionData);
+            
+            // Check if current time is less than the expiration time
+            if (Date.now() < session.expires) {
+                console.log("Active session found. Bypassing login...");
+                
+                // Restore global variables
+                currentUser = session.username;
+                currentUserRole = session.role;
+                currentUserId = session.id;
+                currentUploadAccess = session.uploadAccessUntil;
+
+                // Update HUD Profile
+                const nameDisplay = document.getElementById('currentUserNameDisplay');
+                const avatarImg = document.getElementById('currentUserAvatar');
+                if (nameDisplay) nameDisplay.innerText = currentUser;
+                if (avatarImg) avatarImg.src = `https://ui-avatars.com/api/?name=${currentUser}&background=ff5500&color=fff&bold=true`;
+
+                // Instantly bypass login screen
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainPage').classList.remove('hidden');
+                
+                // Trigger access logic
+                grantAccess(true); // Pass true to skip animations
+                return;
+            } else {
+                // Session expired
+                localStorage.removeItem('w41it_session');
+            }
+        } catch(e) {
+            localStorage.removeItem('w41it_session');
+        }
+    }
+});
 
 function handleKeyPress(e) {
     if (e.key === 'Enter') login();
@@ -9,7 +49,6 @@ function handleKeyPress(e) {
 
 async function login() {
     const btn = document.getElementById('loginBtn');
-
     if (!document.getElementById('username').value.trim() || !document.getElementById('password').value) return;
 
     btn.style.pointerEvents = 'none';
@@ -32,21 +71,23 @@ async function login() {
         currentUser = userDoc.username;
         currentUserRole = userDoc.role;
         currentUserId = userDoc.$id;
-        currentUploadAccess = userDoc.uploadAccessUntil; // Grab their clearance timestamp
+        currentUploadAccess = userDoc.uploadAccessUntil; 
 
-        // ==========================================
-        // NEW: INJECT PROFILE UI UPDATES HERE
-        // ==========================================
+        // CREATE 2-HOUR SESSION IN BROWSER
+        const sessionPayload = {
+            username: currentUser,
+            role: currentUserRole,
+            id: currentUserId,
+            uploadAccessUntil: currentUploadAccess,
+            expires: Date.now() + (2 * 60 * 60 * 1000) // + 2 Hours
+        };
+        localStorage.setItem('w41it_session', JSON.stringify(sessionPayload));
+
+        // UPDATE HUD PROFILE UI
         const nameDisplay = document.getElementById('currentUserNameDisplay');
         const avatarImg = document.getElementById('currentUserAvatar');
-        
-        if (nameDisplay) {
-            nameDisplay.innerText = currentUser; // Update the text in the HUD
-        }
-        
-        if (avatarImg) {
-        }
-        // ==========================================
+        if (nameDisplay) nameDisplay.innerText = currentUser;
+        if (avatarImg) avatarImg.src = `https://ui-avatars.com/api/?name=${currentUser}&background=ff5500&color=fff&bold=true`;
 
         btn.classList.add('btn-success');
         btn.innerHTML = '<i class="fas fa-unlock-alt"></i> ACCESS GRANTED';
@@ -55,7 +96,7 @@ async function login() {
             if (userDoc.forceChange) {
                 document.getElementById('changePasswordModal').classList.remove('hidden');
             } else {
-                grantAccess();
+                grantAccess(false);
             }
         }, 800);
 
@@ -74,39 +115,44 @@ async function login() {
     }
 }
 
-function grantAccess() {
-    document.getElementById('loginPage').classList.add('animate-out');
-    setTimeout(() => {
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('mainPage').classList.remove('hidden');
-        document.getElementById('mainPage').classList.add('animate-in');
+function grantAccess(isAutoLogin = false) {
+    if (!isAutoLogin) {
+        document.getElementById('loginPage').classList.add('animate-out');
+        setTimeout(() => {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainPage').classList.remove('hidden');
+            document.getElementById('mainPage').classList.add('animate-in');
+            executeAccessLogic();
+        }, 600);
+    } else {
+        executeAccessLogic();
+    }
+}
 
-        // ==========================================
-        // SECURITY CLEARANCE CHECK (FIXED SELECTOR)
-        // ==========================================
-        const uploadNav = document.getElementById('uploadNavBtn'); // <-- FIXED
-        const adminNav = document.getElementById('navAdminPanel');
-        
-        // Check if their timestamp is valid (in the future)
-        const isAccessValid = currentUploadAccess && (Date.now() < currentUploadAccess);
+function executeAccessLogic() {
+    const uploadNav = document.getElementById('uploadNavBtn');
+    const adminNav = document.getElementById('navAdminPanel');
+    
+    const isAccessValid = currentUploadAccess && (Date.now() < currentUploadAccess);
 
-        // UI Logic based on Role and VIP Time
-        if (currentUserRole === 'admin') {
-            // Admins see everything
-            if (uploadNav) uploadNav.style.display = 'flex';
-            if (adminNav) adminNav.style.display = 'flex';
-        } else if (isAccessValid) {
-            // VIP Users see upload, but NOT the admin panel
-            if (uploadNav) uploadNav.style.display = 'flex';
-            if (adminNav) adminNav.style.display = 'none';
-        } else {
-            // Standard users see nothing
-            if (uploadNav) uploadNav.style.display = 'none';
-            if (adminNav) adminNav.style.display = 'none';
-        }
+    if (currentUserRole === 'admin') {
+        if (uploadNav) uploadNav.style.display = 'flex';
+        if (adminNav) adminNav.style.display = 'flex';
+    } else if (isAccessValid) {
+        if (uploadNav) uploadNav.style.display = 'flex';
+        if (adminNav) adminNav.style.display = 'none';
+    } else {
+        if (uploadNav) uploadNav.style.display = 'none';
+        if (adminNav) adminNav.style.display = 'none';
+    }
 
-        fetchTracks();
-    }, 600);
+    fetchTracks();
+}
+
+// Add a logout function just in case!
+function logout() {
+    localStorage.removeItem('w41it_session');
+    location.reload();
 }
 
 async function updatePassword() {
@@ -127,7 +173,7 @@ async function updatePassword() {
         });
 
         document.getElementById('changePasswordModal').classList.add('hidden');
-        grantAccess();
+        grantAccess(false);
     } catch (error) {
         alert("Error updating security: " + error.message);
         btn.innerText = "Update Security";
@@ -140,7 +186,7 @@ async function updatePassword() {
 
 function openAdminModal() {
     document.getElementById('adminModal').classList.remove('hidden');
-    loadAdminUserList(); // Fetch the users the moment the modal opens!
+    loadAdminUserList(); 
 }
 
 function closeAdminModal() {
@@ -164,7 +210,6 @@ async function loadAdminUserList() {
         }
 
         response.documents.forEach(user => {
-            // Don't show admins in the temporary access list
             if (user.role === 'admin') return; 
 
             const now = Date.now();
@@ -182,7 +227,7 @@ async function loadAdminUserList() {
                     </div>
                     
                     <div style="display: flex; gap: 8px;">
-                        <button onclick="adminActionGrant('${user.$id}', 12)" style="background: var(--accent); color: black; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: opacity 0.2s;">
+                        <button onclick="adminActionGrant('${user.$id}', 12)" style="background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: opacity 0.2s;">
                             +12h
                         </button>
                         
@@ -200,20 +245,14 @@ async function loadAdminUserList() {
     }
 }
 
-// ==========================================
-// ADMIN DATABASE ACTIONS
-// ==========================================
-
 async function adminActionGrant(targetUserId, hours) {
     try {
         const newTime = Date.now() + (hours * 60 * 60 * 1000);
         await databases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, targetUserId, {
             uploadAccessUntil: newTime
         });
-        
         loadAdminUserList(); 
     } catch (error) {
-        console.error("Grant Access Error:", error);
         alert("Failed to grant clearance.");
     }
 }
@@ -223,18 +262,8 @@ async function adminActionRevoke(targetUserId) {
         await databases.updateDocument(DATABASE_ID, USERS_COLLECTION_ID, targetUserId, {
             uploadAccessUntil: null 
         });
-        
         loadAdminUserList();
     } catch (error) {
-        console.error("Revoke Access Error:", error);
         alert("Failed to revoke clearance.");
     }
 }
-// Grab the variable your system already uses!
-const loggedInUsername = currentUser; 
-
-// Update the text on the HUD
-document.getElementById('currentUserNameDisplay').innerText = loggedInUsername;
-
-// Generate the avatar
-document.getElementById('currentUserAvatar').src = `https://ui-avatars.com/api/?name=${loggedInUsername}&background=00e5ff&color=000&bold=true`;
