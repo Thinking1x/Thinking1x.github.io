@@ -1,21 +1,25 @@
 /* =============================================
-   DESIGN TOKENS
+   DESIGN TOKENS (PREMIUM DARK THEME)
 ============================================= */
 :root {
-  --bg-base:       #111111; /* Deep neutral dark */
-  --bg-elevated:   #1f1f1f; /* Slightly lighter gray for panels */
-  --bg-highlight:  #333333; /* Hover state gray */
-  --accent:        #ff5500; /* SoundCloud Signature Orange */
-  --accent-hover:  #e04a00; /* Slightly darker orange for hovering */
-  --success:       #2b9348;
-  --error:         #d90429;
-  --text-main:     #f2f2f2; /* Crisp white */
-  --text-sub:      #999999; /* Clean neutral gray */
+  /* Smoother, seamless dark grays (No muddy contrast) */
+  --bg-base:       #121212; /* The golden standard for dark mode apps */
+  --bg-elevated:   #181818; /* Barely lifted for panels/sidebar */
+  --bg-highlight:  #282828; /* Soft, clean hover state */
+  
+  /* Vibrant but balanced accents */
+  --accent:        #ff5500; /* Signature Orange */
+  --accent-hover:  #ff7326; /* Brighter on hover (Lighter = closer to user) */
+  --success:       #1db954; /* Clean app green */
+  --error:         #e22134; /* Clean app red */
+  
+  /* Sharper text contrast */
+  --text-main:     #ffffff; /* Pure white for crisp titles */
+  --text-sub:      #a7a7a7; /* Highly readable, soft silver/gray */
 
-  --sidebar-width: 250px; /* Slightly slimmer for a modern feel */
+  --sidebar-width: 240px; 
   --player-height: 90px;
 }
-
 /* =============================================
    RESET & BASE
 ============================================= */
@@ -60,9 +64,10 @@ body {
 #loginPage {
   height: 100vh;
   display: flex;
+  flex-direction: column !important; /* CRITICAL: Forces elements to stack vertically */
   justify-content: center;
   align-items: center;
-  background: var(--bg-base); /* Flat, professional dark background instead of a gradient */
+  background: var(--bg-base); 
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -180,7 +185,8 @@ body {
 ============================================= */
 .sidebar {
   width: var(--sidebar-width);
-  background: var(--bg-base) !important; /* Forces it to perfectly match the main view! */
+  background: var(--bg-base) !important; /* Forces the flat dark gray */
+    border-right: 1px solid rgba(255, 255, 255, 0.02) !important; /* Makes the divider barely visible */
   display: flex;
   flex-direction: column;
   padding-top: 24px;
@@ -1202,6 +1208,7 @@ body.glass-mode .background-cover {
     display: flex;
     align-items: center;
     gap: 6px;
+    align-self: center; /* CRITICAL: Forces the button to stay exactly in the middle */
 }
 .tester-toggle-btn:hover {
     color: var(--text-main);
