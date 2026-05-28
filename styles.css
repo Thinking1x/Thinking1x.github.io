@@ -1261,3 +1261,33 @@ body.glass-mode .background-cover {
     font-family: monospace;
     font-weight: bold;
 }
+/* --- MOBILE SWIPE OVERRIDE --- */
+@media (max-width: 768px) {
+    .top-toggles-bar {
+        justify-content: flex-start;
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch;
+        padding: 8px 15px 10px 15px; /* Slimmer top and bottom padding */
+        gap: 16px; /* Bring items slightly closer together */
+    }
+    
+    .top-toggles-bar::-webkit-scrollbar {
+        display: none; /* Hides ugly scrollbar on phones */
+    }
+
+    .toggle-item {
+        font-size: 0.65rem; /* Sleeker, smaller text */
+        gap: 2px; /* Move the switch right up next to the text */
+    }
+
+    .toggle-item .ios-switch {
+        transform: scale(0.6); /* Shrinks the physical switch by 40% */
+        transform-origin: left center; /* Anchors the shrink to the left */
+        margin-right: -14px; /* Removes the invisible "dead space" left over by shrinking it */
+    }
+    
+    .toggle-item.divider {
+        border-left: none; 
+        padding-left: 0;
+    }
+}
