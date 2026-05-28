@@ -1261,33 +1261,92 @@ body.glass-mode .background-cover {
     font-family: monospace;
     font-weight: bold;
 }
-/* --- MOBILE SWIPE OVERRIDE --- */
+/* ==========================================
+   TOP TOGGLES BAR (Bulletproof Horizontal Swipe)
+========================================== */
+.top-toggles-bar {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important; /* CRITICAL: Forces a single line */
+    justify-content: flex-start !important; /* Start from the left */
+    align-items: center;
+    gap: 20px;
+    padding: 12px 15px;
+    background: var(--bg-elevated); 
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    
+    /* Scroll Logic */
+    overflow-x: auto !important; 
+    -webkit-overflow-scrolling: touch !important; /* Silky smooth iOS scrolling */
+    
+    /* Animation Properties */
+    max-height: 100px;
+    opacity: 1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide the ugly scrollbar */
+.top-toggles-bar::-webkit-scrollbar {
+    display: none; 
+}
+
+/* The Hidden State */
+.top-toggles-bar.collapsed {
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
+    opacity: 0 !important;
+    pointer-events: none;
+}
+
+.toggle-item {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0 !important; /* CRITICAL: Refuses to let the browser squish or wrap them */
+    gap: 8px;
+    color: var(--text-sub);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap !important; 
+}
+
+.toggle-item.divider {
+    border-left: 1px solid rgba(255,255,255,0.1);
+    padding-left: 20px;
+}
+
+.toggle-item .accent-text {
+    color: var(--accent); 
+    font-weight: 800;
+}
+
+.toggle-item .ios-switch {
+    transform: scale(0.8);
+    margin: 0;
+}
+
+/* --- MOBILE SWIPE TWEAKS --- */
 @media (max-width: 768px) {
     .top-toggles-bar {
-        justify-content: flex-start;
-        overflow-x: auto; 
-        -webkit-overflow-scrolling: touch;
-        padding: 8px 15px 10px 15px; /* Slimmer top and bottom padding */
-        gap: 16px; /* Bring items slightly closer together */
+        padding: 8px 15px 12px 15px !important;
+        gap: 16px !important;
     }
     
-    .top-toggles-bar::-webkit-scrollbar {
-        display: none; /* Hides ugly scrollbar on phones */
-    }
-
     .toggle-item {
-        font-size: 0.65rem; /* Sleeker, smaller text */
-        gap: 2px; /* Move the switch right up next to the text */
+        font-size: 0.65rem !important;
+        gap: 4px !important;
     }
 
     .toggle-item .ios-switch {
-        transform: scale(0.6); /* Shrinks the physical switch by 40% */
-        transform-origin: left center; /* Anchors the shrink to the left */
-        margin-right: -14px; /* Removes the invisible "dead space" left over by shrinking it */
+        transform: scale(0.65) !important;
+        transform-origin: left center !important;
+        margin-right: -12px !important;
     }
     
     .toggle-item.divider {
-        border-left: none; 
-        padding-left: 0;
+        border-left: none !important; 
+        padding-left: 0 !important;
     }
 }
