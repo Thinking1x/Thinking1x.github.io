@@ -1,22 +1,14 @@
 /* ==========================================
    HUD.CSS — SoundCloud-Style Home Layout
    Load AFTER styles.css so these win.
-   Uses !important where needed to beat
-   09-visualizer-and-effects.css overrides.
 ========================================== */
 
 /* ==========================================
    0. FORCE RESET — beat style.css conflicts
 ========================================== */
-
-/* The main-view background and blur are set with !important in
-   09-visualizer-and-effects.css. We need !important here too,
-   but ONLY when the home view is visible. We scope it to
-   #homeView being shown so database view is unaffected. */
-
 .main-view {
-    /* Remove the dark gradient — let the page bg show through */
-    background: transparent !important;
+    /* Flat professional dark background, no glassy gradients */
+    background: var(--bg-base) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     padding: 20px 24px !important;
@@ -48,7 +40,7 @@
     display: flex;
     flex-direction: column;
     gap: 0;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 1px solid rgba(255, 255, 255, 0.05); /* Softer divider */
     padding: 8px 0 24px 24px;
     min-width: 0;
 }
@@ -65,12 +57,12 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 .banner-badge {
-    background-color: var(--accent, #00e5ff);
-    color: #000;
+    background-color: var(--accent, #ff5500);
+    color: #fff; /* White looks cleaner on orange */
     padding: 3px 8px;
     font-size: 0.7rem;
     font-weight: 800;
@@ -83,11 +75,11 @@
 .banner-text {
     margin: 0;
     font-size: 0.88rem;
-    color: #999;
+    color: var(--text-sub, #999);
     line-height: 1.4;
 }
 
-.banner-text strong { color: #fff; }
+.banner-text strong { color: var(--text-main, #fff); }
 
 /* ==========================================
    3. SECTION SHELVES
@@ -106,58 +98,53 @@
 
 .shelf-header h2 {
     font-size: 1.25rem;
-    color: #ffffff;
+    color: var(--text-main, #fff);
     margin: 0;
     font-weight: 700;
     letter-spacing: -0.2px;
 }
 
 .shelf-header .view-all {
-    color: #777;
+    color: var(--text-sub, #777);
     text-decoration: none;
     font-size: 0.8rem;
     font-weight: 500;
     transition: color 0.15s;
 }
 
-.shelf-header .view-all:hover { color: #fff; }
+.shelf-header .view-all:hover { color: var(--text-main, #fff); }
 
-/* ---- Card grid: WRAP like SoundCloud, no horizontal scroll ---- */
 .shelf-grid {
-    display: flex !important;
-    flex-wrap: wrap !important;
+    display: grid !important;
+    /* This tells the grid to fit as many cards as possible, minimum 130px wide, stretching to fill gaps */
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
     gap: 18px !important;
-    overflow: visible !important;       /* kill the old overflow-x: auto */
-    overflow-x: visible !important;
+    overflow: hidden !important; 
     padding-bottom: 0 !important;
-    scroll-snap-type: none !important;  /* kill old snap */
-    -webkit-overflow-scrolling: auto !important;
 }
 
 /* ==========================================
-   4. MUSIC CARDS
+   4. MUSIC CARDS (Responsive)
 ========================================== */
 .music-card {
-    flex: 0 0 160px !important;
-    width: 160px;
+    width: 100% !important; /* Take up the full grid cell */
     display: flex;
     flex-direction: column;
     gap: 9px;
     cursor: pointer;
     transition: opacity 0.18s;
-    scroll-snap-align: none !important; /* kill old snap */
 }
 
 .music-card:hover { opacity: 0.82; }
 
 .card-cover-wrapper {
     position: relative;
-    width: 160px !important;
-    height: 160px !important;
-    border-radius: 4px !important;     /* SoundCloud barely rounds corners */
+    width: 100% !important; /* Scale to the grid cell width */
+    height: auto !important; 
+    aspect-ratio: 1 / 1 !important; /* Forces a perfect square at any size! */
+    border-radius: 4px !important;
     overflow: hidden;
-    background-color: #1e1e1e;
-    box-shadow: none !important;
+    background-color: #1a1a1a;
 }
 
 .card-cover {
@@ -166,11 +153,13 @@
     object-fit: cover;
     transition: transform 0.28s ease;
     display: block;
+    background: #1a1a1a !important; /* Flat dark fallback */
+    border: 1px solid #333 !important; /* Subtle inner border */
 }
 
 .music-card:hover .card-cover { transform: scale(1.05); }
 
-/* Play button — dark circle bottom-right, reveals on hover */
+/* Play button — SoundCloud Orange, reveals on hover */
 .card-play-btn {
     position: absolute !important;
     bottom: 10px !important;
@@ -180,8 +169,8 @@
     width: 38px !important;
     height: 38px !important;
     border-radius: 50% !important;
-    background-color: rgba(0, 0, 0, 0.78) !important;
-    border: 2px solid rgba(255, 255, 255, 0.35) !important;
+    background-color: var(--accent, #ff5500) !important;
+    border: none !important;
     color: #fff !important;
     cursor: pointer;
     opacity: 0;
@@ -191,7 +180,6 @@
     align-items: center;
     justify-content: center;
     font-size: 0.85rem;
-    backdrop-filter: blur(4px);
 }
 
 .music-card:hover .card-play-btn {
@@ -200,9 +188,7 @@
 }
 
 .card-play-btn:hover {
-    background-color: var(--accent, #00e5ff) !important;
-    border-color: var(--accent, #00e5ff) !important;
-    color: #000 !important;
+    background-color: var(--accent-hover, #e04a00) !important;
     transform: translateY(0) scale(1.1) !important;
 }
 
@@ -215,7 +201,7 @@
 }
 
 .card-title {
-    color: #fff;
+    color: var(--text-main, #fff);
     font-size: 0.85rem;
     font-weight: 600;
     white-space: nowrap;
@@ -225,7 +211,7 @@
 }
 
 .card-subtitle {
-    color: #666 !important;
+    color: var(--text-sub, #999) !important;
     font-size: 0.76rem;
     font-weight: 400;
     white-space: nowrap;
@@ -241,9 +227,9 @@
     margin-bottom: 26px;
 }
 
-.widget h3 {
+.widget h3, .widget-header h3 {
     font-size: 0.7rem !important;
-    color: #666 !important;
+    color: var(--text-sub, #999) !important;
     text-transform: uppercase !important;
     letter-spacing: 1.5px !important;
     margin: 0 0 14px 0 !important;
@@ -284,15 +270,22 @@
 }
 
 .user-card div > div:nth-child(2) {
-    color: #00c853;
+    color: var(--success, #2b9348);
     font-size: 0.76rem;
     padding-left: 14px;
+    position: relative;
 }
 
 .user-card div > div:nth-child(2)::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
     width: 7px;
     height: 7px;
-    background-color: #00c853;
+    background-color: var(--success, #2b9348);
+    border-radius: 50%;
     box-shadow: none !important;
 }
 
@@ -314,15 +307,6 @@
     margin-bottom: 14px;
 }
 
-.widget-header h3 {
-    font-size: 0.7rem !important;
-    color: #666 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 1.5px !important;
-    margin: 0 !important;
-    font-weight: 700 !important;
-}
-
 /* 4-column grid = SoundCloud "Artist Tools" */
 .tools-icon-grid {
     display: grid !important;
@@ -332,7 +316,7 @@
 
 .tool-tile {
     background-color: #1c1c1c !important;
-    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
     color: #bbb !important;
     padding: 14px 6px 10px !important;
     border-radius: 6px !important;
@@ -344,7 +328,7 @@
     font-size: 0.7rem !important;
     font-weight: 600 !important;
     letter-spacing: 0.2px;
-    transition: background-color 0.18s, color 0.18s !important;
+    transition: background-color 0.18s, color 0.18s, border-color 0.18s !important;
 }
 
 .tool-tile .tile-icon {
@@ -357,11 +341,11 @@
 .tool-tile:hover {
     background-color: #252525 !important;
     color: #fff !important;
-    border-color: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 .tool-tile:hover .tile-icon {
-    color: var(--accent, #00e5ff) !important;
+    color: var(--accent, #ff5500) !important;
 }
 
 /* ==========================================
@@ -373,7 +357,7 @@
     grid-template-rows: 1fr 1fr !important;
     width: 100% !important;
     height: 100% !important;
-    background-color: #1e1e1e;
+    background-color: #1a1a1a;
 }
 
 .mosaic-cover img {
@@ -401,32 +385,7 @@
 .dynamic-shelf:nth-child(4) { animation-delay: 0.22s; }
 
 /* ==========================================
-   10. RESPONSIVE
-========================================== */
-@media (max-width: 1100px) {
-    .hud-main-container {
-        grid-template-columns: 1fr;
-    }
-    .hud-right-sidebar {
-        border-left: none;
-        border-top: 1px solid rgba(255,255,255,0.07);
-        padding: 24px 0 0 0;
-    }
-    .hud-feed-canvas {
-        padding-right: 0;
-    }
-}
-
-@media (max-width: 600px) {
-    .hud-feed-canvas { gap: 26px; padding: 8px 0 16px 0; }
-    .shelf-header h2  { font-size: 1.05rem; }
-    .music-card       { flex: 0 0 130px !important; width: 130px; }
-    .card-cover-wrapper { width: 130px !important; height: 130px !important; }
-    .tools-icon-grid  { gap: 6px !important; }
-    .tool-tile        { padding: 10px 4px 8px !important; font-size: 0.62rem !important; }
-}
-/* ==========================================
-   NEW SIDEBAR WIDGETS
+   10. NEW SIDEBAR WIDGETS
 ========================================== */
 .storage-container {
     display: flex;
@@ -449,9 +408,35 @@
 }
 
 .storage-bar-fill {
-    width: 84%; /* Adjust this percentage to change the bar! */
+    width: 84%; 
     height: 100%;
-    background: var(--accent, #00e5ff);
-    box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    background: var(--accent, #ff5500);
     border-radius: 10px;
+    /* Removed the glowing box-shadow for a clean matte finish */
+}
+
+/* ==========================================
+   11. RESPONSIVE
+========================================== */
+@media (max-width: 1100px) {
+    .hud-main-container {
+        grid-template-columns: 1fr;
+    }
+    .hud-right-sidebar {
+        border-left: none;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        padding: 24px 0 0 0;
+    }
+    .hud-feed-canvas {
+        padding-right: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .hud-feed-canvas { gap: 26px; padding: 8px 0 16px 0; }
+    .shelf-header h2  { font-size: 1.05rem; }
+    .music-card       { flex: 0 0 130px !important; width: 130px; }
+    .card-cover-wrapper { width: 130px !important; height: 130px !important; }
+    .tools-icon-grid  { gap: 6px !important; }
+    .tool-tile        { padding: 10px 4px 8px !important; font-size: 0.62rem !important; }
 }

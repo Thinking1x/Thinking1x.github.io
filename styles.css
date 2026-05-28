@@ -2,18 +2,17 @@
    DESIGN TOKENS
 ============================================= */
 :root {
-  --bg-base:       #050510;
-  --bg-elevated:   #0d0d20;
-  --bg-highlight:  #1a1a36;
-  --accent:        #00E5FF;
-  --accent-hover:  #00b3cc;
-  --success:       #00ff66;
-  --error:         #ff3366;
-  --text-main:     #E0E0FF;
-  --text-sub:      #8B8BAE;
+  --bg-base:       #111111; /* Deep neutral dark */
+  --bg-elevated:   #1f1f1f; /* Slightly lighter gray for panels */
+  --bg-highlight:  #333333; /* Hover state gray */
+  --accent:        #ff5500; /* SoundCloud Signature Orange */
+  --accent-hover:  #e04a00; /* Slightly darker orange for hovering */
+  --success:       #2b9348;
+  --error:         #d90429;
+  --text-main:     #f2f2f2; /* Crisp white */
+  --text-sub:      #999999; /* Clean neutral gray */
 
-  /* Layout tokens — easy to override per breakpoint */
-  --sidebar-width: 280px;
+  --sidebar-width: 250px; /* Slightly slimmer for a modern feel */
   --player-height: 90px;
 }
 
@@ -63,7 +62,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #050510 0%, #00e5ff22 100%);
+  background: var(--bg-base); /* Flat, professional dark background instead of a gradient */
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -72,11 +71,11 @@ body {
 .login-box {
   background: var(--bg-elevated);
   padding: 2.5rem;
-  border-radius: 12px;
+  border-radius: 8px; /* Slightly sharper corners */
   width: min(340px, 90vw);
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 229, 255, 0.15);
-  border: 1px solid rgba(0, 229, 255, 0.1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); /* Deep, neutral drop shadow (no neon) */
+  border: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle gray border */
 }
 .login-box h2 {
   margin-bottom: 1.5rem;
@@ -84,7 +83,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   text-transform: uppercase;
 }
 .login-box h2 i { color: var(--accent); }
@@ -96,30 +95,34 @@ body {
   border-radius: 4px;
   background: rgba(255, 255, 255, 0.05);
   color: white;
-  transition: border 0.3s, background 0.3s;
+  transition: border 0.2s, background 0.2s;
   font-family: inherit;
 }
 .login-box input:focus {
   outline: none;
   border: 1px solid var(--accent);
-  background: rgba(0, 229, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08); /* Clean, brightened gray instead of tinted */
 }
 #loginBtn {
   width: 100%;
   padding: 14px;
   margin-top: 16px;
   border: none;
-  border-radius: 500px;
+  border-radius: 4px; /* Modern, app-style button instead of a pill */
   background: var(--accent);
-  color: #000;
+  color: #fff; /* White text looks much sharper on orange */
   font-weight: bold;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
 }
-#loginBtn:hover      { background: var(--accent-hover); transform: scale(1.02); box-shadow: 0 0 15px rgba(0, 229, 255, 0.4); }
-#loginBtn.btn-success { background: var(--success); box-shadow: 0 0 20px rgba(0, 255, 102, 0.5); }
-#loginBtn.btn-error   { background: var(--error); color: white; box-shadow: 0 0 20px rgba(255, 51, 102, 0.5); }
+#loginBtn:hover { 
+  background: var(--accent-hover); 
+  transform: translateY(-1px); 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* Natural depth shadow, no glow */
+}
+#loginBtn.btn-success { background: var(--success); }
+#loginBtn.btn-error   { background: var(--error); color: white; }
 
 /* =============================================
    APP SHELL
@@ -892,212 +895,126 @@ html, body {
     padding-left: 4px;
     transition: all 0.2s;
 }
-/* =============================================
-   TABLET (≤ 900px)
+//* =============================================
+   RESPONSIVE SCALING (Spotify-Style)
 ============================================= */
-@media (max-width: 900px) {
-  :root {
-    --sidebar-width: 220px;
-    --player-height: 80px;
-  }
 
-  .view-header     { font-size: 2rem; }
-  .track-genre     { display: none; }
-  .volume-bar      { width: 80px; }
+/* LAPTOP / TABLET (≤ 1024px) */
+@media (max-width: 1024px) {
+    :root {
+        --sidebar-width: 220px; /* Slimmer sidebar */
+        --player-height: 80px;  /* Slimmer player */
+    }
+    
+    .buttons { gap: 15px; } /* Tighter player buttons */
+    .volume-bar { width: 70px; }
+    
+    .hud-main-container {
+        grid-template-columns: 1fr; /* Drop right sidebar to bottom */
+    }
+    .hud-right-sidebar {
+        border-left: none;
+        border-top: 1px solid rgba(255,255,255,0.05);
+        padding: 24px 0 0 0;
+    }
+    .hud-feed-canvas { padding-right: 0; }
 }
 
-/* =============================================
-   MOBILE (≤ 600px) — Android & iOS
-============================================= */
-@media (max-width: 600px) {
-  :root {
-    --player-height: 110px;
-  }
+/* MOBILE (≤ 768px) - Full App Restructure */
+@media (max-width: 768px) {
+    :root {
+        --player-height: 65px; /* Super compact mobile player */
+    }
 
-  /* Prevent horizontal scroll */
-  html, body {
-    overflow-x: hidden;
-    width: 100%;
-    height: 100%;
-  }
+    /* Prevent horizontal scrolling */
+    html, body { overflow-x: hidden; width: 100%; height: 100%; }
 
-  /* Show mobile menu button */
-  #mobileMenuBtn { display: flex; align-items: center; }
-  #mobileMenuBtnTop { display: block !important; }
+    /* Activate slide-in mobile menu */
+    #mobileMenuBtn { display: flex; align-items: center; }
+    #mobileMenuBtnTop { display: block !important; }
+    .sidebar {
+        position: fixed;
+        top: 0; left: 0; bottom: var(--player-height);
+        width: 80vw; max-width: 300px;
+        transform: translateX(-100%);
+        box-shadow: 6px 0 30px rgba(0,0,0,0.6);
+        padding-top: 16px;
+        z-index: 1000;
+    }
+    .sidebar.mobile-open { transform: translateX(0); }
 
-  /* ---- SIDEBAR (slide-in drawer) ---- */
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: var(--player-height);
-    width: 80vw;
-    max-width: 300px;
-    transform: translateX(-100%);
-    box-shadow: 6px 0 30px rgba(0,0,0,0.6);
-    padding-top: 16px;
-    z-index: 1000;
-  }
-  .sidebar.mobile-open { transform: translateX(0); }
+    /* Adjust main viewing area */
+    .main-view {
+        padding: 15px 12px !important;
+        padding-bottom: calc(var(--player-height) + 20px) !important;
+        height: calc(100vh - var(--player-height));
+    }
+    .view-header { font-size: 1.6rem; }
+    .btn-edit-playlist { width: 100%; justify-content: center; padding: 10px; margin-top: 10px;}
 
-  /* ---- MAIN VIEW ---- */
-  .main-view {
-    padding: 12px !important;
-    padding-bottom: calc(var(--player-height) + 20px) !important;
-    overflow-y: auto;
-    height: calc(100vh - var(--player-height));
-  }
+    /* Track List Compact Mode */
+    .track-list-header, .track { 
+        grid-template-columns: 30px 1fr 40px !important; 
+        padding: 8px 5px !important;
+    }
+    .track-list-header > :last-child, .track > :last-child { display: none; } /* Hide extra icons */
+    .track-title { font-size: 0.85rem; }
+    .track-meta  { font-size: 0.75rem; }
+    
+    /* -------------------------------------
+       SPOTIFY-STYLE MOBILE PLAYER 
+       ------------------------------------- */
+    .player {
+        grid-template-columns: auto 1fr; /* Cover/Text on left, Buttons on right */
+        grid-template-rows: 1fr;
+        padding: 0 10px;
+        position: relative; /* For absolute positioning the progress bar */
+    }
 
-  /* ---- VIEW HEADER ---- */
-  .view-header-container {
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 16px;
-    gap: 8px;
-  }
-  .view-header { font-size: 1.6rem; }
-  .btn-edit-playlist { width: 100%; justify-content: center; padding: 10px; }
+    /* Left Side: Art & Text */
+    .now-playing { grid-column: 1; max-width: 60vw; }
+    .album-art, #npCover { width: 40px; height: 40px; border-radius: 4px; }
+    .np-title { font-size: 0.85rem; }
+    .np-artist { font-size: 0.7rem; }
 
-  /* ---- TRACK LIST ---- */
-  .track-list-header,
-  .track { 
-    grid-template-columns: 32px 1fr;
-    padding: 8px 10px;
-  }
-  .track-list-header > :last-child,
-  .track > :last-child { display: none; }
+    /* Right Side: Play Controls */
+    .player-controls { grid-column: 2; align-items: flex-end; justify-content: center; }
+    .buttons { gap: 12px; }
+    
+    /* Hide non-essential buttons on mobile to save space */
+    #shuffleBtn, #repeatBtn { display: none; } 
+    
+    .ctrl-btn { font-size: 1rem; }
+    .play-btn { width: 34px; height: 34px; font-size: 0.8rem; }
 
-  .track-title { font-size: 0.9rem; }
-  .track-meta  { font-size: 0.75rem; }
-  .track-genre { display: none; }
+    /* Progress Bar: Thin line pinned to the absolute bottom! */
+    .progress-container {
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        width: 100%;
+        gap: 0;
+    }
+    .time { display: none; } /* Hide timestamps on mobile */
+    input[type=range] { 
+        height: 2px; /* Super thin */
+        border-radius: 0; 
+        background: rgba(255,255,255,0.1); 
+    }
+    input[type=range]::-webkit-slider-thumb { opacity: 0; } /* Hide the thumb dot */
 
-  /* ---- BOTTOM PLAYER ---- */
-  .player {
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
-    height: var(--player-height);
-    padding: 8px 12px 4px;
-    gap: 4px 8px;
-    align-content: center;
-  }
+    /* Hide Volume entirely */
+    .right-controls { display: none; }
 
-  .now-playing { 
-    grid-column: 1; 
-    grid-row: 1;
-    min-width: 0;
-  }
-  .album-art { width: 40px; height: 40px; }
-  #npCover   { width: 40px; height: 40px; }
-  .np-title  { font-size: 0.85rem; }
-  .np-artist { font-size: 0.72rem; }
-
-  .player-controls {
-    grid-column: 2;
-    grid-row: 1;
-    flex-direction: row;
-    align-items: center;
-  }
-  .buttons { gap: 16px; }
-  .ctrl-btn { font-size: 1rem; }
-
-  /* Hide shuffle/repeat on mobile to save space */
-  #shuffleBtn, #repeatBtn { display: none; }
-
-  /* Progress bar spans full width */
-  .progress-container {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    gap: 6px;
-  }
-  .time { font-size: 0.7rem; min-width: 32px; }
-  input[type=range] { height: 3px; }
-
-  /* Hide volume on mobile */
-  .right-controls { display: none; }
-
-  /* ---- VISUALIZER TOGGLE ---- */
-  .visualizer-toggle-container {
-    margin-top: 8px;
-    padding-bottom: 6px;
-    gap: 8px;
-  }
-  .switch-label { font-size: 0.7rem; }
-
-  /* ---- MODALS ---- */
-  .modal-content {
-    padding: 16px;
-    width: 100%;
-    max-height: 90vh;
-    border-radius: 12px 12px 0 0;
-  }
-  .modal-overlay {
-    align-items: flex-end;
-    padding: 0;
-  }
-
-  /* ---- SEARCH ---- */
-  #searchInput { font-size: 0.85rem; padding: 10px 10px 10px 36px; }
+    /* Toggles Grid */
+    .toggles-bar { gap: 10px !important; padding: 10px !important; justify-content: flex-start !important; overflow-x: auto;}
 }
 
-/* =============================================
-   SMALL PHONES (≤ 380px) — iPhone SE etc.
-============================================= */
+/* SMALL PHONES (≤ 380px) */
 @media (max-width: 380px) {
-  .view-header  { font-size: 1.4rem; }
-  .buttons      { gap: 12px; }
-  .ctrl-btn     { font-size: 0.9rem; }
-  .np-title     { font-size: 0.8rem; }
-  .album-art, #npCover { width: 36px; height: 36px; }
+    .shelf-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important; }
+    .album-art, #npCover { width: 36px; height: 36px; }
+    .buttons { gap: 8px; }
 }
-
-/* =============================================
-   iOS SAFE AREA (iPhone X+ notch/home bar)
-============================================= */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .player {
-    padding-bottom: calc(8px + env(safe-area-inset-bottom));
-    height: calc(var(--player-height) + env(safe-area-inset-bottom));
-  }
-@media (max-width: 600px) {
-
-  /* Fix the broken track grid with trash icon */
-  .track {
-    grid-template-columns: 32px 1fr 40px !important;
-    padding: 10px 8px !important;
-    gap: 0;
-  }
-
-  /* Hide the duration, show the trash instead */
-  .track-duration { display: none !important; }
-
-  /* Make trash button fit neatly in the grid */
-  .track button {
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Tighten up spacing between tracks */
-  #trackList { gap: 2px; display: flex; flex-direction: column; }
-
-  /* Fix broken image — give it a fallback background */
-  #npCover {
-    background: var(--bg-highlight);
-    object-fit: cover;
-  }
-
-  /* Tighten track list header */
-  .track-list-header {
-    grid-template-columns: 32px 1fr 40px !important;
-    padding: 6px 8px !important;
-    margin-bottom: 6px;
-  }
-}
-
 }
 /* ==========================================
    TARGETED VIBE & LAUNCHPAD UI
