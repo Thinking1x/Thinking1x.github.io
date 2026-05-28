@@ -42,37 +42,37 @@
   </div>
   
   <div class="top-toggles-bar">
-      <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px;">BACKGROUND</span>
-          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
+      <div class="toggle-item">
+          <span>BACKGROUND</span>
+          <label class="ios-switch">
               <input type="checkbox" id="visualizerToggleInput" onchange="toggleVisualizerMode()">
               <span class="ios-slider"></span>
           </label>
       </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px;">Color Launchpad</span>
-          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
+      <div class="toggle-item">
+          <span>COLOR LAUNCHPAD</span>
+          <label class="ios-switch">
               <input type="checkbox" id="uiGlowToggleInput" onchange="toggleUIGlowMode()">
               <span class="ios-slider"></span>
           </label>
       </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px;">LAUNCHPAD</span>
-          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
+      <div class="toggle-item">
+          <span>LAUNCHPAD</span>
+          <label class="ios-switch">
               <input type="checkbox" id="launchpadToggleInput" onchange="toggleLaunchpadMode()">
               <span class="ios-slider"></span>
           </label>
       </div>
-      <div style="display: flex; align-items: center; gap: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 25px;">
-          <span style="color: var(--text-sub); font-weight: 600; letter-spacing: 0.5px;">COVER ART & TRANSPARENT</span>
-          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
+      <div class="toggle-item divider">
+          <span>COVER ART & TRANSPARENT</span>
+          <label class="ios-switch">
               <input type="checkbox" id="transparentToggleInput" onchange="toggleTransparentMode()">
               <span class="ios-slider"></span>
           </label>
       </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-          <span style="color: var(--accent); font-weight: 800; letter-spacing: 0.5px; text-shadow: 0 0 5px var(--accent);">HYPER-GLOW</span>
-          <label class="ios-switch" style="transform: scale(0.8); margin: 0; transform-origin: center;">
+      <div class="toggle-item">
+          <span class="accent-text">HYPER-GLOW</span>
+          <label class="ios-switch">
               <input type="checkbox" id="hyperGlowToggleInput" onchange="toggleHyperGlowMode()">
               <span class="ios-slider"></span>
           </label>

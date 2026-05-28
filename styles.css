@@ -1315,3 +1315,62 @@ body.glass-mode .background-cover {
     font-weight: bold;
     letter-spacing: 1px;
 }
+
+/* ==========================================
+   TOP TOGGLES BAR (Swipeable on Mobile)
+========================================== */
+.top-toggles-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 15px;
+    background: var(--bg-elevated); /* Matches the dark professional theme */
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.toggle-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-sub);
+    font-weight: 600;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap; /* CRITICAL: Stops text from wrapping/squishing */
+}
+
+.toggle-item.divider {
+    border-left: 1px solid rgba(255,255,255,0.1);
+    padding-left: 20px;
+}
+
+.toggle-item .accent-text {
+    color: var(--accent); /* Clean Orange */
+    font-weight: 800;
+}
+
+.toggle-item .ios-switch {
+    transform: scale(0.8);
+    margin: 0;
+}
+
+/* --- MOBILE SWIPE OVERRIDE --- */
+@media (max-width: 768px) {
+    .top-toggles-bar {
+        justify-content: flex-start;
+        overflow-x: auto; /* Allows smooth horizontal scrolling */
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 14px; /* Breathing room for the scroll area */
+    }
+    
+    .top-toggles-bar::-webkit-scrollbar {
+        display: none; /* Hides ugly scrollbar on phones */
+    }
+    
+    .toggle-item.divider {
+        border-left: none; /* Removes the divider line on mobile to save space */
+        padding-left: 0;
+    }
+}
