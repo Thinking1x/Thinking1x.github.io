@@ -19,14 +19,28 @@ async function fetchTracks() {
             Query.limit(500)
         ]);
 
-        allTracks = response.documents.map(doc => ({
-            id: doc.$id,
-            name: doc.name,
-            artist: doc.artist,
-            genre: doc.genre,
-            file: jwtToken ? `${doc.fileUrl}&jwt=${jwtToken}` : doc.fileUrl,
-            cover: doc.coverUrl || "https://i.ebayimg.com/images/g/JKAAAeSwqtZpbYnr/s-l1200.jpg"
-        }));
+        allTracks = response.documents.map(doc => {
+            let rawCover = doc.coverUrl;
+            
+            // Your custom CD image fallback
+            const defaultImg = "https://i.ebayimg.com/images/g/JKAAAeSwqtZpbYnr/s-l1200.jpg"; 
+
+            // 🛡️ The NULL-Catcher: Intercepts the word 'NULL', empty fields, or placeholders
+            let isBroken = false;
+            if (!rawCover || rawCover === 'NULL') isBroken = true;
+            else if (typeof rawCover === 'string' && rawCover.includes('placeholder')) isBroken = true;
+
+            let finalCover = isBroken ? defaultImg : rawCover;
+
+            return {
+                id: doc.$id,
+                name: doc.name,
+                artist: doc.artist,
+                genre: doc.genre,
+                file: jwtToken ? `${doc.fileUrl}&jwt=${jwtToken}` : doc.fileUrl,
+                cover: finalCover
+            };
+        });
 
         if (allTracks.length > 0 && !audio.src) {
             if (typeof loadTrack === 'function') loadTrack(0, false);
@@ -39,18 +53,16 @@ async function fetchTracks() {
         }
 
         if (typeof renderTrackList === 'function') renderTrackList();
-
-        // ✅ NOW render genre shelves — tracks are ready
+        
+        // ✅ Render genre shelves — tracks are ready
         if (typeof renderGenreShelves === 'function') renderGenreShelves();
 
-        // ✅ NOW fetch playlists — allTracks is populated so covers will work
+        // ✅ Fetch playlists — allTracks is populated so covers will work
         await fetchPlaylists();
 
     } catch (error) {
         console.error("Appwrite Fetch Error:", error);
     }
-if (typeof renderGenreShelves === 'function') renderGenreShelves();
-await fetchPlaylists();
 }
 async function fetchPlaylists() {
     try {
@@ -449,12 +461,12 @@ async function getFileUrl(fileId) {
     return `https://sgp.cloud.appwrite.io/v1/storage/buckets/6a05cdb0000bc961b45f/files/${fileId}/view?project=6a05cc27002debbf6591&jwt=${jwt.jwt}`;
 }
 // ==========================================
-// ONE-TIME ITUNES AUTO-PATCHER (FORCE OVERRIDE)
+// ONE-TIME ITUNES AUTO-PATCHER (NULL-AWARE)
 // ==========================================
 async function patchMissingCovers() {
     if (currentUserRole !== 'admin') return alert("Security Clearance Required.");
 
-    console.log("🚀 Starting iTunes Auto-Patcher (FORCE MODE)...");
+    console.log("🚀 Starting iTunes Auto-Patcher (NULL-AWARE MODE)...");
 
     try {
         const response = await databases.listDocuments(DATABASE_ID, COLLECTION_ID, [
@@ -467,14 +479,19 @@ async function patchMissingCovers() {
             let doc = rawTracks[i];
             let rawCover = doc.coverUrl;
 
-            // FORCE CHECK: If it's missing, is a placeholder, OR if it's NOT an official Apple/iTunes image
-            if (!rawCover || !rawCover.includes('mzstatic.com')) {
-                console.log(`[${i+1}/${rawTracks.length}] Checking: ${doc.name}`);
+            // 🛡️ Check if it is NULL, empty, a placeholder, or a non-Apple link
+            let needsPatch = false;
+            if (!rawCover || rawCover === 'NULL') needsPatch = true;
+            else if (rawCover.includes('placeholder')) needsPatch = true;
+            else if (!rawCover.includes('mzstatic.com')) needsPatch = true;
+
+            if (needsPatch) {
+                console.log(`[${i+1}/${rawTracks.length}] Fixing NULL/Broken Cover: ${doc.name}`);
 
                 let newCover = await fetchCoverArt(doc.name, doc.artist);
 
                 if (newCover) {
-                    console.log(`✅ Match found! Overwriting Appwrite database...`);
+                    console.log(`✅ Match found! Overwriting NULL in database...`);
                     await databases.updateDocument(DATABASE_ID, COLLECTION_ID, doc.$id, {
                         coverUrl: newCover
                     });
@@ -488,7 +505,7 @@ async function patchMissingCovers() {
             }
         }
 
-        console.log(`🎉 Auto-Patcher Finished! Permanently fixed ${successCount} signals.`);
+        console.log(`🎉 Auto-Patcher Finished! Permanently fixed ${successCount} NULL signals.`);
         alert(`Patcher finished. Fixed ${successCount} signals. Refreshing...`);
         fetchTracks(); 
 
