@@ -60,9 +60,10 @@ body {
 #loginPage {
   height: 100vh;
   display: flex;
+  flex-direction: column; /* FORCES VERTICAL STACKING TO KEEP IT CENTERED */
   justify-content: center;
   align-items: center;
-  background: var(--bg-base); /* Flat, professional dark background instead of a gradient */
+  background: var(--bg-base); 
   position: fixed;
   inset: 0;
   z-index: 1000;
@@ -1190,52 +1191,68 @@ body.glass-mode .background-cover {
     transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
 /* The main container for the announcement */
-.tester-info-card {
-    background: rgba(15, 23, 42, 0.6); /* Deep dark blue, slightly transparent */
-    backdrop-filter: blur(8px); /* Modern glass blur effect */
-    border-left: 4px solid #00e5ff; /* Neon cyan accent line */
-    border-radius: 8px;
-    padding: 18px 24px;
-    color: #cbd5e1; /* Soft slate text color */
-    font-family: sans-serif;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-    max-width: 320px;
-    
-    /* If you are using Flexbox on the parent to put them side-by-side, 
-       you might want a margin-left here. E.g., margin-left: 30px; */
+.tester-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-sub);
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 8px 16px;
+    margin-top: 20px;
+    border-radius: 4px;
+    transition: color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.tester-toggle-btn:hover {
+    color: var(--text-main);
+    background: rgba(255,255,255,0.05);
 }
 
-/* Title styling */
+.tester-info-card {
+    background: var(--bg-elevated);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-left: 3px solid var(--accent); /* Now uses Orange instead of Cyan */
+    border-radius: 4px;
+    padding: 16px 20px;
+    color: var(--text-sub);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    max-width: 300px;
+    width: 100%;
+    
+    /* Hide it by default! */
+    display: none; 
+    margin-top: 15px;
+}
+
+/* This class is added when the button is clicked */
+.tester-info-card.show-tester {
+    display: block;
+    animation: fadeInUp 0.3s ease-out forwards; /* Smooth pop-up animation */
+}
+
 .tester-info-card .info-title {
-    color: #ffffff;
+    color: var(--text-main);
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     margin-top: 0;
     margin-bottom: 12px;
-    letter-spacing: 0.5px;
 }
 
-/* Aligning the labels and the code */
 .tester-info-card .credentials p {
-    margin: 8px 0;
-    font-size: 0.9rem;
+    margin: 6px 0;
+    font-size: 0.85rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* Dimmer text for "Username:" and "Password:" */
-.tester-info-card .label {
-    color: #94a3b8;
-}
-
-/* Styling the actual credentials to make them pop */
 .tester-info-card .highlight {
-    background: rgba(0, 229, 255, 0.1); /* Faint cyan background */
-    color: #00e5ff; /* Neon cyan text */
-    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--accent); /* Crisp orange text */
+    padding: 4px 8px;
     border-radius: 4px;
-    font-family: monospace; /* Typewriter font for data */
+    font-family: monospace;
     font-weight: bold;
-    letter-spacing: 1px;
 }
