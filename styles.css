@@ -180,16 +180,21 @@ body {
 ============================================= */
 .sidebar {
   width: var(--sidebar-width);
-  background: #020208;
+  background: var(--bg-base); /* Uses the new flat dark gray */
   display: flex;
   flex-direction: column;
   padding-top: 24px;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.05); /* Softer divider line */
   flex-shrink: 0;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 1000;
 }
-.nav-links { padding: 0 24px; margin-bottom: 24px; }
+
+.nav-links { 
+  padding: 0 24px; 
+  margin-bottom: 24px; 
+}
+
 .nav-item {
   display: flex;
   align-items: center;
@@ -201,18 +206,19 @@ body {
   transition: color 0.2s;
   user-select: none;
 }
+
 .nav-item:hover, .nav-item.active { color: var(--text-main); }
 .nav-item.active i { color: var(--accent); }
 .nav-item i { font-size: 1.2rem; width: 24px; text-align: center; }
 
 .library-section {
   flex: 1;
-  background: #050510;
-  margin: 0 8px;
-  border-radius: 8px;
-  padding: 16px;
+  background: transparent; /* Removed the clunky blue box background */
+  margin: 0;
+  padding: 0 24px 16px 24px; /* Aligned seamlessly with the nav links */
   overflow-y: auto;
 }
+
 .library-header {
   display: flex;
   justify-content: space-between;
@@ -220,26 +226,38 @@ body {
   color: var(--text-sub);
   font-weight: bold;
   margin-bottom: 16px;
-  font-size: 0.9rem;
+  font-size: 0.8rem; /* Slightly smaller for a cleaner look */
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
 }
-.library-header i.fa-plus { transition: color 0.2s; padding: 4px; cursor: pointer; }
-.library-header i.fa-plus:hover { color: var(--accent); }
+
+.library-header i.fa-plus { transition: color 0.2s, transform 0.2s; padding: 4px; cursor: pointer; }
+.library-header i.fa-plus:hover { color: var(--text-main); transform: scale(1.1); }
 
 .playlist-item {
-  padding: 8px;
+  padding: 8px 12px;
+  margin-left: -12px; /* Pulls it left so hover backgrounds align flush with nav links */
+  margin-right: -12px;
   border-radius: 4px;
   color: var(--text-sub);
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
 }
-.playlist-item:hover { background: var(--bg-elevated); color: var(--text-main); transform: translateX(4px); }
-.playlist-item.active { background: rgba(0, 229, 255, 0.1); color: var(--accent); }
 
+.playlist-item:hover { 
+  background: var(--bg-highlight); /* Clean gray hover instead of bumping text to the right */
+  color: var(--text-main); 
+}
+
+.playlist-item.active { 
+  background: rgba(255, 85, 0, 0.08); /* Very subtle orange tint (no more cyan!) */
+  color: var(--accent); 
+  border-left: 3px solid var(--accent); /* Sharp orange indicator line */
+  padding-left: 9px; /* Compensate for the new border width */
+}
 /* =============================================
    MAIN VIEW
 ============================================= */
