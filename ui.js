@@ -195,24 +195,73 @@ function renderTrackList() {
 // DYNAMIC GENRE SHELVES (HUD)
 // ==========================================
 
+// ==========================================
+// DYNAMIC SHELVES (RECENT & GENRES)
+// ==========================================
+
 function renderGenreShelves() {
     const canvas = document.querySelector('.hud-feed-canvas');
     if (!canvas) return;
 
-    // Remove old dynamic shelves
-    document.querySelectorAll('.dynamic-shelf').forEach(shelf => shelf.remove());
+    // Remove all old shelves (including any hardcoded ones)
+    document.querySelectorAll('.hud-shelf').forEach(shelf => shelf.remove());
 
     if (!allTracks || allTracks.length === 0) return;
 
-    // 1. Automatically find all unique genres that actually exist in your database!
+    // --- 1. RECENTLY TRANSMITTED SHELF ---
+    // Grabs the 6 newest tracks (reversing the array so newest are first)
+    const recentTracks = [...allTracks].reverse().slice(0, 6);
+
+    if (recentTracks.length > 0) {
+        const recentShelf = document.createElement('section');
+        recentShelf.className = 'hud-shelf dynamic-shelf';
+        
+        let recentHTML = '';
+        recentTracks.forEach(track => {
+            const globalIndex = allTracks.findIndex(t => t.id === track.id);
+            const hasCover = track.cover && !track.cover.includes('placeholder') && track.cover !== 'NULL';
+            
+            let coverArtHTML = hasCover 
+                ? `<img src="${track.cover}" alt="Cover" class="card-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                   <div class="card-cover" style="display:none; justify-content:center; align-items:center; background:#1a1a1a; border: 1px solid #333; width: 100%; height: 100%;">
+                       <i class="fas fa-compact-disc" style="font-size:2.5rem; color:rgba(255,255,255,0.15);"></i>
+                   </div>`
+                : `<div class="card-cover" style="display:flex; justify-content:center; align-items:center; background:#1a1a1a; border: 1px solid #333; width: 100%; height: 100%;">
+                       <i class="fas fa-compact-disc" style="font-size:2.5rem; color:rgba(255,255,255,0.15);"></i>
+                   </div>`;
+
+            recentHTML += `
+                <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
+                    <div class="card-cover-wrapper">
+                        ${coverArtHTML}
+                        <button class="card-play-btn"><i class="fas fa-play"></i></button>
+                    </div>
+                    <div class="card-meta">
+                        <span class="card-title">${track.name}</span>
+                        <span class="card-subtitle">${track.artist}</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        recentShelf.innerHTML = `
+            <div class="shelf-header">
+                <h2>Recently Transmitted</h2>
+                <a href="#" class="view-all" onclick="showAllTracks()">View Database</a>
+            </div>
+            <div class="shelf-grid">
+                ${recentHTML}
+            </div>
+        `;
+        canvas.appendChild(recentShelf);
+    }
+
+    // --- 2. DYNAMIC GENRE SHELVES ---
     const uniqueGenres = [...new Set(allTracks.map(track => {
-        // Standardize the text: make it uppercase and handle empty genres
         return track.genre ? track.genre.trim().toUpperCase() : 'UNCATEGORIZED';
     }))];
 
-    // 2. Build a shelf for every genre found
     uniqueGenres.forEach(genre => {
-        // Filter tracks matching this genre (case-insensitive)
         const genreTracks = allTracks.filter(track => {
             const trackG = track.genre ? track.genre.trim().toUpperCase() : 'UNCATEGORIZED';
             return trackG === genre;
@@ -227,10 +276,16 @@ function renderGenreShelves() {
         
         genreTracks.forEach(track => {
             const globalIndex = allTracks.findIndex(t => t.id === track.id);
+            const hasCover = track.cover && !track.cover.includes('placeholder') && track.cover !== 'NULL';
             
-            const coverArtHTML = track.cover && !track.cover.includes('placeholder')
-                ? `<img src="${track.cover}" alt="Cover" class="card-cover">`
-                : `<div class="card-cover" style="display:flex; justify-content:center; align-items:center; background:#1a1b26; border:1px solid rgba(255,255,255,0.05);"><i class="fas fa-music" style="font-size:2rem; color:rgba(255,255,255,0.2);"></i></div>`;
+            let coverArtHTML = hasCover 
+                ? `<img src="${track.cover}" alt="Cover" class="card-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                   <div class="card-cover" style="display:none; justify-content:center; align-items:center; background:#1a1a1a; border: 1px solid #333; width: 100%; height: 100%;">
+                       <i class="fas fa-compact-disc" style="font-size:2.5rem; color:rgba(255,255,255,0.15);"></i>
+                   </div>`
+                : `<div class="card-cover" style="display:flex; justify-content:center; align-items:center; background:#1a1a1a; border: 1px solid #333; width: 100%; height: 100%;">
+                       <i class="fas fa-compact-disc" style="font-size:2.5rem; color:rgba(255,255,255,0.15);"></i>
+                   </div>`;
 
             cardsHTML += `
                 <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
