@@ -7,7 +7,7 @@ const { Client, Databases, Account, ID, Query } = Appwrite;
 
 const client = new Client();
 client
-    .setEndpoint('https://cloud.appwrite.io/v1') // (Make sure this matches your Appwrite region)
+    .setEndpoint('https://sgp.cloud.appwrite.io/v1') // (Make sure this matches your Appwrite region)
     .setProject('6a1d4acd002390236d37'); // Your NEW Appwrite Project ID
 
 const databases = new Databases(client);
