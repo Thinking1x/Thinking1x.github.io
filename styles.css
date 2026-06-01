@@ -1288,36 +1288,34 @@ body.glass-mode .background-cover {
     font-family: monospace;
     font-weight: bold;
 }
-/* /* ==========================================
+/* ==========================================
    TOP TOGGLES BAR (Bulletproof Horizontal Swipe + Fixed Layout)
 ========================================== */
 .top-toggles-bar {
-    /* NEW: Pin to the top of the screen */
+    /* Pin to the top of the screen */
     position: fixed !important;
     top: 0;
     left: 0;
     width: 100vw !important;
     z-index: 1000 !important;
-    box-sizing: border-box !important; /* Ensures padding doesn't break the 100% width */
+    box-sizing: border-box !important;
 
-    /* YOUR EXISTING FLEX & SCROLL LOGIC */
+    /* FLEX & SCROLL LOGIC */
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important; /* CRITICAL: Forces a single line */
-    justify-content: flex-start !important; /* Start from the left */
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
     align-items: center;
     gap: 20px;
     padding: 12px 15px;
     
-    /* Background with added glass blur so it looks premium when overlapping */
+    /* DEFAULT STATE: Dark elevated background */
     background: var(--bg-elevated); 
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255,255,255,0.05);
     
     /* Scroll Logic */
     overflow-x: auto !important; 
-    -webkit-overflow-scrolling: touch !important; /* Silky smooth iOS scrolling */
+    -webkit-overflow-scrolling: touch !important;
     
     /* Animation Properties */
     max-height: 100px;
@@ -1325,9 +1323,12 @@ body.glass-mode .background-cover {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Hide the ugly scrollbar */
-.top-toggles-bar::-webkit-scrollbar {
-    display: none; 
+/* 🆕 GLASS MODE FOR HUD: Strips solid background and links it to the music bass pulse */
+body.glass-mode .top-toggles-bar {
+    background: rgba(0, 0, 0, var(--track-beat-alpha, 0.15)) !important; 
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
 /* The Hidden State */
@@ -1343,7 +1344,7 @@ body.glass-mode .background-cover {
 .toggle-item {
     display: flex;
     align-items: center;
-    flex-shrink: 0 !important; /* CRITICAL: Refuses to let the browser squish or wrap them */
+    flex-shrink: 0 !important;
     gap: 8px;
     color: var(--text-sub);
     font-weight: 600;
@@ -1366,6 +1367,15 @@ body.glass-mode .background-cover {
     transform: scale(0.8);
     margin: 0;
 }
+
+/* ==========================================
+   PREVENT OVERLAP (Pushes app down)
+========================================== */
+.sidebar,
+.main-view {
+    padding-top: 70px !important; 
+}
+
 
 /* ==========================================
    PREVENT OVERLAP (Pushes app down)
