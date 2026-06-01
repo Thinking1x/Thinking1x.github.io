@@ -1078,6 +1078,25 @@ html, body.glass-mode {
     /* Safe dark baseline fallback so your screen is never grey */
     background: #09090e !important; 
 }
+/* Strip solid backgrounds from the inner elements of the Database view */
+body.glass-mode .main-content table,
+body.glass-mode .main-content tbody,
+body.glass-mode .main-content tr,
+body.glass-mode .main-content td,
+body.glass-mode .main-content ul,
+body.glass-mode .main-content li,
+body.glass-mode .main-content .song-row,
+body.glass-mode .main-content .track-list-container {
+    background-color: transparent !important;
+    background: transparent !important;
+}
+
+/* Optional: Add a very subtle bottom border to separate the songs since they won't have backgrounds anymore */
+body.glass-mode .main-content tr,
+body.glass-mode .main-content .song-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
 
 /* Clear the panels so they float beautifully and pulse to the bass */
 body.glass-mode .sidebar,
