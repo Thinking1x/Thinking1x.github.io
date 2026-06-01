@@ -1,0 +1,11 @@
+{
+  "name": "create-upload-url",
+  "version": "1.0.0",
+  "description": "Generates a Cloudflare R2 presigned URL for secure uploads",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.400.0",
+    "@aws-sdk/s3-request-presigner": "^3.400.0"
+  }
+}
