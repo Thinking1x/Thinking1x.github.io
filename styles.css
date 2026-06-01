@@ -1288,6 +1288,7 @@ body.glass-mode .background-cover {
     font-family: monospace;
     font-weight: bold;
 }
+
 /* ==========================================
    TOP TOGGLES BAR (Bulletproof Horizontal Swipe + Fixed Layout)
 ========================================== */
@@ -1321,6 +1322,7 @@ body.glass-mode .background-cover {
     max-height: 100px;
     opacity: 1;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto; /* Ensures bar is clickable by default */
 }
 
 /* 🆕 GLASS MODE FOR HUD: Strips solid background and links it to the music bass pulse */
@@ -1331,16 +1333,40 @@ body.glass-mode .top-toggles-bar {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-/* The Hidden State */
-.top-toggles-bar.collapsed {
-    max-height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border-bottom: none !important;
-    opacity: 0 !important;
-    pointer-events: none;
+/* Hide the ugly scrollbar */
+.top-toggles-bar::-webkit-scrollbar {
+    display: none; 
 }
 
+/* ==========================================
+   THE HIDDEN STATE (Fixed lockout issue)
+========================================== */
+.top-toggles-bar.collapsed {
+    /* Makes the background completely invisible instead of shrinking the height to 0 */
+    background: transparent !important;
+    border-bottom: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    
+    /* Lets you click through the invisible bar to the app underneath */
+    pointer-events: none !important; 
+}
+
+/* Hides all switches when collapsed EXCEPT the one with the .keep-visible class */
+.top-toggles-bar.collapsed .toggle-item:not(.keep-visible) {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+/* Forces the button you left behind to STILL accept clicks! */
+.top-toggles-bar.collapsed .keep-visible {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* ==========================================
+   TOGGLE ITEMS & SWITCHES
+========================================== */
 .toggle-item {
     display: flex;
     align-items: center;
@@ -1369,20 +1395,19 @@ body.glass-mode .top-toggles-bar {
 }
 
 /* ==========================================
-   PREVENT OVERLAP (Pushes app down)
+   PERFECT LAYOUT SPACING (Fixes the weird gap)
 ========================================== */
-.sidebar,
-.main-view {
-    padding-top: 70px !important; 
+.sidebar {
+    padding-top: 24px !important; 
+    margin-top: 70px !important;  /* Physically drops the sidebar below the HUD */
+    height: calc(100vh - 70px) !important; 
 }
 
-
-/* ==========================================
-   PREVENT OVERLAP (Pushes app down)
-========================================== */
-.sidebar,
 .main-view {
-    padding-top: 70px !important; 
+    padding-top: 24px !important; 
+    /* Using a transparent border forces the scrollable area to start exactly 
+       below the fixed glass bar, perfectly revealing your "All Tracks" header! */
+    border-top: 70px solid transparent !important; 
 }
 
 
