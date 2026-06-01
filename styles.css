@@ -1094,23 +1094,30 @@ body.glass-mode #mainPage {
     background: transparent !important; 
 }
 
-/* Strip solid backgrounds from ALL inner elements of the Database view */
-body.glass-mode .main-view table,
-body.glass-mode .main-view tbody,
-body.glass-mode .main-view tr,
-body.glass-mode .main-view td,
-body.glass-mode .main-view ul,
-body.glass-mode .main-view li,
-body.glass-mode .main-view .song-row,
-body.glass-mode .main-view .track-list-container {
+/* Strip solid backgrounds and Launchpad colors from the track rows */
+body.glass-mode .main-view .track,
+body.glass-mode .main-view .track-list-header,
+body.glass-mode .main-view .track[style*="background"] {
     background-color: transparent !important;
     background: transparent !important;
 }
 
-/* Add a very subtle bottom border to separate the songs since they won't have backgrounds anymore */
-body.glass-mode .main-view tr,
-body.glass-mode .main-view .song-row {
+/* Add a very subtle bottom border to separate the songs */
+body.glass-mode .main-view .track,
+body.glass-mode .main-view .track-list-header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* PRESERVE the neon hover and active states! 
+   (Needed here to override the transparent !important rules above) */
+body.glass-mode .main-view .track:hover {
+    background: rgba(0, 229, 255, 0.15) !important;
+    box-shadow: inset 3px 0 0 var(--accent) !important;
+}
+
+body.glass-mode .main-view .track.active {
+    background: rgba(0, 229, 255, 0.2) !important;
+    box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(0, 229, 255, 0.15) !important;
 }
 
 /* The Background Cover Container */
@@ -1139,6 +1146,7 @@ body.glass-mode .background-cover {
     transform: scale(1.1) !important;
     transition: opacity 0.3s ease;
 }
+
 
 /* ==========================================
    HYPER-GLOW LAUNCHPAD EFFECT (Subtle)
