@@ -20,8 +20,8 @@ export default async ({ req, res, log, error }) => {
             region: "auto",
             endpoint: `https://63da69305ac7a82a7e65fda9a21cb664.r2.cloudflarestorage.com`,
             credentials: {
-                accessKeyId:b789aed3a2292150b94b7b646c49d77b,
-                secretAccessKey: 8c28635d148f74e59738358ba06d37d17b7706dc64011db99f4973cbaa9c7a2f,
+                accessKeyId:'b789aed3a2292150b94b7b646c49d77b',
+                secretAccessKey: '8c28635d148f74e59738358ba06d37d17b7706dc64011db99f4973cbaa9c7a2f',
             },
         });
 
@@ -32,7 +32,7 @@ export default async ({ req, res, log, error }) => {
 
         // 4. Set up the upload command
         const command = new PutObjectCommand({
-            Bucket: process.env.CLOUDFLARE_BUCKET_NAME,
+            Bucket: 'thinking',
             Key: uniqueKey,
             ContentType: fileType
         });
@@ -46,7 +46,7 @@ export default async ({ req, res, log, error }) => {
         return res.json({ 
             uploadUrl: vipPassUrl,
             // We also return the final public URL so your frontend can instantly save it to the database
-            finalFileUrl: `https://${process.env.CLOUDFLARE_PUBLIC_DOMAIN}/${uniqueKey}` 
+            finalFileUrl: `https://pub-1b4a853a5f0d498caff77b78b258549d.r2.dev` 
         });
 
     } catch (err) {
