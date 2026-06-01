@@ -1288,7 +1288,6 @@ body.glass-mode .background-cover {
     font-family: monospace;
     font-weight: bold;
 }
-
 /* ==========================================
    TOP TOGGLES BAR (Bulletproof Horizontal Swipe + Fixed Layout)
 ========================================== */
@@ -1421,6 +1420,7 @@ body.glass-mode .top-toggles-bar {
        below the fixed glass bar, perfectly revealing your "All Tracks" header! */
     border-top: 70px solid transparent !important; 
 }
+
 
 
 
