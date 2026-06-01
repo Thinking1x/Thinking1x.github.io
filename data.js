@@ -254,91 +254,77 @@ function handleFileSelection() {
 }
 
 // ==========================================
-// BULLETPROOF UPLOAD FUNCTION (NO TIMERS)
+// BULLETPROOF UPLOAD FUNCTION (R2 LINK VERSION)
 // ==========================================
 async function triggerUpload() {
     const btn = document.getElementById('startUploadBtn');
     if (btn) btn.disabled = true;
 
-    const fileInput = document.getElementById('uploadFileInput');
-    const files = fileInput ? fileInput.files : [];
+    // We are no longer looking for physical files, just the R2 link
+    const linkInput = document.getElementById('uploadR2Link'); 
+    const r2Url = linkInput ? linkInput.value.trim() : "";
     
+    const trackInput = document.getElementById('uploadTrackName');
+    const trackName = trackInput ? trackInput.value.trim() : "";
+
     const artistInput = document.getElementById('uploadArtistName');
     const artistName = artistInput && artistInput.value.trim() !== "" ? artistInput.value.trim() : "Unknown Artist";
     
     const genreInput = document.getElementById('uploadGenre');
     const genre = genreInput ? genreInput.value : "J-POP";
     
-    const trackInput = document.getElementById('uploadTrackName');
-    const customTrackName = trackInput ? trackInput.value.trim() : "";
-
     const status = document.getElementById('uploadStatus');
 
-    if (files.length === 0) {
-        alert("Please select at least one file.");
+    if (!r2Url || !trackName) {
+        alert("Please provide both a Track Name and the Cloudflare R2 Link.");
         if (btn) btn.disabled = false;
         return;
     }
 
     try {
-        let successCount = 0;
+        if(status) {
+            status.innerText = `MATCHING ARTWORK: ${trackName}...`;
+            status.style.color = "var(--accent)";
+        }
 
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            
-            let trackName;
-            if (files.length === 1 && customTrackName !== "") {
-                trackName = customTrackName;
-            } else {
-                trackName = file.name.replace(/\.[^/.]+$/, "");
-            }
+        // 1. Let your brilliant iTunes scrubber find the cover art
+        let fetchedCover = await fetchCoverArt(trackName, artistName);
 
-            if(status) {
-                status.innerText = `UPLOADING [${i + 1}/${files.length}]: ${trackName}...`;
-                status.style.color = "var(--accent)";
-            }
-
-            const uploadedFile = await storage.createFile(BUCKET_ID, ID.unique(), file);
-            const fileResult = storage.getFileView(BUCKET_ID, uploadedFile.$id);
-
-            if(status) status.innerText = `MATCHING ARTWORK [${i + 1}/${files.length}]: ${trackName}...`;
-            let fetchedCover = await fetchCoverArt(trackName, artistName);
-
-            if (!fetchedCover) {
-                fetchedCover = "https://via.placeholder.com/600x600/0f172a/00ffcc?text=NO+COVER+DETECTED";
-            }
-
-            if(status) status.innerText = `SYNCING [${i + 1}/${files.length}]: ${trackName}...`;
-            
-            // Send the data to Appwrite without any expiration time
-            await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
-                name: trackName,
-                artist: artistName,
-                genre: genre,
-                fileUrl: fileResult.href,
-                coverUrl: fetchedCover
-            });
-
-            successCount++;
+        if (!fetchedCover) {
+            fetchedCover = "https://via.placeholder.com/600x600/0f172a/00ffcc?text=NO+COVER+DETECTED";
         }
 
         if(status) {
-            status.innerText = `TRANSMISSION COMPLETE. ${successCount} signals added.`;
+            status.innerText = `SAVING TO DATABASE...`;
+        }
+        
+        // 2. Save straight to the Appwrite Database (Bypassing Appwrite Storage entirely)
+        await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
+            name: trackName,
+            artist: artistName,
+            genre: genre,
+            fileUrl: r2Url,
+            coverUrl: fetchedCover
+        });
+
+        if(status) {
+            status.innerText = `TRANSMISSION COMPLETE. Signal added.`;
             status.style.color = "var(--success)";
         }
 
+        // 3. Clean up the UI
         setTimeout(() => {
             closeUploadModal();
             fetchTracks(); 
             
             if (btn) btn.disabled = false;
-            
-            if (fileInput) fileInput.value = "";
+            if (linkInput) linkInput.value = "";
             if (trackInput) trackInput.value = ""; 
+            if (artistInput) artistInput.value = ""; 
         }, 2000);
 
     } catch (error) {
-        console.error("BATCH UPLOAD ERROR:", error);
+        console.error("UPLOAD ERROR:", error);
         if(status) {
             status.innerText = "FAILED: " + (error.message || "Connection Lost");
             status.style.color = "var(--error)";
@@ -346,7 +332,6 @@ async function triggerUpload() {
         if (btn) btn.disabled = false;
     }
 }
-
 
 // ==========================================
 // iTUNES API ARTWORK MATCHER (SUPER SMART VERSION)

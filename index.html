@@ -301,25 +301,21 @@
 <div id="uploadModal" class="modal-overlay hidden">
   <div class="modal-content">
     <h3>TRANSMIT NEW SIGNAL</h3>
-    <div id="dropZone" class="drop-zone">
-      <i class="fas fa-cloud-upload-alt"></i>
-      <span style="font-weight:bold; color:var(--text-main);">Drag & Drop Audio here</span>
-      <span style="font-size:0.75rem; color:var(--text-sub);">.mp3, .wav, or .flac (or click to browse)</span>
-      <div id="fileNameDisplay"></div>
-      <input type="file" id="uploadFileInput" accept="audio/mp3, audio/mpeg, audio/wav, audio/flac, .flac" style="display:none;">
-    </div>
+    
+    <label>Cloudflare R2 Link</label>
+    <input type="url" id="uploadR2Link" placeholder="https://pub-1b4a...r2.dev/song.mp3" autocomplete="off" required>
+    
     <label>Track Name</label>
     <input type="text" id="uploadTrackName" placeholder="E.g., Night Dancer" autocomplete="off">
+    
     <label>Artist Name</label>
     <input type="text" id="uploadArtistName" placeholder="E.g., imase" autocomplete="off">
-    <label>Genre</label>
-    <select id="uploadGenre">
-        <option value="J-POP">J-POP</option>
-        <option value="US-UK">US-UK</option>
-        <option value="OST">OST</option>
-        <option value="Other">Other</option>
-    </select>
+    
+<label>Genre</label>
+<input type="text" id="uploadGenre" placeholder="E.g., Lofi, K-Pop, Synthwave" autocomplete="off">
+    
     <div id="uploadStatus" class="status-text" style="margin-top: 15px; font-size: 0.85rem; font-family: monospace; min-height: 20px;"></div>
+    
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeUploadModal()">Abort</button>
       <button class="btn-save" id="startUploadBtn" onclick="triggerUpload()">Transmit to Cloud</button>
