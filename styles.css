@@ -1321,7 +1321,6 @@ body.glass-mode .background-cover {
     max-height: 100px;
     opacity: 1;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: auto; /* Ensures bar is clickable by default */
 }
 
 /* 🆕 GLASS MODE FOR HUD: Strips solid background and links it to the music bass pulse */
@@ -1337,34 +1336,16 @@ body.glass-mode .top-toggles-bar {
     display: none; 
 }
 
-/* ==========================================
-   THE HIDDEN STATE (Fixed lockout issue)
-========================================== */
-/* ==========================================
-   THE HIDDEN STATE (Keeps the bar visible, hides the switches)
-========================================== */
+/* The Hidden State */
 .top-toggles-bar.collapsed {
-    /* We removed the transparent background rules here! 
-       Now the bar will keep its beautiful glass/dark background 
-       and stay a physical element on the screen. */
-    pointer-events: auto !important; 
-}
-
-/* Hides all switches when collapsed EXCEPT the one with the .keep-visible class */
-.top-toggles-bar.collapsed .toggle-item:not(.keep-visible) {
-    display: none !important;
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: none !important;
     opacity: 0 !important;
+    pointer-events: none;
 }
 
-/* Ensures the button you left behind remains fully clickable */
-.top-toggles-bar.collapsed .keep-visible {
-    pointer-events: auto !important;
-    cursor: pointer !important;
-}
-
-/* ==========================================
-   TOGGLE ITEMS & SWITCHES
-========================================== */
 .toggle-item {
     display: flex;
     align-items: center;
@@ -1391,6 +1372,15 @@ body.glass-mode .top-toggles-bar {
     transform: scale(0.8);
     margin: 0;
 }
+
+/* ==========================================
+   PREVENT OVERLAP (Pushes app down)
+========================================== */
+.sidebar,
+.main-view {
+    padding-top: 70px !important; 
+}
+
 
 /* 🆕 MOBILE OVERLAP FIX: Forces the HUD Settings button to behave */
 .top-toggles-bar .keep-visible,
