@@ -1394,6 +1394,18 @@ body.glass-mode .top-toggles-bar {
     margin: 0;
 }
 
+/* 🆕 MOBILE OVERLAP FIX: Forces the HUD Settings button to behave */
+.top-toggles-bar .keep-visible,
+.top-toggles-bar [id*="hud"] {
+    position: relative !important;
+    right: auto !important;
+    top: auto !important;
+    float: none !important;
+    margin-left: auto !important; /* Dynamically pushes it to the far right */
+    padding-left: 15px !important; 
+    opacity: 1 !important;
+}
+
 /* ==========================================
    PERFECT LAYOUT SPACING (Fixes the weird gap)
 ========================================== */
@@ -1409,6 +1421,7 @@ body.glass-mode .top-toggles-bar {
        below the fixed glass bar, perfectly revealing your "All Tracks" header! */
     border-top: 70px solid transparent !important; 
 }
+
 
 
 /* --- MOBILE SWIPE TWEAKS --- */
