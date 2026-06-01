@@ -2,22 +2,25 @@
 // CONFIG.JS — Appwrite Setup & Global State
 // ==========================================
 
-const { Client, Databases, Storage, Account, ID, Query } = Appwrite;
+// Notice: I removed 'Storage' from the import below!
+const { Client, Databases, Account, ID, Query } = Appwrite;
 
 const client = new Client();
 client
-    .setEndpoint('https://sgp.cloud.appwrite.io/v1')
-    .setProject('6a05cc27002debbf6591');
+    .setEndpoint('https://cloud.appwrite.io/v1') // (Make sure this matches your Appwrite region)
+    .setProject('6a1d4acd002390236d37'); // Your NEW Appwrite Project ID
 
 const databases = new Databases(client);
-const storage = new Storage(client);
+const account = new Account(client); 
 
-const DATABASE_ID = '6a05cc43000fdc34115a';
-const BUCKET_ID = '6a05cdb0000bc961b45f';
+// ---- Database IDs ----
+// You need to grab these from your NEW Appwrite project dashboard!
+const DATABASE_ID = '6a1d4af100202f96af67';
 const COLLECTION_ID = 'tracks';
 const PLAYLIST_COLLECTION_ID = 'playlists';
 const USERS_COLLECTION_ID = 'users';
-const account = new Account(client); 
+
+// (I completely deleted BUCKET_ID, you don't need it!)
 
 // ---- Playback State ----
 let allTracks = [];
