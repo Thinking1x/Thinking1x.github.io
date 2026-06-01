@@ -18,10 +18,10 @@ export default async ({ req, res, log, error }) => {
         // These process.env variables are securely hidden in your Appwrite Console
         const S3 = new S3Client({
             region: "auto",
-            endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+            endpoint: `https://63da69305ac7a82a7e65fda9a21cb664.r2.cloudflarestorage.com`,
             credentials: {
-                accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY,
-                secretAccessKey: process.env.CLOUDFLARE_SECRET_KEY,
+                accessKeyId:b789aed3a2292150b94b7b646c49d77b,
+                secretAccessKey: 8c28635d148f74e59738358ba06d37d17b7706dc64011db99f4973cbaa9c7a2f,
             },
         });
 
