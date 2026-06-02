@@ -1339,18 +1339,9 @@ body.glass-mode .top-toggles-bar {
     pointer-events: auto !important; 
 }
 
-/* Hides all switches when collapsed EXCEPT items with .keep-visible OR an ID containing "hud" */
-.top-toggles-bar.collapsed .toggle-item:not(.keep-visible):not([id*="hud"]) {
+/* Hides all switches when collapsed EXCEPT the HUD Settings */
+.top-toggles-bar.collapsed .toggle-item:not(.keep-visible) {
     display: none !important;
-}
-
-/* 🔥 BULLETPROOF OVERRIDE: Forces the HUD button to stay visible even if the HTML class is missing */
-.top-toggles-bar.collapsed [id*="hud"],
-.top-toggles-bar.collapsed .keep-visible {
-    display: flex !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    cursor: pointer !important;
 }
 
 /* ==========================================
