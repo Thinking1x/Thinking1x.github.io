@@ -1473,9 +1473,6 @@ body.glass-mode .top-toggles-bar {
     opacity: 1 !important;
     pointer-events: auto !important;
     cursor: pointer !important;
-
-    /* 🚀 THE FIX: Forces the button to the absolute top layer of the screen */
-    z-index: 2147483647 !important; 
 }
 /* ==========================================
    PERFECT LAYOUT SPACING (Fixes the Blank Space!)
