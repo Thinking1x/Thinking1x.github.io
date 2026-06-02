@@ -298,29 +298,45 @@
   </div>
 </div>
 
-<div id="uploadModal" class="modal-overlay hidden">
-  <div class="modal-content">
-    <h3>TRANSMIT NEW SIGNAL</h3>
-    
-    <label>Cloudflare R2 Link</label>
-    <input type="url" id="uploadR2Link" placeholder="https://pub-1b4a...r2.dev/song.mp3" autocomplete="off" required>
-    
-    <label>Track Name</label>
-    <input type="text" id="uploadTrackName" placeholder="E.g., Night Dancer" autocomplete="off">
-    
-    <label>Artist Name</label>
-    <input type="text" id="uploadArtistName" placeholder="E.g., imase" autocomplete="off">
-    
-<label>Genre</label>
-<input type="text" id="uploadGenre" placeholder="E.g., Lofi, K-Pop, Synthwave" autocomplete="off">
-    
-    <div id="uploadStatus" class="status-text" style="margin-top: 15px; font-size: 0.85rem; font-family: monospace; min-height: 20px;"></div>
-    
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeUploadModal()">Abort</button>
-      <button class="btn-save" id="startUploadBtn" onclick="triggerUpload()">Transmit to Cloud</button>
+<div id="uploadModal" class="modal hidden">
+    <div class="modal-content">
+        <h2 style="color: var(--accent); margin-bottom: 20px; font-weight: 800; letter-spacing: 1px;">TRANSMIT NEW SIGNAL</h2>
+        
+        <div id="dropZone" class="upload-drop-zone">
+            <input type="file" id="uploadFileInput" accept=".mp3,.flac,.wav,audio/*" style="display: none;">
+            <span id="fileNameDisplay">Drag & Drop MP3/FLAC here or Click to Browse</span>
+        </div>
+
+        <div class="input-group">
+            <label>TRACK NAME</label>
+            <input type="text" id="uploadTrackName" placeholder="E.g., Night Dancer">
+        </div>
+
+        <div class="input-group">
+            <label>ARTIST NAME</label>
+            <input type="text" id="uploadArtistName" placeholder="E.g., imase">
+        </div>
+
+     <div class="input-group">
+            <label>GENRE</label>
+            <input type="text" id="uploadGenre" placeholder="Type a custom genre (e.g., Synthwave)..." value="J-POP">
+            
+            <div class="quick-genres" style="margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap;">
+                <span class="genre-tag" onclick="document.getElementById('uploadGenre').value = 'J-POP'">J-POP</span>
+                <span class="genre-tag" onclick="document.getElementById('uploadGenre').value = 'US-UK'">US-UK</span>
+                <span class="genre-tag" onclick="document.getElementById('uploadGenre').value = 'K-POP'">K-POP</span>
+                <span class="genre-tag" onclick="document.getElementById('uploadGenre').value = 'REMIX'">REMIX</span>
+                <span class="genre-tag" onclick="document.getElementById('uploadGenre').value = 'ANIME'">ANIME</span>
+            </div>
+        </div>
+
+        <div id="uploadStatus" style="font-size: 0.85rem; margin-top: 15px; font-weight: bold; text-align: center;"></div>
+
+        <div class="modal-actions" style="margin-top: 25px;">
+            <button class="btn-cancel" onclick="closeUploadModal()">Abort</button>
+            <button class="btn-save" id="startUploadBtn" onclick="triggerUpload()" style="background: #ff5500; border-color: #ff5500;">Transmit to Cloud</button>
+        </div>
     </div>
-  </div>
 </div>
 
 <div id="changePasswordModal" class="modal-overlay hidden">
