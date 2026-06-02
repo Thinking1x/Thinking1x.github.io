@@ -265,14 +265,21 @@ body {
   padding-left: 9px; /* Compensate for the new border width */
 }
 /* =============================================
-   MAIN VIEW
+   MAIN VIEW (Fully Merged & Cleaned)
 ============================================= */
 .main-view {
   flex: 1;
   background: linear-gradient(180deg, #11112b 0%, #050510 100%);
-  padding: 24px;
+  
+  /* Merged padding: 94px on top to clear the HUD, 24px for the sides and bottom */
+  padding: 94px 24px 24px 24px !important; 
+  
   overflow-y: auto;
   min-width: 0; /* prevent flex blowout */
+  
+  /* Forces the browser to delete any old weird spacing */
+  margin-top: 0 !important;
+  border-top: none !important;
 }
 
 .view-header-container {
@@ -1374,24 +1381,26 @@ body.glass-mode .top-toggles-bar {
     margin: 0;
 }
 
-/* 🆕 OVERLAP FIX: Forces HUD Settings to the far right safely */
+/* 🆕 OVERLAP FIX: Forces HUD Settings to the far right safely AND stays above menus */
 .top-toggles-bar .keep-visible,
 .top-toggles-bar [id*="hud"] {
     position: relative !important;
     right: auto !important;
     top: auto !important;
     float: none !important;
-    margin-left: auto !important; /* Pushes it to the right */
+    margin-left: auto !important; 
     
-    /* FIX 3: Adds padding on BOTH sides so it sits comfortably away from the screen edge */
+    /* Adds padding on BOTH sides so it sits comfortably away from the screen edge */
     padding-left: 15px !important; 
     padding-right: 15px !important; 
     
     opacity: 1 !important;
     pointer-events: auto !important;
     cursor: pointer !important;
-}
 
+    /* 🚀 THE FIX: Forces the button to the absolute top layer of the screen */
+    z-index: 2147483647 !important; 
+}
 /* ==========================================
    PERFECT LAYOUT SPACING (Fixes the Blank Space!)
 ========================================== */
@@ -1399,12 +1408,6 @@ body.glass-mode .top-toggles-bar {
     padding-top: 24px !important; 
     margin-top: 70px !important;  
     height: calc(100vh - 70px) !important; 
-}
-
-.main-view {
-    padding-top: 94px !important; 
-    margin-top: 0 !important;
-    border-top: none !important;
 }
 
 /* --- MOBILE SWIPE TWEAKS --- */
