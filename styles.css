@@ -1295,8 +1295,12 @@ body.glass-mode .background-cover {
     position: fixed !important;
     top: 0;
     left: 0;
-    width: 100vw !important;
-    z-index: 1000 !important;
+    
+    /* FIX 1: Changed from 100vw to 100% so it doesn't bleed off the screen on desktop */
+    width: 100% !important; 
+    
+    /* FIX 2: Bumped z-index to maximum to guarantee nothing overlaps your buttons */
+    z-index: 9999 !important; 
     box-sizing: border-box !important;
 
     /* FLEX LOGIC */
@@ -1313,7 +1317,7 @@ body.glass-mode .background-cover {
     
     overflow-x: auto !important; 
     -webkit-overflow-scrolling: touch !important;
-    pointer-events: auto; /* Ensures bar is clickable */
+    pointer-events: auto !important; 
 }
 
 /* 🆕 GLASS MODE FOR HUD */
@@ -1332,7 +1336,6 @@ body.glass-mode .top-toggles-bar {
    THE HIDDEN STATE (Flex & Display Fix)
 ========================================== */
 .top-toggles-bar.collapsed {
-    /* We DO NOT shrink to 0 height anymore. We just let it act as a normal bar */
     pointer-events: auto !important; 
 }
 
@@ -1371,7 +1374,7 @@ body.glass-mode .top-toggles-bar {
     margin: 0;
 }
 
-/* 🆕 MOBILE OVERLAP FIX: Forces HUD Settings to the far right safely */
+/* 🆕 OVERLAP FIX: Forces HUD Settings to the far right safely */
 .top-toggles-bar .keep-visible,
 .top-toggles-bar [id*="hud"] {
     position: relative !important;
@@ -1379,7 +1382,11 @@ body.glass-mode .top-toggles-bar {
     top: auto !important;
     float: none !important;
     margin-left: auto !important; /* Pushes it to the right */
+    
+    /* FIX 3: Adds padding on BOTH sides so it sits comfortably away from the screen edge */
     padding-left: 15px !important; 
+    padding-right: 15px !important; 
+    
     opacity: 1 !important;
     pointer-events: auto !important;
     cursor: pointer !important;
@@ -1395,16 +1402,10 @@ body.glass-mode .top-toggles-bar {
 }
 
 .main-view {
-    /* Instead of using transparent borders or double padding, we just add 
-       the 70px of the top bar to your normal 24px padding (70 + 24 = 94). 
-       This perfectly slides the content down while letting backgrounds flow naturally! */
     padding-top: 94px !important; 
-    
-    /* Forces the browser to delete any old weird spacing */
     margin-top: 0 !important;
     border-top: none !important;
 }
-
 
 /* --- MOBILE SWIPE TWEAKS --- */
 @media (max-width: 768px) {
