@@ -41,12 +41,12 @@
       <div class="background-overlay"></div>
   </div>
   
-<div style="display: flex; justify-content: flex-end; padding: 10px 15px 0 0; position: relative; z-index: 50;">
-      <button onclick="document.getElementById('togglesBar').classList.toggle('collapsed')" 
-              style="background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-sub); padding: 5px 12px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-          <i class="fas fa-sliders-h"></i> HUD Settings
-      </button>
-  </div>
+<div style="position: fixed; top: 12px; right: 20px; z-index: 2147483647;">
+    <button onclick="document.getElementById('togglesBar').classList.toggle('collapsed')" 
+            style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.2s ease;">
+        <i class="fas fa-sliders-h" style="color: var(--accent);"></i> HUD Settings
+    </button>
+</div>
 
   <div id="togglesBar" class="top-toggles-bar collapsed">
       <div class="toggle-item">
