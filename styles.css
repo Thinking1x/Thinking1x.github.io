@@ -1289,10 +1289,9 @@ body.glass-mode .background-cover {
     font-weight: bold;
 }
 /* ==========================================
-   TOP TOGGLES BAR (Bulletproof Horizontal Swipe + Fixed Layout)
+   TOP TOGGLES BAR (Fixed Layout + Flex)
 ========================================== */
 .top-toggles-bar {
-    /* Pin to the top of the screen */
     position: fixed !important;
     top: 0;
     left: 0;
@@ -1300,7 +1299,7 @@ body.glass-mode .background-cover {
     z-index: 1000 !important;
     box-sizing: border-box !important;
 
-    /* FLEX & SCROLL LOGIC */
+    /* FLEX LOGIC */
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
@@ -1309,21 +1308,15 @@ body.glass-mode .background-cover {
     gap: 20px;
     padding: 12px 15px;
     
-    /* DEFAULT STATE: Dark elevated background */
     background: var(--bg-elevated); 
     border-bottom: 1px solid rgba(255,255,255,0.05);
     
-    /* Scroll Logic */
     overflow-x: auto !important; 
     -webkit-overflow-scrolling: touch !important;
-    
-    /* Animation Properties */
-    max-height: 100px;
-    opacity: 1;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto; /* Ensures bar is clickable */
 }
 
-/* 🆕 GLASS MODE FOR HUD: Strips solid background and links it to the music bass pulse */
+/* 🆕 GLASS MODE FOR HUD */
 body.glass-mode .top-toggles-bar {
     background: rgba(0, 0, 0, var(--track-beat-alpha, 0.15)) !important; 
     backdrop-filter: none !important;
@@ -1331,21 +1324,26 @@ body.glass-mode .top-toggles-bar {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
 }
 
-/* Hide the ugly scrollbar */
 .top-toggles-bar::-webkit-scrollbar {
     display: none; 
 }
 
-/* The Hidden State */
+/* ==========================================
+   THE HIDDEN STATE (Flex & Display Fix)
+========================================== */
 .top-toggles-bar.collapsed {
-    max-height: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border-bottom: none !important;
-    opacity: 0 !important;
-    pointer-events: none;
+    /* We DO NOT shrink to 0 height anymore. We just let it act as a normal bar */
+    pointer-events: auto !important; 
 }
 
+/* Hides all switches when collapsed EXCEPT the HUD Settings */
+.top-toggles-bar.collapsed .toggle-item:not(.keep-visible) {
+    display: none !important;
+}
+
+/* ==========================================
+   TOGGLE ITEMS & HUD BUTTON
+========================================== */
 .toggle-item {
     display: flex;
     align-items: center;
@@ -1373,44 +1371,39 @@ body.glass-mode .top-toggles-bar {
     margin: 0;
 }
 
-/* ==========================================
-   PREVENT OVERLAP (Pushes app down)
-========================================== */
-.sidebar,
-.main-view {
-    padding-top: 70px !important; 
-}
-
-
-/* 🆕 MOBILE OVERLAP FIX: Forces the HUD Settings button to behave */
+/* 🆕 MOBILE OVERLAP FIX: Forces HUD Settings to the far right safely */
 .top-toggles-bar .keep-visible,
 .top-toggles-bar [id*="hud"] {
     position: relative !important;
     right: auto !important;
     top: auto !important;
     float: none !important;
-    margin-left: auto !important; /* Dynamically pushes it to the far right */
+    margin-left: auto !important; /* Pushes it to the right */
     padding-left: 15px !important; 
     opacity: 1 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
 }
 
 /* ==========================================
-   PERFECT LAYOUT SPACING (Fixes the weird gap)
+   PERFECT LAYOUT SPACING (Fixes the Blank Space!)
 ========================================== */
 .sidebar {
     padding-top: 24px !important; 
-    margin-top: 70px !important;  /* Physically drops the sidebar below the HUD */
+    margin-top: 70px !important;  
     height: calc(100vh - 70px) !important; 
 }
 
 .main-view {
-    padding-top: 24px !important; 
-    /* Using a transparent border forces the scrollable area to start exactly 
-       below the fixed glass bar, perfectly revealing your "All Tracks" header! */
-    border-top: 70px solid transparent !important; 
+    /* Instead of using transparent borders or double padding, we just add 
+       the 70px of the top bar to your normal 24px padding (70 + 24 = 94). 
+       This perfectly slides the content down while letting backgrounds flow naturally! */
+    padding-top: 94px !important; 
+    
+    /* Forces the browser to delete any old weird spacing */
+    margin-top: 0 !important;
+    border-top: none !important;
 }
-
-
 
 
 /* --- MOBILE SWIPE TWEAKS --- */
