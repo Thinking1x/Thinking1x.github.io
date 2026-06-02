@@ -254,15 +254,15 @@ function handleFileSelection() {
 }
 
 // ==========================================
-// BULLETPROOF UPLOAD FUNCTION (R2 LINK VERSION)
+// BULLETPROOF UPLOAD FUNCTION (DIRECT R2 WORKER UPLOAD)
 // ==========================================
 async function triggerUpload() {
     const btn = document.getElementById('startUploadBtn');
     if (btn) btn.disabled = true;
 
-    // We are no longer looking for physical files, just the R2 link
-    const linkInput = document.getElementById('uploadR2Link'); 
-    const r2Url = linkInput ? linkInput.value.trim() : "";
+    // 1. Grab the physical file from the file input (Drop Zone)
+    const fileInput = document.getElementById('uploadFileInput');
+    const file = fileInput && fileInput.files.length > 0 ? fileInput.files[0] : null;
     
     const trackInput = document.getElementById('uploadTrackName');
     const trackName = trackInput ? trackInput.value.trim() : "";
@@ -275,35 +275,64 @@ async function triggerUpload() {
     
     const status = document.getElementById('uploadStatus');
 
-    if (!r2Url || !trackName) {
-        alert("Please provide both a Track Name and the Cloudflare R2 Link.");
+    if (!file || !trackName) {
+        alert("Please provide both an audio file and a Track Name.");
         if (btn) btn.disabled = false;
         return;
     }
 
     try {
+        // --- STEP 1: UPLOAD PHYSICAL FILE TO CLOUDFLARE WORKER ---
         if(status) {
-            status.innerText = `MATCHING ARTWORK: ${trackName}...`;
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            status.innerText = `UPLOADING TO R2 CLOUD: ${fileSizeMB}MB...`;
             status.style.color = "var(--accent)";
         }
 
-        // 1. Let your brilliant iTunes scrubber find the cover art
-        let fetchedCover = await fetchCoverArt(trackName, artistName);
+        // ⚠️ IMPORTANT: Replace this with the URL of your deployed Cloudflare Worker!
+        const workerUploadEndpoint = "https://music-uploader.dinhgiathinh1234567.workers.dev";
+        
+        // Clean the filename so there are no weird spaces or characters in the URL
+        const safeFileName = encodeURIComponent(file.name.replace(/\s+/g, '_'));
 
-        if (!fetchedCover) {
-            fetchedCover = "https://via.placeholder.com/600x600/0f172a/00ffcc?text=NO+COVER+DETECTED";
+        // Send the raw file directly via PUT request
+        const uploadResponse = await fetch(`${workerUploadEndpoint}/${safeFileName}`, {
+            method: 'PUT',
+            body: file,
+            headers: {
+                'Content-Type': file.type || 'audio/mpeg'
+            }
+        });
+
+        if (!uploadResponse.ok) {
+            throw new Error(`Cloudflare Upload Failed: ${uploadResponse.statusText}`);
         }
 
+        // The Worker successfully uploaded the file and returns the shiny new public URL!
+        const uploadData = await uploadResponse.json();
+        const r2Url = uploadData.fileUrl; 
+
+        // --- STEP 2: FETCH ARTWORK ---
+        if(status) {
+            status.innerText = `MATCHING ARTWORK: ${trackName}...`;
+        }
+        
+        let fetchedCover = await fetchCoverArt(trackName, artistName);
+        if (!fetchedCover) {
+            // Fallback cover if iTunes can't find it
+            fetchedCover = "https://via.placeholder.com/600x600/09090e/00e5ff?text=NO+COVER+DETECTED";
+        }
+
+        // --- STEP 3: SAVE TO APPWRITE DATABASE ---
         if(status) {
             status.innerText = `SAVING TO DATABASE...`;
         }
         
-        // 2. Save straight to the Appwrite Database (Bypassing Appwrite Storage entirely)
         await databases.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
             name: trackName,
             artist: artistName,
             genre: genre,
-            fileUrl: r2Url,
+            fileUrl: r2Url, // The URL generated automatically by Cloudflare R2!
             coverUrl: fetchedCover
         });
 
@@ -312,13 +341,15 @@ async function triggerUpload() {
             status.style.color = "var(--success)";
         }
 
-        // 3. Clean up the UI
+        // --- STEP 4: CLEANUP UI ---
         setTimeout(() => {
             closeUploadModal();
-            fetchTracks(); 
+            fetchTracks(); // Refresh the list so the new song appears instantly
             
             if (btn) btn.disabled = false;
-            if (linkInput) linkInput.value = "";
+            if (fileInput) fileInput.value = "";
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            if (fileNameDisplay) fileNameDisplay.innerText = "Drag & Drop MP3/FLAC here or Click to Browse";
             if (trackInput) trackInput.value = ""; 
             if (artistInput) artistInput.value = ""; 
         }, 2000);
