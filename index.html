@@ -298,11 +298,11 @@
   </div>
 </div>
 
-<div id="uploadModal" class="modal hidden">
+<div id="uploadModal" class="modal-overlay hidden">
     <div class="modal-content">
         <h2 style="color: var(--accent); margin-bottom: 20px; font-weight: 800; letter-spacing: 1px;">TRANSMIT NEW SIGNAL</h2>
         
-        <div id="dropZone" class="upload-drop-zone">
+        <div id="dropZone" class="drop-zone">
             <input type="file" id="uploadFileInput" accept=".mp3,.flac,.wav,audio/*" style="display: none;">
             <span id="fileNameDisplay">Drag & Drop MP3/FLAC here or Click to Browse</span>
         </div>
@@ -317,7 +317,7 @@
             <input type="text" id="uploadArtistName" placeholder="E.g., imase">
         </div>
 
-     <div class="input-group">
+        <div class="input-group">
             <label>GENRE</label>
             <input type="text" id="uploadGenre" placeholder="Type a custom genre (e.g., Synthwave)..." value="J-POP">
             
