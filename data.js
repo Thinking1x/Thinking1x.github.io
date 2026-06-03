@@ -292,11 +292,11 @@ async function triggerUpload() {
         // ⚠️ IMPORTANT: Replace this with the URL of your deployed Cloudflare Worker!
         const workerUploadEndpoint = "https://mybucket.dinhgiathinh1234567.workers.dev";
         
-        // Clean the filename so there are no weird spaces or characters in the URL
+        // Clean the filename
         const safeFileName = encodeURIComponent(file.name.replace(/\s+/g, '_'));
 
-        // Send the raw file directly via PUT request
-        const uploadResponse = await fetch(`${workerUploadEndpoint}/${safeFileName}`, {
+        // Send the raw file directly via PUT request (with cache buster!)
+        const uploadResponse = await fetch(`${workerUploadEndpoint}/${safeFileName}?t=${Date.now()}`, {
             method: 'PUT',
             body: file,
             headers: {
