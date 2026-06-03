@@ -290,7 +290,7 @@ async function triggerUpload() {
         }
 
         // ⚠️ IMPORTANT: Replace this with the URL of your deployed Cloudflare Worker!
-        const workerUploadEndpoint = "https://music-uploader.dinhgiathinh1234567.workers.dev";
+        const workerUploadEndpoint = "mybucket.dinhgiathinh1234567.workers.dev";
         
         // Clean the filename so there are no weird spaces or characters in the URL
         const safeFileName = encodeURIComponent(file.name.replace(/\s+/g, '_'));
