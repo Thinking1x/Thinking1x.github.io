@@ -44,14 +44,23 @@ async function loadTrack(i, autoplay = false) {
     // Completely bypasses the fetch/blob CORS headache. Streams straight from R2.
     audio.src = cleanUrl;
 
-    // 4. Update the tiny cover art in the player bar
+        // 4. Update the tiny cover art in the player bar (CSS Background Method)
     const coverArtEl = document.getElementById('npCover');
     if (coverArtEl) {
-        coverArtEl.src = track.cover;
-        coverArtEl.onerror = () => {
-            coverArtEl.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect width='56' height='56' fill='%231a1a36'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='24' fill='%2300E5FF'%3E♪%3C/text%3E%3C/svg%3E`;
-        };
+        if (track.cover && !track.cover.includes('placeholder') && track.cover !== 'NULL') {
+            // It's a DIV, so we must use CSS backgrounds, not .src!
+            coverArtEl.style.backgroundImage = `url('${track.cover}')`;
+            coverArtEl.style.backgroundSize = 'cover';
+            coverArtEl.style.backgroundPosition = 'center';
+            // Erase the default music note icon
+            coverArtEl.innerHTML = ''; 
+        } else {
+            // Reset to the dark box with the music note if no cover exists
+            coverArtEl.style.backgroundImage = 'none';
+            coverArtEl.innerHTML = '<i class="fas fa-music" style="color:rgba(255,255,255,0.2); font-size: 1.2rem;"></i>';
+        }
     }
+
 
     // 5. Update the massive background image
     const bgImage = document.getElementById('cover-bg-image');
