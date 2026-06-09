@@ -508,11 +508,26 @@ function toggleTransparentMode() {
     
     if (userWantsTransparent) {
         document.body.classList.add('glass-mode');
+        
+        // 🚀 THE CUSTOM FIX: 
+        // 1. Target the exact IDs from your HTML
+        const smallPlayerCover = document.getElementById('npCover');
+        const giantBackground = document.getElementById('cover-bg-image');
+        
+        if (smallPlayerCover && smallPlayerCover.style.backgroundImage && giantBackground) {
+            // 2. Extract the raw image link out of the CSS url(...) format
+            const rawCssUrl = smallPlayerCover.style.backgroundImage;
+            const cleanUrl = rawCssUrl.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+            
+            // 3. Inject it into the giant background
+            if (!cleanUrl.includes('music') && cleanUrl.length > 5) {
+                giantBackground.src = cleanUrl;
+            }
+        }
     } else {
         document.body.classList.remove('glass-mode');
     }
 }
-
 function toggleHyperGlowMode() {
     userWantsHyperGlow = document.getElementById('hyperGlowToggleInput').checked;
     localStorage.setItem('hyperState', userWantsHyperGlow);
