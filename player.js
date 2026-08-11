@@ -15,15 +15,17 @@ let userWantsHyperGlow = localStorage.getItem('hyperState') === 'true';
 let audioCtx, analyser, dataArray;
 let isVisualizerRunning = false;
 let colorHue = 0; 
-let lastBeatTime=0; // Launchpad debouncer
+let lastBeatTime = 0; // Launchpad debouncer
 let currentPadIndex = 0; // Remembers the Waterfall position
 
 let snowCtx, canvasW, canvasH;
 let particles = [];
 const MAX_PARTICLES = 200; 
 
+let isSwitchingTrack = false; // Debounce lock to prevent UI thread freezing
+
 // ==========================================
-// 2. TRACK LOADING & PLAYBACK CONTROLS
+// 2. TRACK LOADING & PLAYBACK CONTROLS (OPTIMIZED)
 // ==========================================
 async function loadTrack(i, autoplay = false) {
     if (i < 0 || i >= allTracks.length) return;
@@ -40,78 +42,84 @@ async function loadTrack(i, autoplay = false) {
     if (cleanUrl.includes('&jwt=')) cleanUrl = cleanUrl.split('&jwt=')[0];
     if (cleanUrl.includes('?jwt=')) cleanUrl = cleanUrl.split('?jwt=')[0];
 
-    // 3. DIRECT STREAMING (The New Method)
-    // Completely bypasses the fetch/blob CORS headache. Streams straight from R2.
+    // 3. DIRECT STREAMING
     audio.src = cleanUrl;
 
-        // 4. Update the tiny cover art in the player bar (CSS Background Method)
+    // 4. Update the tiny cover art in the player bar
     const coverArtEl = document.getElementById('npCover');
     if (coverArtEl) {
         if (track.cover && !track.cover.includes('placeholder') && track.cover !== 'NULL') {
-            // It's a DIV, so we must use CSS backgrounds, not .src!
             coverArtEl.style.backgroundImage = `url('${track.cover}')`;
             coverArtEl.style.backgroundSize = 'cover';
             coverArtEl.style.backgroundPosition = 'center';
-            // Erase the default music note icon
             coverArtEl.innerHTML = ''; 
         } else {
-            // Reset to the dark box with the music note if no cover exists
             coverArtEl.style.backgroundImage = 'none';
             coverArtEl.innerHTML = '<i class="fas fa-music" style="color:rgba(255,255,255,0.2); font-size: 1.2rem;"></i>';
         }
     }
-
 
     // 5. Update the massive background image
     const bgImage = document.getElementById('cover-bg-image');
     if (bgImage) {
         bgImage.src = track.cover; 
         bgImage.onerror = () => {
-            bgImage.src = ""; // Clears to dark if no artwork exists
+            bgImage.src = ""; 
         };
     }
 
     renderTrackList(); // Highlight active track in the UI
 
-    // 6. Handle Autoplay & Visualizer
-    if (autoplay) {
-        try {
-            await audio.play();
-            playIcon.className = 'fas fa-pause';
-            
-            if (typeof userWantsVisualizer !== 'undefined' && userWantsVisualizer) {
-                if (typeof setupVisualizer === 'function') setupVisualizer();
-                if (typeof audioCtx !== 'undefined' && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-                if (typeof startVisualizer === 'function') startVisualizer();
-            }
-        } catch (e) {
-            console.error('Playback failed. Browser might require user interaction first:', e);
-            playIcon.className = 'fas fa-play';
-        }
-    } else {
-        playIcon.className = 'fas fa-play';
-    }
-
-    // 7. Media Session API (Hardware media keys / Lock screen controls)
+    // 6. Update Hardware Metadata (NO event listeners here anymore!)
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: track.name,
             artist: track.artist,
             artwork: [{ src: track.cover, sizes: '600x600', type: 'image/jpeg' }]
         });
-        
-        // Make sure you have a togglePlay() function defined elsewhere in your code!
-        navigator.mediaSession.setActionHandler('play', togglePlay);
-        navigator.mediaSession.setActionHandler('pause', togglePlay);
-        navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-        navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack(false));
+    }
+
+    // 7. Smart Autoplay with Promise Handling
+    if (autoplay) {
+        // Prepare visualizer before playing to prevent stutter
+        if (userWantsVisualizer && typeof setupVisualizer === 'function') {
+            setupVisualizer();
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        try {
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    playIcon.className = 'fas fa-pause';
+                    if (userWantsVisualizer && typeof startVisualizer === 'function') {
+                        startVisualizer();
+                    }
+                }).catch(error => {
+                    // SILENTLY ignore AbortErrors caused by rapid track switching
+                    if (error.name !== 'AbortError') {
+                        console.error('Playback failed:', error);
+                        playIcon.className = 'fas fa-play';
+                    }
+                });
+            }
+        } catch (e) {
+            console.error('Audio subsystem error:', e);
+            playIcon.className = 'fas fa-play';
+        }
+    } else {
+        playIcon.className = 'fas fa-play';
     }
 }
 
 function nextTrack(isAutoAdvance = false) {
+    if (isSwitchingTrack) return; // Prevent spam-clicking lag
+    isSwitchingTrack = true;
+    setTimeout(() => isSwitchingTrack = false, 150); // 150ms cooldown
+
     if (repeatMode === 2 && isAutoAdvance) {
         audio.currentTime = 0; 
-        audio.play(); 
+        audio.play().catch(e => { if(e.name !== 'AbortError') console.error(e) }); 
         return;
     }
     
@@ -140,6 +148,10 @@ function nextTrack(isAutoAdvance = false) {
 }
 
 function prevTrack() {
+    if (isSwitchingTrack) return;
+    isSwitchingTrack = true;
+    setTimeout(() => isSwitchingTrack = false, 150);
+
     // If the song is more than 3 seconds in, restart it instead of skipping back
     if (audio.currentTime > 3) { 
         audio.currentTime = 0; 
@@ -160,9 +172,15 @@ function togglePlay() {
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
     if (audio.paused) {
-        audio.play();
-        document.getElementById('playIcon').classList.replace('fa-play', 'fa-pause');
-        if (userWantsVisualizer) startVisualizer(); 
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+            playPromise.then(() => {
+                document.getElementById('playIcon').classList.replace('fa-play', 'fa-pause');
+                if (userWantsVisualizer) startVisualizer(); 
+            }).catch(e => {
+                if (e.name !== 'AbortError') console.error('Play toggled failed:', e);
+            });
+        }
     } else {
         audio.pause();
         document.getElementById('playIcon').classList.replace('fa-pause', 'fa-play');
@@ -207,10 +225,6 @@ function toggleRepeat() {
         btn.style.color = 'var(--text-sub)';
     }
 }
-
-
-
-
 
 // ==========================================
 // 3. TIMELINE & EVENT LISTENERS
@@ -510,7 +524,7 @@ function toggleLaunchpadMode() {
     userWantsLaunchpad = document.getElementById('launchpadToggleInput').checked;
     localStorage.setItem('padState', userWantsLaunchpad);
 }
-// Add these below your other toggle functions
+
 function toggleTransparentMode() {
     userWantsTransparent = document.getElementById('transparentToggleInput').checked;
     localStorage.setItem('transState', userWantsTransparent);
@@ -518,17 +532,14 @@ function toggleTransparentMode() {
     if (userWantsTransparent) {
         document.body.classList.add('glass-mode');
         
-        // 🚀 THE CUSTOM FIX: 
-        // 1. Target the exact IDs from your HTML
+        // 🚀 THE CUSTOM FIX
         const smallPlayerCover = document.getElementById('npCover');
         const giantBackground = document.getElementById('cover-bg-image');
         
         if (smallPlayerCover && smallPlayerCover.style.backgroundImage && giantBackground) {
-            // 2. Extract the raw image link out of the CSS url(...) format
             const rawCssUrl = smallPlayerCover.style.backgroundImage;
             const cleanUrl = rawCssUrl.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
             
-            // 3. Inject it into the giant background
             if (!cleanUrl.includes('music') && cleanUrl.length > 5) {
                 giantBackground.src = cleanUrl;
             }
@@ -556,5 +567,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (transInput) transInput.checked = userWantsTransparent;
     if (hyperInput) hyperInput.checked = userWantsHyperGlow;
     if (userWantsTransparent) document.body.classList.add('glass-mode');
-});
 
+    // Bind Media Keys ONCE to prevent memory leaks and lag
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('play', togglePlay);
+        navigator.mediaSession.setActionHandler('pause', togglePlay);
+        navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+        navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack(false));
+    }
+});
