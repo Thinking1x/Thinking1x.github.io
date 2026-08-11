@@ -37,15 +37,21 @@ async function loadTrack(i, autoplay = false) {
     document.getElementById('npArtist').innerText = track.artist || 'Unknown Artist';
 
     // 2. CLEAN THE URL (The Bouncer)
-    // Strips out any leftover Appwrite JWT tokens that cause 404 errors in Cloudflare
     let cleanUrl = track.file; 
     if (cleanUrl.includes('&jwt=')) cleanUrl = cleanUrl.split('&jwt=')[0];
     if (cleanUrl.includes('?jwt=')) cleanUrl = cleanUrl.split('?jwt=')[0];
 
-    // 3. DIRECT STREAMING
+    // 3. DIRECT STREAMING & AGGRESSIVE PRELOAD
     audio.src = cleanUrl;
+    audio.preload = 'auto'; // Tell browser to download ASAP
+    audio.load(); // Force the network request to start right now
 
-    // 4. Update the tiny cover art in the player bar
+    // 4. INSTANT UI RESET (Fixes the stuck timeline glitch)
+    document.getElementById('totalTime').innerText = "--:--";
+    document.getElementById('currentTime').innerText = "0:00";
+    seekbar.value = 0;
+
+    // 5. Update the tiny cover art in the player bar
     const coverArtEl = document.getElementById('npCover');
     if (coverArtEl) {
         if (track.cover && !track.cover.includes('placeholder') && track.cover !== 'NULL') {
@@ -59,7 +65,7 @@ async function loadTrack(i, autoplay = false) {
         }
     }
 
-    // 5. Update the massive background image
+    // 6. Update the massive background image
     const bgImage = document.getElementById('cover-bg-image');
     if (bgImage) {
         bgImage.src = track.cover; 
@@ -70,7 +76,7 @@ async function loadTrack(i, autoplay = false) {
 
     renderTrackList(); // Highlight active track in the UI
 
-    // 6. Update Hardware Metadata (NO event listeners here anymore!)
+    // 7. Update Hardware Metadata (NO event listeners here anymore!)
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: track.name,
@@ -79,7 +85,7 @@ async function loadTrack(i, autoplay = false) {
         });
     }
 
-    // 7. Smart Autoplay with Promise Handling
+    // 8. Smart Autoplay with Buffering State
     if (autoplay) {
         // Prepare visualizer before playing to prevent stutter
         if (userWantsVisualizer && typeof setupVisualizer === 'function') {
@@ -87,15 +93,13 @@ async function loadTrack(i, autoplay = false) {
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }
 
+        const playIcon = document.getElementById('playIcon');
+        playIcon.className = 'fas fa-spinner fa-spin'; // Instantly show loading spinner
+
         try {
             const playPromise = audio.play();
             if (playPromise !== undefined) {
-                playPromise.then(() => {
-                    playIcon.className = 'fas fa-pause';
-                    if (userWantsVisualizer && typeof startVisualizer === 'function') {
-                        startVisualizer();
-                    }
-                }).catch(error => {
+                playPromise.catch(error => {
                     // SILENTLY ignore AbortErrors caused by rapid track switching
                     if (error.name !== 'AbortError') {
                         console.error('Playback failed:', error);
@@ -108,7 +112,7 @@ async function loadTrack(i, autoplay = false) {
             playIcon.className = 'fas fa-play';
         }
     } else {
-        playIcon.className = 'fas fa-play';
+        document.getElementById('playIcon').className = 'fas fa-play';
     }
 }
 
@@ -137,7 +141,7 @@ function nextTrack(isAutoAdvance = false) {
                 nextIndexInPlaylist = 0;
             } else { 
                 audio.pause(); 
-                playIcon.className = 'fas fa-play'; 
+                document.getElementById('playIcon').className = 'fas fa-play'; 
                 return; 
             }
         }
@@ -174,16 +178,12 @@ function togglePlay() {
     if (audio.paused) {
         const playPromise = audio.play();
         if (playPromise !== undefined) {
-            playPromise.then(() => {
-                document.getElementById('playIcon').classList.replace('fa-play', 'fa-pause');
-                if (userWantsVisualizer) startVisualizer(); 
-            }).catch(e => {
+            playPromise.catch(e => {
                 if (e.name !== 'AbortError') console.error('Play toggled failed:', e);
             });
         }
     } else {
         audio.pause();
-        document.getElementById('playIcon').classList.replace('fa-pause', 'fa-play');
     }
 }
 
@@ -229,8 +229,27 @@ function toggleRepeat() {
 // ==========================================
 // 3. TIMELINE & EVENT LISTENERS
 // ==========================================
+
+// NEW: Network Buffering Events (Lets the audio engine control the UI)
+audio.addEventListener('waiting', () => {
+    document.getElementById('playIcon').className = 'fas fa-spinner fa-spin';
+});
+
+audio.addEventListener('playing', () => {
+    document.getElementById('playIcon').className = 'fas fa-pause';
+    if (userWantsVisualizer) startVisualizer(); 
+});
+
+audio.addEventListener('pause', () => {
+    if (audio.readyState >= 3) {
+        document.getElementById('playIcon').className = 'fas fa-play';
+    }
+});
+
 audio.addEventListener('ended', () => nextTrack(true));
-audio.addEventListener('loadedmetadata', () => { document.getElementById('totalTime').innerText = formatTime(audio.duration); });
+audio.addEventListener('loadedmetadata', () => { 
+    document.getElementById('totalTime').innerText = formatTime(audio.duration); 
+});
 
 seekbar.addEventListener('input', () => {
     isSeeking = true;
@@ -548,6 +567,7 @@ function toggleTransparentMode() {
         document.body.classList.remove('glass-mode');
     }
 }
+
 function toggleHyperGlowMode() {
     userWantsHyperGlow = document.getElementById('hyperGlowToggleInput').checked;
     localStorage.setItem('hyperState', userWantsHyperGlow);
