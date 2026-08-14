@@ -2,7 +2,7 @@
 // PLAYER.JS — Audio Engine & Visualizer
 // ==========================================
 
-// Safely declare globals without crashing if they already exist in other files
+// Safely declare globals
 var userWantsVisualizer = true;
 var userWantsUIGlow = true;
 var isSwitchingTrack = false;
@@ -130,12 +130,52 @@ async function loadTrack(i, autoplay = false) {
     }
 }
 
+// ==========================================
+// NEW: SMART PLAYER CONTROLS
+// ==========================================
+function togglePlay() {
+    const audioEl = document.getElementById('audio');
+    if (!audioEl) return;
+
+    // FIX: If the player is Idle, automatically load and play the first track!
+    const isIdle = !audioEl.src || audioEl.src === window.location.href || audioEl.currentSrc === "";
+    
+    if (isIdle) {
+        if (typeof currentPlaylistTracks !== 'undefined' && currentPlaylistTracks.length > 0) {
+            const firstTrackIndex = allTracks.findIndex(t => t.id === currentPlaylistTracks[0].id);
+            loadTrack(firstTrackIndex > -1 ? firstTrackIndex : 0, true);
+        } else if (typeof allTracks !== 'undefined' && allTracks.length > 0) {
+            loadTrack(0, true);
+        }
+        return;
+    }
+
+    setupVisualizer();
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+
+    if (audioEl.paused) {
+        const playPromise = audioEl.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => console.log("Play interrupted: ", e));
+        }
+    } else {
+        audioEl.pause();
+    }
+}
+
 function nextTrack(isAutoAdvance = false) {
     if (isSwitchingTrack) return; 
     isSwitchingTrack = true;
     setTimeout(() => isSwitchingTrack = false, 150); 
 
     const audioEl = document.getElementById('audio');
+    const isIdle = !audioEl || !audioEl.src || audioEl.src === window.location.href || audioEl.currentSrc === "";
+    
+    if (isIdle) {
+        togglePlay(); // Wake up the system if it's idle
+        return;
+    }
+
     if (repeatMode === 2 && isAutoAdvance && audioEl) {
         audioEl.currentTime = 0; 
         audioEl.play().catch(e => {}); 
@@ -175,6 +215,13 @@ function prevTrack() {
     setTimeout(() => isSwitchingTrack = false, 150);
 
     const audioEl = document.getElementById('audio');
+    const isIdle = !audioEl || !audioEl.src || audioEl.src === window.location.href || audioEl.currentSrc === "";
+    
+    if (isIdle) {
+        togglePlay(); // Wake up the system if it's idle
+        return;
+    }
+
     if (audioEl && audioEl.currentTime > 3) { 
         audioEl.currentTime = 0; 
         return; 
@@ -189,22 +236,6 @@ function prevTrack() {
     loadTrack(originalIndex, true);
 }
 
-function togglePlay() {
-    const audioEl = document.getElementById('audio');
-    if (!audioEl || !audioEl.src) return;
-
-    setupVisualizer();
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-
-    if (audioEl.paused) {
-        const playPromise = audioEl.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(e => {});
-        }
-    } else {
-        audioEl.pause();
-    }
-}
 
 // ==========================================
 // 3. TIMELINE & EVENT LISTENERS
