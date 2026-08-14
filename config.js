@@ -30,7 +30,6 @@ let currentViewPlaylistIndex = -1;
 let isShuffle = false;
 let repeatMode = 0; // 0: Off, 1: Repeat All, 2: Repeat One
 let userPlaylists = [];
-let isSeeking = false; // Fixes the timeline tug-of-war
 
 // ---- User Session State ----
 let currentUser = null;
