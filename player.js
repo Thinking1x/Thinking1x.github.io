@@ -5,9 +5,9 @@
 // ==========================================
 // 1. GLOBAL VARIABLES & MEMORY
 // ==========================================
+// Variables native ONLY to the visualizer and player engine
 let userWantsVisualizer = localStorage.getItem('visState') === null ? true : (localStorage.getItem('visState') === 'true');
 let userWantsUIGlow = localStorage.getItem('glowState') === null ? true : (localStorage.getItem('glowState') === 'true');
-let showWaveform = true; 
 let isSwitchingTrack = false;
 let isSeeking = false;
 
@@ -21,7 +21,7 @@ const MAX_PARTICLES = 200;
 
 let waveCtx, waveCanvasW, waveCanvasH;
 
-// Default dummy lyrics until a real track loads
+// Dummy Lyrics Data
 let currentLyrics = [
     { time: 5.0, text: "System online..." },
     { time: 10.5, text: "Establishing connection to the main server." },
@@ -31,34 +31,8 @@ let currentLyrics = [
 ];
 
 // ==========================================
-// 2. TRACK LOADING & LYRICS PARSING
+// 2. TRACK LOADING & PLAYBACK CONTROLS
 // ==========================================
-function parseLRC(lrcText) {
-    const lines = lrcText.split('\n');
-    const parsedLyrics = [];
-    // Matches the [mm:ss.xx] timestamp format
-    const timeRegEx = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/;
-
-    lines.forEach(line => {
-        const match = timeRegEx.exec(line);
-        if (match) {
-            const minutes = parseInt(match[1]);
-            const seconds = parseInt(match[2]);
-            // Handles both 2-digit and 3-digit millisecond formats
-            const milliseconds = match[3].length === 2 ? parseInt(match[3]) * 10 : parseInt(match[3]);
-            
-            // Convert to total seconds for the audio engine
-            const timeInSeconds = (minutes * 60) + seconds + (milliseconds / 1000);
-            const text = line.replace(timeRegEx, '').trim();
-
-            if (text) {
-                parsedLyrics.push({ time: timeInSeconds, text: text });
-            }
-        }
-    });
-    return parsedLyrics;
-}
-
 async function loadTrack(i, autoplay = false) {
     const audioEl = document.getElementById('audio');
     if (!audioEl) return;
@@ -114,20 +88,6 @@ async function loadTrack(i, autoplay = false) {
         npBg.onerror = () => { npBg.src = ""; };
     }
 
-    // LYRICS INJECTION ENGINE
-    if (track.rawLrcText && track.rawLrcText.trim() !== "") {
-        currentLyrics = parseLRC(track.rawLrcText);
-    } else {
-        currentLyrics = [{ time: 0, text: "No lyrics detected in database." }];
-    }
-
-    // Reset the DOM to force the lyrics engine to clear the old song
-    const lyricsContent = document.getElementById('lyrics-content');
-    if (lyricsContent) {
-        lyricsContent.dataset.activeIndex = "-1";
-        lyricsContent.innerHTML = ""; 
-    }
-
     if (typeof renderTrackList === 'function') renderTrackList(); 
 
     if ('mediaSession' in navigator) {
@@ -165,12 +125,13 @@ async function loadTrack(i, autoplay = false) {
 }
 
 // ==========================================
-// 3. SMART PLAYER CONTROLS
+// SMART PLAYER CONTROLS
 // ==========================================
 function togglePlay() {
     const audioEl = document.getElementById('audio');
     if (!audioEl) return;
 
+    // Wake the system up if it is idle
     const isIdle = !audioEl.src || audioEl.src === window.location.href || audioEl.currentSrc === "";
     if (isIdle) {
         if (typeof currentPlaylistTracks !== 'undefined' && currentPlaylistTracks.length > 0) {
@@ -268,8 +229,47 @@ function prevTrack() {
     loadTrack(originalIndex, true);
 }
 
+function toggleShuffle() {
+    isShuffle = !isShuffle;
+    const btn = document.getElementById('shuffleBtn');
+    if (isShuffle) {
+        btn.classList.add('active');
+        btn.style.color = 'var(--accent, #00ffcc)';
+        btn.style.textShadow = '0 0 8px var(--accent, #00ffcc)';
+    } else {
+        btn.classList.remove('active');
+        btn.style.color = '';
+        btn.style.textShadow = '';
+    }
+}
+
+function toggleRepeat() {
+    repeatMode = (repeatMode + 1) % 3;
+    const btn = document.getElementById('repeatBtn');
+    const icon = btn.querySelector('i');
+
+    btn.classList.remove('active');
+    btn.removeAttribute('data-repeat-one');
+    btn.style.color = '';
+    btn.style.textShadow = '';
+
+    if (repeatMode === 1) {
+        btn.classList.add('active');
+        icon.className = 'fas fa-redo-alt';
+        btn.style.color = 'var(--accent)';
+    } else if (repeatMode === 2) {
+        btn.classList.add('active');
+        icon.className = 'fas fa-redo-alt';
+        btn.setAttribute('data-repeat-one', 'true');
+        btn.style.color = 'var(--success)';
+    } else {
+        icon.className = 'fas fa-redo-alt';
+        btn.style.color = 'var(--text-sub)';
+    }
+}
+
 // ==========================================
-// 4. TIMELINE & EVENT LISTENERS
+// 3. TIMELINE & EVENT LISTENERS
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const audioEl = document.getElementById('audio');
@@ -364,7 +364,7 @@ document.addEventListener('keydown', function (event) {
 });
 
 // ==========================================
-// 5. REAL-TIME AUDIO VISUALIZER ENGINES
+// 4. REAL-TIME AUDIO VISUALIZER ENGINES
 // ==========================================
 function setupVisualizer() {
     if (audioCtx) return;
@@ -497,7 +497,7 @@ function renderFrame() {
 }
 
 // ==========================================
-// 6. DRAWING ROUTINES
+// 5. DRAWING ROUTINES
 // ==========================================
 function drawParticles(currentHue, overallAverage) {
     if (!snowCtx) return;
@@ -527,45 +527,36 @@ function drawParticles(currentHue, overallAverage) {
 }
 
 function drawSoundwave(dataArray, currentHue) {
-    if (!waveCtx || !showWaveform) return;
+    if (!waveCtx) return;
     
     waveCtx.clearRect(0, 0, waveCanvasW, waveCanvasH);
     
     const bufferLength = analyser.frequencyBinCount;
-    const barCount = 90; 
-    const spacing = 4;
-    const barWidth = (waveCanvasW - (barCount * spacing)) / barCount;
-    const centerY = waveCanvasH / 2; 
+    const barCount = 120; 
+    const barWidth = (waveCanvasW / barCount) * 1.5;
+    let barHeight;
     let x = 0;
 
-    waveCtx.shadowBlur = 12;
-    waveCtx.shadowColor = `hsla(${currentHue}, 100%, 60%, 0.4)`;
-
     for (let i = 0; i < barCount; i++) {
-        const dataIndex = Math.floor(i * (bufferLength / barCount) * 0.8); 
-        
-        const normalizedData = dataArray[dataIndex] / 255;
-        let barHeight = (normalizedData * waveCanvasH * 0.8) || 4; 
+        const dataIndex = Math.floor(i * (bufferLength / barCount));
+        barHeight = dataArray[dataIndex] * 1.2; 
 
-        const gradient = waveCtx.createLinearGradient(0, centerY - (barHeight/2), 0, centerY + (barHeight/2));
-        gradient.addColorStop(0, `hsla(${currentHue}, 100%, 80%, 0.9)`);
-        gradient.addColorStop(0.5, `hsla(${currentHue}, 100%, 60%, 1)`);
-        gradient.addColorStop(1, `hsla(${currentHue}, 100%, 80%, 0.9)`);
+        const gradient = waveCtx.createLinearGradient(0, waveCanvasH - barHeight, 0, waveCanvasH);
+        gradient.addColorStop(0, `hsla(${currentHue}, 100%, 60%, 1)`);
+        gradient.addColorStop(1, `hsla(${currentHue}, 80%, 20%, 0.1)`);
 
         waveCtx.fillStyle = gradient;
         
         waveCtx.beginPath();
-        waveCtx.roundRect(x, centerY - (barHeight / 2), barWidth, barHeight, [20]);
+        waveCtx.roundRect(x, waveCanvasH - barHeight, barWidth - 2, barHeight, [5, 5, 0, 0]);
         waveCtx.fill();
 
-        x += barWidth + spacing;
+        x += barWidth;
     }
-    
-    waveCtx.shadowBlur = 0;
 }
 
 // ==========================================
-// 7. LYRICS ENGINE
+// 6. LYRICS ENGINE
 // ==========================================
 function syncLyrics(currentTime) {
     const lyricsContent = document.getElementById('lyrics-content');
@@ -605,19 +596,8 @@ function syncLyrics(currentTime) {
 }
 
 // ==========================================
-// 8. SETTING TOGGLES
+// 7. HUD SETTING TOGGLES
 // ==========================================
-function toggleWaveform() {
-    showWaveform = !showWaveform;
-    const btn = document.getElementById('waveToggleBtn');
-    if (btn) {
-        btn.style.opacity = showWaveform ? '1' : '0.4';
-    }
-    if (!showWaveform && waveCtx) {
-        waveCtx.clearRect(0, 0, waveCanvasW, waveCanvasH);
-    }
-}
-
 function toggleVisualizerMode() {
     userWantsVisualizer = document.getElementById('visualizerToggleInput').checked;
     localStorage.setItem('visState', userWantsVisualizer);
