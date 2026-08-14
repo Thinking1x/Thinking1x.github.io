@@ -2,34 +2,26 @@
 // PLAYER.JS — Audio Engine & Visualizer
 // ==========================================
 
-// ==========================================
-// 1. GLOBAL VARIABLES & MEMORY
-// ==========================================
-// Default visual settings
-let userWantsVisualizer = true;
-let userWantsUIGlow = true;
+// Safely declare globals without crashing if they already exist in other files
+var userWantsVisualizer = true;
+var userWantsUIGlow = true;
+var isSwitchingTrack = false;
+var currentTrackIndex = 0;
+var isShuffle = false;
+var repeatMode = 0;
+var isSeeking = false;
 
-// CRITICAL FIX: Define DOM elements at the very top so loadTrack can access them!
-const audio = document.getElementById('audio');
-const seekbar = document.getElementById('seekbar');
-const volumebar = document.getElementById('volumebar');
+var audioCtx, analyser, dataArray;
+var isVisualizerRunning = false;
+var colorHue = 0; 
 
-let audioCtx, analyser, dataArray;
-let isVisualizerRunning = false;
-let colorHue = 0; 
+var snowCtx, canvasW, canvasH;
+var particles = [];
+var MAX_PARTICLES = 200; 
 
-// Particle System
-let snowCtx, canvasW, canvasH;
-let particles = [];
-const MAX_PARTICLES = 200; 
+var waveCtx, waveCanvasW, waveCanvasH;
 
-// Soundwave System
-let waveCtx, waveCanvasW, waveCanvasH;
-
-let isSwitchingTrack = false; // Debounce lock to prevent UI thread freezing
-
-// Dummy Lyrics Data
-let currentLyrics = [
+var currentLyrics = [
     { time: 5.0, text: "System online..." },
     { time: 10.5, text: "Establishing connection to the main server." },
     { time: 18.0, text: "The signal is breaking through." },
@@ -41,32 +33,37 @@ let currentLyrics = [
 // 2. TRACK LOADING & PLAYBACK CONTROLS
 // ==========================================
 async function loadTrack(i, autoplay = false) {
-    if (i < 0 || i >= allTracks.length) return;
+    const audioEl = document.getElementById('audio');
+    if (!audioEl) return;
+    
+    if (typeof allTracks === 'undefined' || !allTracks || i < 0 || i >= allTracks.length) return;
+    
     currentTrackIndex = i;
     const track = allTracks[i];
 
-    // 1. Update UI Text immediately
+    // 1. Update UI Text
     const npTitle = document.getElementById('npTitle');
     const npArtist = document.getElementById('npArtist');
     if (npTitle) npTitle.innerText = track.name || 'Unknown Track';
     if (npArtist) npArtist.innerText = track.artist || 'Unknown Artist';
 
     // 2. CLEAN THE URL
-    let cleanUrl = track.file; 
+    let cleanUrl = track.file || ""; 
     if (cleanUrl.includes('&jwt=')) cleanUrl = cleanUrl.split('&jwt=')[0];
     if (cleanUrl.includes('?jwt=')) cleanUrl = cleanUrl.split('?jwt=')[0];
 
-    // 3. DIRECT STREAMING & PRELOAD
-    audio.src = cleanUrl;
-    audio.preload = 'auto'; 
-    audio.load(); 
+    // 3. DIRECT STREAMING
+    audioEl.src = cleanUrl;
+    audioEl.preload = 'auto'; 
+    audioEl.load(); 
 
     // 4. INSTANT UI RESET
     const totalTimeEl = document.getElementById('totalTime');
     const currentTimeEl = document.getElementById('currentTime');
+    const seekbarEl = document.getElementById('seekbar');
     if (totalTimeEl) totalTimeEl.innerText = "--:--";
     if (currentTimeEl) currentTimeEl.innerText = "0:00";
-    if (seekbar) seekbar.value = 0;
+    if (seekbarEl) seekbarEl.value = 0;
 
     // 5. Update tiny cover art
     const coverArtEl = document.getElementById('npCover');
@@ -82,7 +79,7 @@ async function loadTrack(i, autoplay = false) {
         }
     }
 
-    // 6. Update massive background and Now Playing background
+    // 6. Update backgrounds
     const bgImage = document.getElementById('cover-bg-image');
     if (bgImage) {
         bgImage.src = track.cover; 
@@ -97,7 +94,7 @@ async function loadTrack(i, autoplay = false) {
 
     if (typeof renderTrackList === 'function') renderTrackList(); 
 
-    // 7. Update Hardware Metadata
+    // 7. Hardware Metadata
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: track.name,
@@ -107,31 +104,28 @@ async function loadTrack(i, autoplay = false) {
     }
 
     // 8. Smart Autoplay
+    const playIcon = document.getElementById('playIcon');
     if (autoplay) {
         if (userWantsVisualizer) {
             setupVisualizer();
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        const playIcon = document.getElementById('playIcon');
         if (playIcon) playIcon.className = 'fas fa-spinner fa-spin'; 
 
         try {
-            const playPromise = audio.play();
+            const playPromise = audioEl.play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
                     if (error.name !== 'AbortError' && playIcon) {
-                        console.error('Playback failed:', error);
                         playIcon.className = 'fas fa-play';
                     }
                 });
             }
         } catch (e) {
-            console.error('Audio subsystem error:', e);
             if (playIcon) playIcon.className = 'fas fa-play';
         }
     } else {
-        const playIcon = document.getElementById('playIcon');
         if (playIcon) playIcon.className = 'fas fa-play';
     }
 }
@@ -141,28 +135,29 @@ function nextTrack(isAutoAdvance = false) {
     isSwitchingTrack = true;
     setTimeout(() => isSwitchingTrack = false, 150); 
 
-    if (typeof repeatMode !== 'undefined' && repeatMode === 2 && isAutoAdvance) {
-        audio.currentTime = 0; 
-        audio.play().catch(e => { if(e.name !== 'AbortError') console.error(e) }); 
+    const audioEl = document.getElementById('audio');
+    if (repeatMode === 2 && isAutoAdvance && audioEl) {
+        audioEl.currentTime = 0; 
+        audioEl.play().catch(e => {}); 
         return;
     }
     
-    if (typeof currentPlaylistTracks === 'undefined' || typeof currentTrackIndex === 'undefined') return;
+    if (typeof currentPlaylistTracks === 'undefined' || currentPlaylistTracks.length === 0) return;
 
     const currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
     let nextIndexInPlaylist;
 
-    if (typeof isShuffle !== 'undefined' && isShuffle && currentPlaylistTracks.length > 1) {
+    if (isShuffle && currentPlaylistTracks.length > 1) {
         do { 
             nextIndexInPlaylist = Math.floor(Math.random() * currentPlaylistTracks.length); 
         } while (nextIndexInPlaylist === currentIndexInPlaylist);
     } else {
         nextIndexInPlaylist = currentIndexInPlaylist + 1;
         if (nextIndexInPlaylist >= currentPlaylistTracks.length) {
-            if (typeof repeatMode !== 'undefined' && repeatMode === 1) {
+            if (repeatMode === 1) {
                 nextIndexInPlaylist = 0;
             } else { 
-                audio.pause(); 
+                if (audioEl) audioEl.pause(); 
                 const playIcon = document.getElementById('playIcon');
                 if (playIcon) playIcon.className = 'fas fa-play'; 
                 return; 
@@ -179,12 +174,13 @@ function prevTrack() {
     isSwitchingTrack = true;
     setTimeout(() => isSwitchingTrack = false, 150);
 
-    if (audio.currentTime > 3) { 
-        audio.currentTime = 0; 
+    const audioEl = document.getElementById('audio');
+    if (audioEl && audioEl.currentTime > 3) { 
+        audioEl.currentTime = 0; 
         return; 
     }
     
-    if (typeof currentPlaylistTracks === 'undefined' || typeof currentTrackIndex === 'undefined') return;
+    if (typeof currentPlaylistTracks === 'undefined' || currentPlaylistTracks.length === 0) return;
 
     const currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
     const prevIndexInPlaylist = (currentIndexInPlaylist - 1 + currentPlaylistTracks.length) % currentPlaylistTracks.length;
@@ -194,86 +190,97 @@ function prevTrack() {
 }
 
 function togglePlay() {
-    if (!audio.src) return;
+    const audioEl = document.getElementById('audio');
+    if (!audioEl || !audioEl.src) return;
 
     setupVisualizer();
     if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
 
-    if (audio.paused) {
-        const playPromise = audio.play();
+    if (audioEl.paused) {
+        const playPromise = audioEl.play();
         if (playPromise !== undefined) {
-            playPromise.catch(e => {
-                if (e.name !== 'AbortError') console.error('Play toggled failed:', e);
-            });
+            playPromise.catch(e => {});
         }
     } else {
-        audio.pause();
+        audioEl.pause();
     }
 }
 
 // ==========================================
 // 3. TIMELINE & EVENT LISTENERS
 // ==========================================
-
-audio.addEventListener('waiting', () => {
+document.addEventListener('DOMContentLoaded', () => {
+    const audioEl = document.getElementById('audio');
+    const seekbarEl = document.getElementById('seekbar');
+    const volumebarEl = document.getElementById('volumebar');
     const playIcon = document.getElementById('playIcon');
-    if (playIcon) playIcon.className = 'fas fa-spinner fa-spin';
-});
 
-audio.addEventListener('playing', () => {
-    const playIcon = document.getElementById('playIcon');
-    if (playIcon) playIcon.className = 'fas fa-pause';
-    if (userWantsVisualizer) startVisualizer(); 
-});
+    if (audioEl) {
+        audioEl.addEventListener('waiting', () => {
+            if (playIcon) playIcon.className = 'fas fa-spinner fa-spin';
+        });
 
-audio.addEventListener('pause', () => {
-    if (audio.readyState >= 3) {
-        const playIcon = document.getElementById('playIcon');
-        if (playIcon) playIcon.className = 'fas fa-play';
+        audioEl.addEventListener('playing', () => {
+            if (playIcon) playIcon.className = 'fas fa-pause';
+            if (userWantsVisualizer) startVisualizer(); 
+        });
+
+        audioEl.addEventListener('pause', () => {
+            if (audioEl.readyState >= 3 && playIcon) {
+                playIcon.className = 'fas fa-play';
+            }
+        });
+
+        audioEl.addEventListener('ended', () => nextTrack(true));
+
+        audioEl.addEventListener('loadedmetadata', () => { 
+            const totalTimeEl = document.getElementById('totalTime');
+            if (totalTimeEl) totalTimeEl.innerText = formatTime(audioEl.duration); 
+        });
+
+        audioEl.addEventListener('timeupdate', () => {
+            if (audioEl.duration && !isSeeking) {
+                if (seekbarEl) seekbarEl.value = (audioEl.currentTime / audioEl.duration) * 100;
+                
+                const currentTimeEl = document.getElementById('currentTime');
+                if (currentTimeEl) currentTimeEl.innerText = formatTime(audioEl.currentTime);
+                
+                syncLyrics(audioEl.currentTime); 
+            }
+        });
+    }
+
+    if (seekbarEl) {
+        seekbarEl.addEventListener('input', () => {
+            isSeeking = true;
+            if (audioEl && audioEl.duration) {
+                const currentTimeEl = document.getElementById('currentTime');
+                if (currentTimeEl) currentTimeEl.innerText = formatTime((seekbarEl.value / 100) * audioEl.duration);
+            }
+        });
+
+        seekbarEl.addEventListener('change', () => {
+            if (audioEl && audioEl.duration) {
+                audioEl.currentTime = (seekbarEl.value / 100) * audioEl.duration;
+            }
+            isSeeking = false;
+        });
+    }
+
+    if (volumebarEl && audioEl) {
+        volumebarEl.addEventListener('input', () => {
+            audioEl.volume = volumebarEl.value / 100;
+            localStorage.setItem('userVolume', audioEl.volume);
+        });
+    }
+
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('play', togglePlay);
+        navigator.mediaSession.setActionHandler('pause', togglePlay);
+        navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
+        navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack(false));
     }
 });
-
-audio.addEventListener('ended', () => nextTrack(true));
-
-audio.addEventListener('loadedmetadata', () => { 
-    const totalTimeEl = document.getElementById('totalTime');
-    if (totalTimeEl) totalTimeEl.innerText = formatTime(audio.duration); 
-});
-
-let isSeeking = false;
-
-if (seekbar) {
-    seekbar.addEventListener('input', () => {
-        isSeeking = true;
-        if (audio.duration) {
-            const currentTimeEl = document.getElementById('currentTime');
-            if (currentTimeEl) currentTimeEl.innerText = formatTime((seekbar.value / 100) * audio.duration);
-        }
-    });
-
-    seekbar.addEventListener('change', () => {
-        if (audio.duration) audio.currentTime = (seekbar.value / 100) * audio.duration;
-        isSeeking = false;
-    });
-}
-
-audio.addEventListener('timeupdate', () => {
-    if (audio.duration && !isSeeking) {
-        if (seekbar) seekbar.value = (audio.currentTime / audio.duration) * 100;
-        
-        const currentTimeEl = document.getElementById('currentTime');
-        if (currentTimeEl) currentTimeEl.innerText = formatTime(audio.currentTime);
-        
-        syncLyrics(audio.currentTime); 
-    }
-});
-
-if (volumebar) {
-    volumebar.addEventListener('input', () => {
-        audio.volume = volumebar.value / 100;
-        localStorage.setItem('userVolume', audio.volume);
-    });
-}
 
 function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
@@ -285,11 +292,12 @@ function formatTime(seconds) {
 document.addEventListener('keydown', function (event) {
     const activeTag = document.activeElement.tagName;
     if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+    const audioEl = document.getElementById('audio');
 
     switch (event.code) {
         case 'Space': event.preventDefault(); togglePlay(); break;
-        case 'ArrowRight': event.preventDefault(); if (audio.duration) audio.currentTime = Math.min(audio.currentTime + 5, audio.duration); break;
-        case 'ArrowLeft': event.preventDefault(); if (audio.src) audio.currentTime = Math.max(audio.currentTime - 5, 0); break;
+        case 'ArrowRight': event.preventDefault(); if (audioEl && audioEl.duration) audioEl.currentTime = Math.min(audioEl.currentTime + 5, audioEl.duration); break;
+        case 'ArrowLeft': event.preventDefault(); if (audioEl && audioEl.src) audioEl.currentTime = Math.max(audioEl.currentTime - 5, 0); break;
     }
 });
 
@@ -298,12 +306,15 @@ document.addEventListener('keydown', function (event) {
 // ==========================================
 function setupVisualizer() {
     if (audioCtx) return;
+    const audioEl = document.getElementById('audio');
+    if (!audioEl) return;
+
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContext();
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 1024; 
     
-    const source = audioCtx.createMediaElementSource(audio);
+    const source = audioCtx.createMediaElementSource(audioEl);
     source.connect(analyser);
     analyser.connect(audioCtx.destination);
     dataArray = new Uint8Array(analyser.frequencyBinCount);
@@ -358,8 +369,9 @@ function startVisualizer() {
 
 function renderFrame() {
     const root = document.documentElement; 
+    const audioEl = document.getElementById('audio');
 
-    if (!isVisualizerRunning || audio.paused) {
+    if (!isVisualizerRunning || !audioEl || audioEl.paused) {
         isVisualizerRunning = false;
         const bg = document.getElementById('reactive-bg');
         if (bg) bg.style.boxShadow = 'none';
@@ -520,15 +532,3 @@ function syncLyrics(currentTime) {
         }
     }
 }
-
-// ==========================================
-// 7. INITIALIZATION
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.setActionHandler('play', togglePlay);
-        navigator.mediaSession.setActionHandler('pause', togglePlay);
-        navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-        navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack(false));
-    }
-});
