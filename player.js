@@ -6,8 +6,8 @@
 // 1. GLOBAL VARIABLES & MEMORY
 // ==========================================
 // Variables native ONLY to the visualizer and player engine
-let userWantsVisualizer = true;
-let userWantsUIGlow = true;
+let userWantsVisualizer = localStorage.getItem('visState') === null ? true : (localStorage.getItem('visState') === 'true');
+let userWantsUIGlow = localStorage.getItem('glowState') === null ? true : (localStorage.getItem('glowState') === 'true');
 let isSwitchingTrack = false;
 let isSeeking = false;
 
@@ -21,6 +21,7 @@ const MAX_PARTICLES = 200;
 
 let waveCtx, waveCanvasW, waveCanvasH;
 
+// Dummy Lyrics Data
 let currentLyrics = [
     { time: 5.0, text: "System online..." },
     { time: 10.5, text: "Establishing connection to the main server." },
@@ -38,7 +39,7 @@ async function loadTrack(i, autoplay = false) {
     
     if (typeof allTracks === 'undefined' || !allTracks || i < 0 || i >= allTracks.length) return;
     
-    // Updates the global variable residing in data.js
+    // Updates the global variable residing in your config/data file
     currentTrackIndex = i;
     const track = allTracks[i];
 
@@ -124,14 +125,14 @@ async function loadTrack(i, autoplay = false) {
 }
 
 // ==========================================
-// NEW: SMART PLAYER CONTROLS
+// SMART PLAYER CONTROLS
 // ==========================================
 function togglePlay() {
     const audioEl = document.getElementById('audio');
     if (!audioEl) return;
 
+    // Wake the system up if it is idle
     const isIdle = !audioEl.src || audioEl.src === window.location.href || audioEl.currentSrc === "";
-    
     if (isIdle) {
         if (typeof currentPlaylistTracks !== 'undefined' && currentPlaylistTracks.length > 0) {
             const firstTrackIndex = allTracks.findIndex(t => t.id === currentPlaylistTracks[0].id);
@@ -228,6 +229,44 @@ function prevTrack() {
     loadTrack(originalIndex, true);
 }
 
+function toggleShuffle() {
+    isShuffle = !isShuffle;
+    const btn = document.getElementById('shuffleBtn');
+    if (isShuffle) {
+        btn.classList.add('active');
+        btn.style.color = 'var(--accent, #00ffcc)';
+        btn.style.textShadow = '0 0 8px var(--accent, #00ffcc)';
+    } else {
+        btn.classList.remove('active');
+        btn.style.color = '';
+        btn.style.textShadow = '';
+    }
+}
+
+function toggleRepeat() {
+    repeatMode = (repeatMode + 1) % 3;
+    const btn = document.getElementById('repeatBtn');
+    const icon = btn.querySelector('i');
+
+    btn.classList.remove('active');
+    btn.removeAttribute('data-repeat-one');
+    btn.style.color = '';
+    btn.style.textShadow = '';
+
+    if (repeatMode === 1) {
+        btn.classList.add('active');
+        icon.className = 'fas fa-redo-alt';
+        btn.style.color = 'var(--accent)';
+    } else if (repeatMode === 2) {
+        btn.classList.add('active');
+        icon.className = 'fas fa-redo-alt';
+        btn.setAttribute('data-repeat-one', 'true');
+        btn.style.color = 'var(--success)';
+    } else {
+        icon.className = 'fas fa-redo-alt';
+        btn.style.color = 'var(--text-sub)';
+    }
+}
 
 // ==========================================
 // 3. TIMELINE & EVENT LISTENERS
@@ -554,4 +593,67 @@ function syncLyrics(currentTime) {
             });
         }
     }
+}
+
+// ==========================================
+// 7. HUD SETTING TOGGLES
+// ==========================================
+function toggleVisualizerMode() {
+    userWantsVisualizer = document.getElementById('visualizerToggleInput').checked;
+    localStorage.setItem('visState', userWantsVisualizer);
+
+    if (userWantsVisualizer) {
+        const audioEl = document.getElementById('audio');
+        if (audioEl && !audioEl.paused && audioEl.src) {
+            isVisualizerRunning = false;
+            startVisualizer();
+        }
+    } else {
+        isVisualizerRunning = false;
+        const bg = document.getElementById('reactive-bg');
+        if (bg) bg.style.boxShadow = 'none';
+        
+        const snow = document.getElementById('snow-canvas');
+        if (snow) snow.style.opacity = '0';
+        
+        document.documentElement.style.setProperty('--beat-glow-alpha', '0');
+        document.documentElement.style.setProperty('--cover-scale', '1');
+    }
+}
+
+function toggleUIGlowMode() {
+    userWantsUIGlow = document.getElementById('uiGlowToggleInput').checked;
+    localStorage.setItem('glowState', userWantsUIGlow);
+    if (!userWantsUIGlow) {
+        document.documentElement.style.setProperty('--beat-glow-alpha', '0');
+        document.documentElement.style.setProperty('--cover-scale', '1');
+    }
+}
+
+function toggleTransparentMode() {
+    let userWantsTransparent = document.getElementById('transparentToggleInput').checked;
+    localStorage.setItem('transState', userWantsTransparent);
+    
+    if (userWantsTransparent) {
+        document.body.classList.add('glass-mode');
+        
+        const smallPlayerCover = document.getElementById('npCover');
+        const giantBackground = document.getElementById('cover-bg-image');
+        
+        if (smallPlayerCover && smallPlayerCover.style.backgroundImage && giantBackground) {
+            const rawCssUrl = smallPlayerCover.style.backgroundImage;
+            const cleanUrl = rawCssUrl.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+            
+            if (!cleanUrl.includes('music') && cleanUrl.length > 5) {
+                giantBackground.src = cleanUrl;
+            }
+        }
+    } else {
+        document.body.classList.remove('glass-mode');
+    }
+}
+
+function toggleHyperGlowMode() {
+    let userWantsHyperGlow = document.getElementById('hyperGlowToggleInput').checked;
+    localStorage.setItem('hyperState', userWantsHyperGlow);
 }
