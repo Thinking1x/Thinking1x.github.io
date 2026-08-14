@@ -43,51 +43,15 @@
       <img src="https://placehold.co/1000x1000/0f172a/00ffcc?text=COVER+ART" id="cover-bg-image" />
       <div class="background-overlay"></div>
   </div>
-  
+<!-- QUICK ACTION: JUMP TO LYRICS/SOUNDWAVE -->
 <div style="position: fixed; top: 12px; right: 20px; z-index: 2147483647;">
-    <button onclick="document.getElementById('togglesBar').classList.toggle('collapsed')" 
-            style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.2s ease;">
-        <i class="fas fa-sliders-h" style="color: var(--accent);"></i> HUD Settings
+    <button onclick="switchView('nowPlaying')" 
+            style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 8px 14px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: all 0.2s ease;"
+            onmouseover="this.style.background='rgba(0, 229, 255, 0.1)'; this.style.borderColor='var(--accent)';"
+            onmouseout="this.style.background='rgba(0, 0, 0, 0.5)'; this.style.borderColor='rgba(255,255,255,0.15)';">
+        <i class="fas fa-wave-square" style="color: var(--accent);"></i> Soundwave & Lyrics
     </button>
 </div>
-
-  <div id="togglesBar" class="top-toggles-bar collapsed">
-      <div class="toggle-item">
-          <span>BACKGROUND</span>
-          <label class="ios-switch">
-              <input type="checkbox" id="visualizerToggleInput" onchange="toggleVisualizerMode()">
-              <span class="ios-slider"></span>
-          </label>
-      </div>
-      <div class="toggle-item">
-          <span>COLOR LAUNCHPAD</span>
-          <label class="ios-switch">
-              <input type="checkbox" id="uiGlowToggleInput" onchange="toggleUIGlowMode()">
-              <span class="ios-slider"></span>
-          </label>
-      </div>
-      <div class="toggle-item">
-          <span>LAUNCHPAD</span>
-          <label class="ios-switch">
-              <input type="checkbox" id="launchpadToggleInput" onchange="toggleLaunchpadMode()">
-              <span class="ios-slider"></span>
-          </label>
-      </div>
-      <div class="toggle-item divider">
-          <span>COVER ART & TRANSPARENT</span>
-          <label class="ios-switch">
-              <input type="checkbox" id="transparentToggleInput" onchange="toggleTransparentMode()">
-              <span class="ios-slider"></span>
-          </label>
-      </div>
-      <div class="toggle-item">
-          <span class="accent-text">HYPER-GLOW</span>
-          <label class="ios-switch">
-              <input type="checkbox" id="hyperGlowToggleInput" onchange="toggleHyperGlowMode()">
-              <span class="ios-slider"></span>
-          </label>
-      </div>
-  </div>
 
   <div id="sidebarOverlay" onclick="closeSidebar()"></div>
 

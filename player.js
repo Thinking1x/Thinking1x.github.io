@@ -1,31 +1,39 @@
 // ==========================================
-// PLAYER.JS — The Ultimate Audio Engine
+// PLAYER.JS — Audio Engine & Visualizer
 // ==========================================
 
 // ==========================================
 // 1. GLOBAL VARIABLES & MEMORY
 // ==========================================
-const savedState = localStorage.getItem('visualizerState');
-let userWantsVisualizer = localStorage.getItem('visState') === null ? true : (localStorage.getItem('visState') === 'true');
-let userWantsUIGlow = localStorage.getItem('glowState') === null ? true : (localStorage.getItem('glowState') === 'true');
-let userWantsLaunchpad = localStorage.getItem('padState') === null ? true : (localStorage.getItem('padState') === 'true');
-let userWantsTransparent = localStorage.getItem('transState') === 'true';
-let userWantsHyperGlow = localStorage.getItem('hyperState') === 'true';
+// Default visual settings (since the toggle menu was removed)
+let userWantsVisualizer = true;
+let userWantsUIGlow = true;
 
 let audioCtx, analyser, dataArray;
 let isVisualizerRunning = false;
 let colorHue = 0; 
-let lastBeatTime = 0; // Launchpad debouncer
-let currentPadIndex = 0; // Remembers the Waterfall position
 
+// Particle System
 let snowCtx, canvasW, canvasH;
 let particles = [];
 const MAX_PARTICLES = 200; 
 
+// Soundwave System
+let waveCtx, waveCanvasW, waveCanvasH;
+
 let isSwitchingTrack = false; // Debounce lock to prevent UI thread freezing
 
+// Dummy Lyrics Data (This can be dynamically updated later based on currentTrackIndex)
+let currentLyrics = [
+    { time: 5.0, text: "System online..." },
+    { time: 10.5, text: "Establishing connection to the main server." },
+    { time: 18.0, text: "The signal is breaking through." },
+    { time: 26.2, text: "Synchronizing visual data." },
+    { time: 35.0, text: "Audio stream stabilized." }
+];
+
 // ==========================================
-// 2. TRACK LOADING & PLAYBACK CONTROLS (OPTIMIZED)
+// 2. TRACK LOADING & PLAYBACK CONTROLS
 // ==========================================
 async function loadTrack(i, autoplay = false) {
     if (i < 0 || i >= allTracks.length) return;
@@ -33,25 +41,30 @@ async function loadTrack(i, autoplay = false) {
     const track = allTracks[i];
 
     // 1. Update UI Text immediately
-    document.getElementById('npTitle').innerText = track.name || 'Unknown Track';
-    document.getElementById('npArtist').innerText = track.artist || 'Unknown Artist';
+    const npTitle = document.getElementById('npTitle');
+    const npArtist = document.getElementById('npArtist');
+    if (npTitle) npTitle.innerText = track.name || 'Unknown Track';
+    if (npArtist) npArtist.innerText = track.artist || 'Unknown Artist';
 
-    // 2. CLEAN THE URL (The Bouncer)
+    // 2. CLEAN THE URL
     let cleanUrl = track.file; 
     if (cleanUrl.includes('&jwt=')) cleanUrl = cleanUrl.split('&jwt=')[0];
     if (cleanUrl.includes('?jwt=')) cleanUrl = cleanUrl.split('?jwt=')[0];
 
-    // 3. DIRECT STREAMING & AGGRESSIVE PRELOAD
+    // 3. DIRECT STREAMING & PRELOAD
     audio.src = cleanUrl;
-    audio.preload = 'auto'; // Tell browser to download ASAP
-    audio.load(); // Force the network request to start right now
+    audio.preload = 'auto'; 
+    audio.load(); 
 
-    // 4. INSTANT UI RESET (Fixes the stuck timeline glitch)
-    document.getElementById('totalTime').innerText = "--:--";
-    document.getElementById('currentTime').innerText = "0:00";
-    seekbar.value = 0;
+    // 4. INSTANT UI RESET
+    const totalTimeEl = document.getElementById('totalTime');
+    const currentTimeEl = document.getElementById('currentTime');
+    const seekbarEl = document.getElementById('seekbar');
+    if (totalTimeEl) totalTimeEl.innerText = "--:--";
+    if (currentTimeEl) currentTimeEl.innerText = "0:00";
+    if (seekbarEl) seekbarEl.value = 0;
 
-    // 5. Update the tiny cover art in the player bar
+    // 5. Update tiny cover art
     const coverArtEl = document.getElementById('npCover');
     if (coverArtEl) {
         if (track.cover && !track.cover.includes('placeholder') && track.cover !== 'NULL') {
@@ -65,18 +78,22 @@ async function loadTrack(i, autoplay = false) {
         }
     }
 
-    // 6. Update the massive background image
+    // 6. Update massive background and Now Playing background
     const bgImage = document.getElementById('cover-bg-image');
     if (bgImage) {
         bgImage.src = track.cover; 
-        bgImage.onerror = () => {
-            bgImage.src = ""; 
-        };
+        bgImage.onerror = () => { bgImage.src = ""; };
     }
 
-    renderTrackList(); // Highlight active track in the UI
+    const npBg = document.getElementById('np-background');
+    if (npBg) {
+        npBg.src = track.cover;
+        npBg.onerror = () => { npBg.src = ""; };
+    }
 
-    // 7. Update Hardware Metadata (NO event listeners here anymore!)
+    if (typeof renderTrackList === 'function') renderTrackList(); 
+
+    // 7. Update Hardware Metadata
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: track.name,
@@ -85,23 +102,21 @@ async function loadTrack(i, autoplay = false) {
         });
     }
 
-    // 8. Smart Autoplay with Buffering State
+    // 8. Smart Autoplay
     if (autoplay) {
-        // Prepare visualizer before playing to prevent stutter
-        if (userWantsVisualizer && typeof setupVisualizer === 'function') {
+        if (userWantsVisualizer) {
             setupVisualizer();
             if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
         }
 
         const playIcon = document.getElementById('playIcon');
-        playIcon.className = 'fas fa-spinner fa-spin'; // Instantly show loading spinner
+        if (playIcon) playIcon.className = 'fas fa-spinner fa-spin'; 
 
         try {
             const playPromise = audio.play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
-                    // SILENTLY ignore AbortErrors caused by rapid track switching
-                    if (error.name !== 'AbortError') {
+                    if (error.name !== 'AbortError' && playIcon) {
                         console.error('Playback failed:', error);
                         playIcon.className = 'fas fa-play';
                     }
@@ -109,39 +124,43 @@ async function loadTrack(i, autoplay = false) {
             }
         } catch (e) {
             console.error('Audio subsystem error:', e);
-            playIcon.className = 'fas fa-play';
+            if (playIcon) playIcon.className = 'fas fa-play';
         }
     } else {
-        document.getElementById('playIcon').className = 'fas fa-play';
+        const playIcon = document.getElementById('playIcon');
+        if (playIcon) playIcon.className = 'fas fa-play';
     }
 }
 
 function nextTrack(isAutoAdvance = false) {
-    if (isSwitchingTrack) return; // Prevent spam-clicking lag
+    if (isSwitchingTrack) return; 
     isSwitchingTrack = true;
-    setTimeout(() => isSwitchingTrack = false, 150); // 150ms cooldown
+    setTimeout(() => isSwitchingTrack = false, 150); 
 
-    if (repeatMode === 2 && isAutoAdvance) {
+    if (typeof repeatMode !== 'undefined' && repeatMode === 2 && isAutoAdvance) {
         audio.currentTime = 0; 
         audio.play().catch(e => { if(e.name !== 'AbortError') console.error(e) }); 
         return;
     }
     
+    if (typeof currentPlaylistTracks === 'undefined' || typeof currentTrackIndex === 'undefined') return;
+
     const currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
     let nextIndexInPlaylist;
 
-    if (isShuffle && currentPlaylistTracks.length > 1) {
+    if (typeof isShuffle !== 'undefined' && isShuffle && currentPlaylistTracks.length > 1) {
         do { 
             nextIndexInPlaylist = Math.floor(Math.random() * currentPlaylistTracks.length); 
         } while (nextIndexInPlaylist === currentIndexInPlaylist);
     } else {
         nextIndexInPlaylist = currentIndexInPlaylist + 1;
         if (nextIndexInPlaylist >= currentPlaylistTracks.length) {
-            if (repeatMode === 1) {
+            if (typeof repeatMode !== 'undefined' && repeatMode === 1) {
                 nextIndexInPlaylist = 0;
             } else { 
                 audio.pause(); 
-                document.getElementById('playIcon').className = 'fas fa-play'; 
+                const playIcon = document.getElementById('playIcon');
+                if (playIcon) playIcon.className = 'fas fa-play'; 
                 return; 
             }
         }
@@ -156,12 +175,13 @@ function prevTrack() {
     isSwitchingTrack = true;
     setTimeout(() => isSwitchingTrack = false, 150);
 
-    // If the song is more than 3 seconds in, restart it instead of skipping back
     if (audio.currentTime > 3) { 
         audio.currentTime = 0; 
         return; 
     }
     
+    if (typeof currentPlaylistTracks === 'undefined' || typeof currentTrackIndex === 'undefined') return;
+
     const currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
     const prevIndexInPlaylist = (currentIndexInPlaylist - 1 + currentPlaylistTracks.length) % currentPlaylistTracks.length;
     const originalIndex = allTracks.findIndex(t => t.id === currentPlaylistTracks[prevIndexInPlaylist].id);
@@ -187,91 +207,71 @@ function togglePlay() {
     }
 }
 
-function toggleShuffle() {
-    isShuffle = !isShuffle;
-    const btn = document.getElementById('shuffleBtn');
-    if (isShuffle) {
-        btn.classList.add('active');
-        btn.style.color = 'var(--accent, #00ffcc)';
-        btn.style.textShadow = '0 0 8px var(--accent, #00ffcc)';
-    } else {
-        btn.classList.remove('active');
-        btn.style.color = '';
-        btn.style.textShadow = '';
-    }
-}
-
-function toggleRepeat() {
-    repeatMode = (repeatMode + 1) % 3;
-    const btn = document.getElementById('repeatBtn');
-    const icon = btn.querySelector('i');
-
-    btn.classList.remove('active');
-    btn.removeAttribute('data-repeat-one');
-    btn.style.color = '';
-    btn.style.textShadow = '';
-
-    if (repeatMode === 1) {
-        btn.classList.add('active');
-        icon.className = 'fas fa-redo-alt';
-        btn.style.color = 'var(--accent)';
-    } else if (repeatMode === 2) {
-        btn.classList.add('active');
-        icon.className = 'fas fa-redo-alt';
-        btn.setAttribute('data-repeat-one', 'true');
-        btn.style.color = 'var(--success)';
-    } else {
-        icon.className = 'fas fa-redo-alt';
-        btn.style.color = 'var(--text-sub)';
-    }
-}
-
 // ==========================================
 // 3. TIMELINE & EVENT LISTENERS
 // ==========================================
 
-// NEW: Network Buffering Events (Lets the audio engine control the UI)
 audio.addEventListener('waiting', () => {
-    document.getElementById('playIcon').className = 'fas fa-spinner fa-spin';
+    const playIcon = document.getElementById('playIcon');
+    if (playIcon) playIcon.className = 'fas fa-spinner fa-spin';
 });
 
 audio.addEventListener('playing', () => {
-    document.getElementById('playIcon').className = 'fas fa-pause';
+    const playIcon = document.getElementById('playIcon');
+    if (playIcon) playIcon.className = 'fas fa-pause';
     if (userWantsVisualizer) startVisualizer(); 
 });
 
 audio.addEventListener('pause', () => {
     if (audio.readyState >= 3) {
-        document.getElementById('playIcon').className = 'fas fa-play';
+        const playIcon = document.getElementById('playIcon');
+        if (playIcon) playIcon.className = 'fas fa-play';
     }
 });
 
 audio.addEventListener('ended', () => nextTrack(true));
+
 audio.addEventListener('loadedmetadata', () => { 
-    document.getElementById('totalTime').innerText = formatTime(audio.duration); 
+    const totalTimeEl = document.getElementById('totalTime');
+    if (totalTimeEl) totalTimeEl.innerText = formatTime(audio.duration); 
 });
 
-seekbar.addEventListener('input', () => {
-    isSeeking = true;
-    if (audio.duration) document.getElementById('currentTime').innerText = formatTime((seekbar.value / 100) * audio.duration);
-});
+const seekbar = document.getElementById('seekbar');
+let isSeeking = false;
 
-seekbar.addEventListener('change', () => {
-    if (audio.duration) audio.currentTime = (seekbar.value / 100) * audio.duration;
-    isSeeking = false;
-});
+if (seekbar) {
+    seekbar.addEventListener('input', () => {
+        isSeeking = true;
+        if (audio.duration) {
+            const currentTimeEl = document.getElementById('currentTime');
+            if (currentTimeEl) currentTimeEl.innerText = formatTime((seekbar.value / 100) * audio.duration);
+        }
+    });
+
+    seekbar.addEventListener('change', () => {
+        if (audio.duration) audio.currentTime = (seekbar.value / 100) * audio.duration;
+        isSeeking = false;
+    });
+}
 
 audio.addEventListener('timeupdate', () => {
     if (audio.duration && !isSeeking) {
-        seekbar.value = (audio.currentTime / audio.duration) * 100;
-        document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
+        if (seekbar) seekbar.value = (audio.currentTime / audio.duration) * 100;
+        
+        const currentTimeEl = document.getElementById('currentTime');
+        if (currentTimeEl) currentTimeEl.innerText = formatTime(audio.currentTime);
+        
+        syncLyrics(audio.currentTime); // Fire lyrics sync
     }
 });
 
-volumebar.addEventListener('input', () => {
-    audio.volume = volumebar.value / 100;
-    localStorage.setItem('userVolume', audio.volume);
-});
+const volumebar = document.getElementById('volumebar');
+if (volumebar) {
+    volumebar.addEventListener('input', () => {
+        audio.volume = volumebar.value / 100;
+        localStorage.setItem('userVolume', audio.volume);
+    });
+}
 
 function formatTime(seconds) {
     if (isNaN(seconds)) return "0:00";
@@ -292,20 +292,21 @@ document.addEventListener('keydown', function (event) {
 });
 
 // ==========================================
-// 4. REAL-TIME AUDIO VISUALIZER (STARFIELD + MATH)
+// 4. REAL-TIME AUDIO VISUALIZER ENGINES
 // ==========================================
 function setupVisualizer() {
     if (audioCtx) return;
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContext();
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 512; 
+    analyser.fftSize = 1024; // High resolution for smooth waveforms
     
     const source = audioCtx.createMediaElementSource(audio);
     source.connect(analyser);
     analyser.connect(audioCtx.destination);
     dataArray = new Uint8Array(analyser.frequencyBinCount);
 
+    // Particle Canvas Init
     const canvas = document.getElementById('snow-canvas');
     if (canvas) {
         snowCtx = canvas.getContext('2d');
@@ -321,6 +322,14 @@ function setupVisualizer() {
             });
         }
     }
+
+    // Soundwave Canvas Init
+    const wCanvas = document.getElementById('soundwave-canvas');
+    if (wCanvas) {
+        waveCtx = wCanvas.getContext('2d');
+        resizeWaveCanvas(wCanvas);
+        window.addEventListener('resize', () => resizeWaveCanvas(wCanvas));
+    }
 }
 
 function resizeCanvas(canvas) {
@@ -330,10 +339,19 @@ function resizeCanvas(canvas) {
     canvas.height = canvasH;
 }
 
+function resizeWaveCanvas(canvas) {
+    if (!canvas.parentElement) return;
+    waveCanvasW = canvas.parentElement.clientWidth;
+    waveCanvasH = canvas.parentElement.clientHeight;
+    canvas.width = waveCanvasW;
+    canvas.height = waveCanvasH;
+}
+
 function startVisualizer() {
     if (!isVisualizerRunning) {
         isVisualizerRunning = true;
-        document.getElementById('snow-canvas').style.opacity = '1';
+        const snow = document.getElementById('snow-canvas');
+        if (snow) snow.style.opacity = '1';
         renderFrame();
     }
 }
@@ -343,10 +361,12 @@ function renderFrame() {
 
     if (!isVisualizerRunning || audio.paused) {
         isVisualizerRunning = false;
-        document.getElementById('reactive-bg').style.boxShadow = 'none';
-        document.getElementById('snow-canvas').style.opacity = '0';
+        const bg = document.getElementById('reactive-bg');
+        if (bg) bg.style.boxShadow = 'none';
         
-        // Failsafe: Turn everything off when paused
+        const snow = document.getElementById('snow-canvas');
+        if (snow) snow.style.opacity = '0';
+        
         root.style.setProperty('--beat-glow-alpha', '0');
         root.style.setProperty('--cover-scale', '1');
         return;
@@ -363,75 +383,50 @@ function renderFrame() {
     for (let i = 0; i < dataArray.length; i++) totalSum += dataArray[i];
     const overallAverage = totalSum / dataArray.length;
 
-    // Keeps calculating the color even if effects are turned off
+    // Constantly shift hue based on audio energy
     colorHue += 0.2 + (overallAverage / 40);
     if (colorHue > 360) colorHue -= 360;
 
     const bg = document.getElementById('reactive-bg');
-    const now = Date.now();
-
-    // ==========================================
-    // 1. UI GLOW LOGIC (Breathing vs Flashing)
-    // ==========================================
+    
+    // UI Glow Engine
     if (bassAverage > 180) {
-        // 🔥 INTENSE BASS DROP
         const intensity = (bassAverage - 180) / 75;
         const blurSize = 150 + (intensity * 150); 
         const spreadSize = 20 + (intensity * 40); 
         
-        // Background always runs if visualizer is on
-        bg.style.boxShadow = `inset 0 0 ${blurSize}px ${spreadSize}px hsla(${colorHue}, 100%, 55%, ${0.15 + (intensity * 0.2)})`;
+        if (bg) bg.style.boxShadow = `inset 0 0 ${blurSize}px ${spreadSize}px hsla(${colorHue}, 100%, 55%, ${0.15 + (intensity * 0.2)})`;
         root.style.setProperty('--track-beat-alpha', 0.2 + (intensity * 0.6));
         
-        // 🎚️ THE TOGGLE CHECK
         if (userWantsUIGlow) {
             root.style.setProperty('--beat-glow-spread', `${12 + (intensity * 20)}px`);
             root.style.setProperty('--beat-glow-alpha', 0.6 + (intensity * 0.4));
             root.style.setProperty('--beat-hue', colorHue);
             root.style.setProperty('--cover-scale', 1.08 + (intensity * 0.1)); 
-        } else {
-            // Disappear instantly when tag is unchecked!
-            root.style.setProperty('--beat-glow-alpha', '0');
-            root.style.setProperty('--cover-scale', '1');
         }
-
     } else {
-        // ❄️ CHILL BEAT
         const chillLevel = Math.max(overallAverage, 1) / 120;
         const blurSize = 100 + (chillLevel * 100);
         const spreadSize = 10 + (chillLevel * 20);
         
-        // Background always runs if visualizer is on
-        bg.style.boxShadow = `inset 0 0 ${blurSize}px ${spreadSize}px hsla(${colorHue}, 100%, 50%, ${0.05 + (chillLevel * 0.1)})`;
+        if (bg) bg.style.boxShadow = `inset 0 0 ${blurSize}px ${spreadSize}px hsla(${colorHue}, 100%, 50%, ${0.05 + (chillLevel * 0.1)})`;
         root.style.setProperty('--track-beat-alpha', 0.05 + (chillLevel * 0.15));
         
-        // 🎚️ THE TOGGLE CHECK
         if (userWantsUIGlow) {
             root.style.setProperty('--beat-glow-spread', `${2 + (chillLevel * 6)}px`);
             root.style.setProperty('--beat-glow-alpha', 0.1 + (chillLevel * 0.3));
             root.style.setProperty('--beat-hue', colorHue);
             root.style.setProperty('--cover-scale', 1 + (chillLevel * 0.02)); 
-        } else {
-            // Disappear instantly when tag is unchecked!
-            root.style.setProperty('--beat-glow-alpha', '0');
-            root.style.setProperty('--cover-scale', '1');
-        }
-    }
-
-    // ==========================================
-    // 2. THE DYNAMIC LAUNCHPAD TRIGGER
-    // ==========================================
-    if (bassAverage > 140 && (now - lastBeatTime > 90)) {
-        lastBeatTime = now;
-        
-        // 🎚️ ONLY fire if the Launchpad switch is checked
-        if (typeof userWantsLaunchpad !== 'undefined' && userWantsLaunchpad) {
-            triggerDynamicLaunchpad(bassAverage); 
         }
     }
 
     drawParticles(colorHue, overallAverage);
+    drawSoundwave(dataArray, colorHue);
 }
+
+// ==========================================
+// 5. DRAWING ROUTINES
+// ==========================================
 function drawParticles(currentHue, overallAverage) {
     if (!snowCtx) return;
     snowCtx.clearRect(0, 0, canvasW, canvasH);
@@ -459,136 +454,82 @@ function drawParticles(currentHue, overallAverage) {
     }
 }
 
-// Add this right above the function to act as a metronome switch
-let isEvenBeat = true;
+function drawSoundwave(dataArray, currentHue) {
+    if (!waveCtx) return;
+    
+    waveCtx.clearRect(0, 0, waveCanvasW, waveCanvasH);
+    
+    const bufferLength = analyser.frequencyBinCount;
+    const barCount = 120; // Number of bars to draw
+    const barWidth = (waveCanvasW / barCount) * 1.5;
+    let barHeight;
+    let x = 0;
+
+    for (let i = 0; i < barCount; i++) {
+        const dataIndex = Math.floor(i * (bufferLength / barCount));
+        barHeight = dataArray[dataIndex] * 1.2; 
+
+        const gradient = waveCtx.createLinearGradient(0, waveCanvasH - barHeight, 0, waveCanvasH);
+        gradient.addColorStop(0, `hsla(${currentHue}, 100%, 60%, 1)`);
+        gradient.addColorStop(1, `hsla(${currentHue}, 80%, 20%, 0.1)`);
+
+        waveCtx.fillStyle = gradient;
+        
+        waveCtx.beginPath();
+        waveCtx.roundRect(x, waveCanvasH - barHeight, barWidth - 2, barHeight, [5, 5, 0, 0]);
+        waveCtx.fill();
+
+        x += barWidth;
+    }
+}
 
 // ==========================================
-// 5. DYNAMIC SMART LAUNCHPAD
+// 6. LYRICS ENGINE
 // ==========================================
-function triggerDynamicLaunchpad(bassStrength) {
-    const allInactiveTracks = document.querySelectorAll('.track:not(.active)');
-    const visibleTracks = Array.from(allInactiveTracks).filter(track => {
-        const rect = track.getBoundingClientRect();
-        return (rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight));
+function syncLyrics(currentTime) {
+    const lyricsContent = document.getElementById('lyrics-content');
+    if (!lyricsContent || currentLyrics.length === 0) return;
+
+    let activeIndex = -1;
+    for (let i = 0; i < currentLyrics.length; i++) {
+        if (currentTime >= currentLyrics[i].time) {
+            activeIndex = i;
+        } else {
+            break;
+        }
+    }
+
+    let html = '';
+    currentLyrics.forEach((lyric, index) => {
+        if (index === activeIndex) {
+            html += `<div style="color: #fff; font-size: 2rem; font-weight: bold; text-shadow: 0 0 10px var(--accent); transition: 0.3s; transform: scale(1.05);">${lyric.text}</div>`;
+        } else {
+            html += `<div style="transition: 0.3s; opacity: 0.5;">${lyric.text}</div>`;
+        }
     });
 
-    if (visibleTracks.length === 0) return;
-
-    // STATE 1: THE BUILDUP (Bass 150 to 175) -> Waterfall Effect
-    if (bassStrength < 175) {
-        if (currentPadIndex >= visibleTracks.length) currentPadIndex = 0;
+    // Only update the DOM if the active lyric has changed to prevent lag
+    if (lyricsContent.dataset.activeIndex !== activeIndex.toString()) {
+        lyricsContent.innerHTML = html;
+        lyricsContent.dataset.activeIndex = activeIndex;
         
-        const targetTrack = visibleTracks[currentPadIndex];
-        targetTrack.classList.add('launchpad-flash');
-        setTimeout(() => targetTrack.classList.remove('launchpad-flash'), 60);
-        
-        currentPadIndex++;
-        return; // Stop here, don't do random flashes
-    }
-
-    // STATE 2: NORMAL TO HEAVY DROP (Bass 175+) -> Random Flashes
-    let numFlashes = 1; // Default for a normal beat
-
-    if (bassStrength >= 195 && bassStrength < 210) {
-        numFlashes = 2; // Heavy beat
-    } else if (bassStrength >= 210) {
-        // Insane Drop: The louder it is, the more it flashes (Max 5)
-        numFlashes = Math.floor((bassStrength - 200) / 10) + 2; 
-        numFlashes = Math.min(numFlashes, 5, visibleTracks.length); 
-    }
-
-    // Execute the random drum pads based on the math above
-    for (let i = 0; i < numFlashes; i++) {
-        const randomTrack = visibleTracks[Math.floor(Math.random() * visibleTracks.length)];
-        
-        randomTrack.classList.add('launchpad-flash');
-        if (userWantsHyperGlow) randomTrack.classList.add('hyper-glow')
-        setTimeout(() => {
-            randomTrack.classList.remove('launchpad-flash');
-            randomTrack.classList.remove('hyper-glow'); // NEW
-        }, 70);
-    }
-}
-// ==========================================
-// 6. TOGGLES & INITIALIZATION
-// ==========================================
-function toggleVisualizerMode() {
-    userWantsVisualizer = document.getElementById('visualizerToggleInput').checked;
-    localStorage.setItem('visState', userWantsVisualizer);
-
-    if (userWantsVisualizer) {
-        if (!audio.paused && audio.src) {
-            isVisualizerRunning = false;
-            startVisualizer();
+        // Auto-scroll logic
+        const container = document.getElementById('lyrics-container');
+        const activeElement = lyricsContent.children[activeIndex];
+        if (activeElement && container) {
+            container.scrollTo({
+                top: activeElement.offsetTop - (container.clientHeight / 2) + (activeElement.clientHeight / 2),
+                behavior: 'smooth'
+            });
         }
-    } else {
-        isVisualizerRunning = false;
-        document.getElementById('reactive-bg').style.boxShadow = 'none';
-        document.getElementById('snow-canvas').style.opacity = '0';
-        document.documentElement.style.setProperty('--beat-glow-alpha', '0');
-        document.documentElement.style.setProperty('--cover-scale', '1');
     }
 }
 
-function toggleUIGlowMode() {
-    userWantsUIGlow = document.getElementById('uiGlowToggleInput').checked;
-    localStorage.setItem('glowState', userWantsUIGlow);
-    if (!userWantsUIGlow) {
-        document.documentElement.style.setProperty('--beat-glow-alpha', '0');
-        document.documentElement.style.setProperty('--cover-scale', '1');
-    }
-}
-
-function toggleLaunchpadMode() {
-    userWantsLaunchpad = document.getElementById('launchpadToggleInput').checked;
-    localStorage.setItem('padState', userWantsLaunchpad);
-}
-
-function toggleTransparentMode() {
-    userWantsTransparent = document.getElementById('transparentToggleInput').checked;
-    localStorage.setItem('transState', userWantsTransparent);
-    
-    if (userWantsTransparent) {
-        document.body.classList.add('glass-mode');
-        
-        // 🚀 THE CUSTOM FIX
-        const smallPlayerCover = document.getElementById('npCover');
-        const giantBackground = document.getElementById('cover-bg-image');
-        
-        if (smallPlayerCover && smallPlayerCover.style.backgroundImage && giantBackground) {
-            const rawCssUrl = smallPlayerCover.style.backgroundImage;
-            const cleanUrl = rawCssUrl.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-            
-            if (!cleanUrl.includes('music') && cleanUrl.length > 5) {
-                giantBackground.src = cleanUrl;
-            }
-        }
-    } else {
-        document.body.classList.remove('glass-mode');
-    }
-}
-
-function toggleHyperGlowMode() {
-    userWantsHyperGlow = document.getElementById('hyperGlowToggleInput').checked;
-    localStorage.setItem('hyperState', userWantsHyperGlow);
-}
-
+// ==========================================
+// 7. INITIALIZATION
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Set the physical switches to match the saved memory when the page loads
-    const visInput = document.getElementById('visualizerToggleInput');
-    const glowInput = document.getElementById('uiGlowToggleInput');
-    const padInput = document.getElementById('launchpadToggleInput');
-    const transInput = document.getElementById('transparentToggleInput');
-    const hyperInput = document.getElementById('hyperGlowToggleInput');
-    
-    if (visInput) visInput.checked = userWantsVisualizer;
-    if (glowInput) glowInput.checked = userWantsUIGlow;
-    if (padInput) padInput.checked = userWantsLaunchpad;
-    if (transInput) transInput.checked = userWantsTransparent;
-    if (hyperInput) hyperInput.checked = userWantsHyperGlow;
-    if (userWantsTransparent) document.body.classList.add('glass-mode');
-
-    // Bind Media Keys ONCE to prevent memory leaks and lag
+    // Media key bindings
     if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('play', togglePlay);
         navigator.mediaSession.setActionHandler('pause', togglePlay);

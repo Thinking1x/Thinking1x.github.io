@@ -10,34 +10,46 @@
 window.switchView = function(viewName) {
     const homeView = document.getElementById('homeView');
     const databaseView = document.getElementById('databaseView');
+    const nowPlayingView = document.getElementById('nowPlayingView'); // NEW: Soundwave view
     const viewTitle = document.getElementById('viewTitle');
+    
     const navHome = document.getElementById('navHome');
     const navAllTracks = document.getElementById('navAllTracks');
+    const navNowPlaying = document.getElementById('navNowPlaying'); // NEW: Nav button
 
-    // Failsafe checks
-    if (!homeView || !databaseView) return;
+    // 1. Hide all views
+    if (homeView) homeView.style.display = 'none';
+    if (databaseView) databaseView.style.display = 'none';
+    if (nowPlayingView) nowPlayingView.style.display = 'none';
 
-    // Remove active classes
-    if (navHome) navHome.classList.remove('active');
-    if (navAllTracks) navAllTracks.classList.remove('active');
+    // 2. Remove active state from all sidebar navigation items
+    document.querySelectorAll('.nav-links .nav-item').forEach(el => el.classList.remove('active'));
 
+    // 3. Route to the requested view
     if (viewName === 'home') {
-        // Show Home HUD
-        homeView.style.display = 'block';
-        databaseView.style.display = 'none';
-        
+        if (homeView) homeView.style.display = 'block';
         if (navHome) navHome.classList.add('active');
         if (viewTitle) viewTitle.innerText = "Discover Signals"; 
         
     } else if (viewName === 'database') {
-        // Show Database List
-        homeView.style.display = 'none';
-        databaseView.style.display = 'block';
+        if (databaseView) databaseView.style.display = 'block';
         
         // Only highlight the main database button if we aren't looking at a specific playlist
         if (currentViewPlaylistIndex === -1 && navAllTracks) {
             navAllTracks.classList.add('active');
             if (viewTitle) viewTitle.innerText = "All Tracks";
+        }
+        
+    } else if (viewName === 'nowPlaying') {
+        if (nowPlayingView) nowPlayingView.style.display = 'block';
+        if (navNowPlaying) navNowPlaying.classList.add('active');
+        if (viewTitle) viewTitle.innerText = "Now Playing";
+        
+        // CRITICAL: The canvas will render at 0px width if it is drawn while hidden (display: none).
+        // This forces the soundwave to recalculate its width the moment the view becomes visible.
+        const waveCanvas = document.getElementById('soundwave-canvas');
+        if (typeof resizeWaveCanvas === 'function' && waveCanvas) {
+            resizeWaveCanvas(waveCanvas);
         }
     }
 };
@@ -46,18 +58,14 @@ window.switchView = function(viewName) {
 // PLAYLIST RENDERING & COVERS
 // ==========================================
 
-// ==========================================
-// PLAYLIST RENDERING & COVERS
-// ==========================================
-
 function getPlaylistCover(playlist) {
     const plTracks = allTracks.filter(track => playlist.ids.includes(track.id));
     
-    // Your default backup image link
+    // Default backup image link
     const defaultImg = "https://i.imgur.com/YourCustomImage.png"; 
 
     if (plTracks.length > 0) {
-        // Just use the first song's cover, scaled down perfectly for the sidebar!
+        // Use the first song's cover, scaled down perfectly for the sidebar
         const singleCover = plTracks[0].cover && !plTracks[0].cover.includes('placeholder') ? plTracks[0].cover : defaultImg;
         return `<img src="${singleCover}" style="width:24px; height:24px; border-radius:4px; object-fit:cover; flex-shrink:0;">`;
     } else {
@@ -79,7 +87,6 @@ function renderPlaylists() {
         const div = document.createElement('div');
         div.className = `playlist-item ${currentViewPlaylistIndex === index ? 'active' : ''}`;
         
-        // Generate the dynamic cover art
         const coverArtHTML = getPlaylistCover(pl);
         const isMine = (pl.owner === currentUser);
 
@@ -112,9 +119,7 @@ function renderPlaylists() {
 
 function showAllTracks() {
     currentViewPlaylistIndex = -1;
-    
-    // Force the view to switch to the database screen
-    switchView('database');
+    switchView('database'); // Force view switch
     
     const editBtn = document.getElementById('editPlaylistBtn');
     if (editBtn) editBtn.classList.add('hidden');
@@ -128,8 +133,7 @@ function loadPlaylist(index) {
     currentViewPlaylistIndex = index;
     const pl = userPlaylists[index];
     
-    // Force the view to switch to the database screen
-    switchView('database');
+    switchView('database'); // Force view switch
     
     const viewTitle = document.getElementById('viewTitle');
     if (viewTitle) viewTitle.innerText = pl.name;
@@ -195,21 +199,16 @@ function renderTrackList() {
 // DYNAMIC GENRE SHELVES (HUD)
 // ==========================================
 
-// ==========================================
-// DYNAMIC SHELVES (RECENT & GENRES)
-// ==========================================
-
 function renderGenreShelves() {
     const canvas = document.querySelector('.hud-feed-canvas');
     if (!canvas) return;
 
-    // Remove all old shelves (including any hardcoded ones)
+    // Remove old dynamic shelves
     document.querySelectorAll('.hud-shelf').forEach(shelf => shelf.remove());
 
     if (!allTracks || allTracks.length === 0) return;
 
     // --- 1. RECENTLY TRANSMITTED SHELF ---
-    // Grabs the 6 newest tracks (reversing the array so newest are first)
     const recentTracks = [...allTracks].reverse().slice(0, 6);
 
     if (recentTracks.length > 0) {
