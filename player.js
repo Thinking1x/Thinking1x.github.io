@@ -36,21 +36,26 @@ let currentLyrics = [
 function parseLRC(lrcText) {
     const lines = lrcText.split('\n');
     const parsedLyrics = [];
-    // Matches the [mm:ss.xx] timestamp format
-    const timeRegEx = /\[(\d{2}):(\d{2})\.(\d{2,3})\]/;
+    // Matches standard [mm:ss.xx] or [mm:ss.xxx] formatting
+    const timeRegEx = /\[(\d{2}):(\d{2})\.(\d{1,3})\]/;
+
+    // Global time offset if you need to shift everything forward or backward globally (in seconds)
+    const timeOffset = 0.0; 
 
     lines.forEach(line => {
         const match = timeRegEx.exec(line);
         if (match) {
-            const minutes = parseInt(match[1]);
-            const seconds = parseInt(match[2]);
-            // Handles both 2-digit and 3-digit millisecond formats
-            const milliseconds = match[3].length === 2 ? parseInt(match[3]) * 10 : parseInt(match[3]);
+            const minutes = parseInt(match[1], 10);
+            const seconds = parseInt(match[2], 10);
+            const rawMilli = match[3];
             
-            // Convert to total seconds for the audio engine
-            const timeInSeconds = (minutes * 60) + seconds + (milliseconds / 1000);
-            const text = line.replace(timeRegEx, '').trim();
+            // Intelligently normalizes fractional seconds (e.g., .1 becomes 100ms, .10 becomes 100ms, .05 becomes 50ms)
+            const milliseconds = parseInt(rawMilli.padEnd(3, '0'), 10);
+            
+            let timeInSeconds = (minutes * 60) + seconds + (milliseconds / 1000) + timeOffset;
+            if (timeInSeconds < 0) timeInSeconds = 0;
 
+            const text = line.replace(timeRegEx, '').trim();
             if (text) {
                 parsedLyrics.push({ time: timeInSeconds, text: text });
             }

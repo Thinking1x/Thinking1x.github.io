@@ -39,7 +39,7 @@ async function fetchTracks() {
                 genre: doc.genre,
                 file: jwtToken ? `${doc.fileUrl}&jwt=${jwtToken}` : doc.fileUrl,
                 cover: finalCover,
-                rawLrcText: doc.rawLrcText || "" // ✅ Comma added here correctly!
+                rawLrcText: doc.rawLrcText || "" //  
             };
         });
 
