@@ -5,9 +5,14 @@
 // ==========================================
 // 1. GLOBAL VARIABLES & MEMORY
 // ==========================================
-// Default visual settings (since the toggle menu was removed)
+// Default visual settings
 let userWantsVisualizer = true;
 let userWantsUIGlow = true;
+
+// CRITICAL FIX: Define DOM elements at the very top so loadTrack can access them!
+const audio = document.getElementById('audio');
+const seekbar = document.getElementById('seekbar');
+const volumebar = document.getElementById('volumebar');
 
 let audioCtx, analyser, dataArray;
 let isVisualizerRunning = false;
@@ -23,7 +28,7 @@ let waveCtx, waveCanvasW, waveCanvasH;
 
 let isSwitchingTrack = false; // Debounce lock to prevent UI thread freezing
 
-// Dummy Lyrics Data (This can be dynamically updated later based on currentTrackIndex)
+// Dummy Lyrics Data
 let currentLyrics = [
     { time: 5.0, text: "System online..." },
     { time: 10.5, text: "Establishing connection to the main server." },
@@ -59,10 +64,9 @@ async function loadTrack(i, autoplay = false) {
     // 4. INSTANT UI RESET
     const totalTimeEl = document.getElementById('totalTime');
     const currentTimeEl = document.getElementById('currentTime');
-    const seekbarEl = document.getElementById('seekbar');
     if (totalTimeEl) totalTimeEl.innerText = "--:--";
     if (currentTimeEl) currentTimeEl.innerText = "0:00";
-    if (seekbarEl) seekbarEl.value = 0;
+    if (seekbar) seekbar.value = 0;
 
     // 5. Update tiny cover art
     const coverArtEl = document.getElementById('npCover');
@@ -236,7 +240,6 @@ audio.addEventListener('loadedmetadata', () => {
     if (totalTimeEl) totalTimeEl.innerText = formatTime(audio.duration); 
 });
 
-const seekbar = document.getElementById('seekbar');
 let isSeeking = false;
 
 if (seekbar) {
@@ -261,11 +264,10 @@ audio.addEventListener('timeupdate', () => {
         const currentTimeEl = document.getElementById('currentTime');
         if (currentTimeEl) currentTimeEl.innerText = formatTime(audio.currentTime);
         
-        syncLyrics(audio.currentTime); // Fire lyrics sync
+        syncLyrics(audio.currentTime); 
     }
 });
 
-const volumebar = document.getElementById('volumebar');
 if (volumebar) {
     volumebar.addEventListener('input', () => {
         audio.volume = volumebar.value / 100;
@@ -299,14 +301,13 @@ function setupVisualizer() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     audioCtx = new AudioContext();
     analyser = audioCtx.createAnalyser();
-    analyser.fftSize = 1024; // High resolution for smooth waveforms
+    analyser.fftSize = 1024; 
     
     const source = audioCtx.createMediaElementSource(audio);
     source.connect(analyser);
     analyser.connect(audioCtx.destination);
     dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-    // Particle Canvas Init
     const canvas = document.getElementById('snow-canvas');
     if (canvas) {
         snowCtx = canvas.getContext('2d');
@@ -323,7 +324,6 @@ function setupVisualizer() {
         }
     }
 
-    // Soundwave Canvas Init
     const wCanvas = document.getElementById('soundwave-canvas');
     if (wCanvas) {
         waveCtx = wCanvas.getContext('2d');
@@ -383,13 +383,11 @@ function renderFrame() {
     for (let i = 0; i < dataArray.length; i++) totalSum += dataArray[i];
     const overallAverage = totalSum / dataArray.length;
 
-    // Constantly shift hue based on audio energy
     colorHue += 0.2 + (overallAverage / 40);
     if (colorHue > 360) colorHue -= 360;
 
     const bg = document.getElementById('reactive-bg');
     
-    // UI Glow Engine
     if (bassAverage > 180) {
         const intensity = (bassAverage - 180) / 75;
         const blurSize = 150 + (intensity * 150); 
@@ -460,7 +458,7 @@ function drawSoundwave(dataArray, currentHue) {
     waveCtx.clearRect(0, 0, waveCanvasW, waveCanvasH);
     
     const bufferLength = analyser.frequencyBinCount;
-    const barCount = 120; // Number of bars to draw
+    const barCount = 120; 
     const barWidth = (waveCanvasW / barCount) * 1.5;
     let barHeight;
     let x = 0;
@@ -508,12 +506,10 @@ function syncLyrics(currentTime) {
         }
     });
 
-    // Only update the DOM if the active lyric has changed to prevent lag
     if (lyricsContent.dataset.activeIndex !== activeIndex.toString()) {
         lyricsContent.innerHTML = html;
         lyricsContent.dataset.activeIndex = activeIndex;
         
-        // Auto-scroll logic
         const container = document.getElementById('lyrics-container');
         const activeElement = lyricsContent.children[activeIndex];
         if (activeElement && container) {
@@ -529,7 +525,6 @@ function syncLyrics(currentTime) {
 // 7. INITIALIZATION
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // Media key bindings
     if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('play', togglePlay);
         navigator.mediaSession.setActionHandler('pause', togglePlay);
