@@ -427,58 +427,42 @@ async function fetchCoverArt(trackName, artistName) {
 // ==========================================
 // DEEZER API ARTIST PICTURE MATCHER (WITH FAILSAFES)
 // ==========================================
+// ==========================================
+// iTUNES ARTIST IMAGE MATCHER (BY ARTIST NAME)
+// ==========================================
 function fetchArtistImage(artistName) {
     return new Promise(async (resolve) => {
-        const primaryArtist = artistName.split(/&|feat\.?|ft\.?| x |,/i)[0].trim();
-        
-        // ATTEMPT 1: Try Deezer via a reliable CORS Proxy
         try {
-            const proxyUrl = `https://api.allorigins.win/raw?url=`;
-            const deezerUrl = `https://api.deezer.com/search/artist?q=${encodeURIComponent(primaryArtist)}`;
+            // Clean up featured artists (e.g., "Wiz Khalifa ft. Charlie Puth" -> "Wiz Khalifa")
+            const primaryArtist = artistName.split(/&|feat\.?|ft\.?| x |,/i)[0].trim();
             
-            const response = await fetch(proxyUrl + encodeURIComponent(deezerUrl));
+            // Query iTunes for the artist entity
+            const url = `https://itunes.apple.com/search?term=${encodeURIComponent(primaryArtist)}&entity=musicArtist&limit=1`;
+            
+            const response = await fetch(url);
             const data = await response.json();
             
-            if (data && data.data && data.data.length > 0) {
-                return resolve(data.data[0].picture_xl);
+            if (data.results && data.results.length > 0 && data.results[0].artistName) {
+                // iTunes artist search doesn't always give a direct square portrait URL, 
+                // but we can query their top album to grab a high-res cover photo as a fallback portrait!
+                const artistId = data.results[0].artistId;
+                const albumUrl = `https://itunes.apple.com/lookup?id=${artistId}&entity=album&limit=1`;
+                
+                const albumRes = await fetch(albumUrl);
+                const albumData = await albumRes.json();
+                
+                if (albumData.results && albumData.results.length > 1) {
+                    // Grab the artwork from their top release and upgrade it to high resolution (600x600)
+                    const highResArt = albumData.results[1].artworkUrl100.replace('100x100bb.jpg', '600x600bb.jpg');
+                    return resolve(highResArt);
+                }
             }
-        } catch (err) {
-            console.warn("CORS proxy failed, attempting JSONP fallback...");
-        }
-
-        // ATTEMPT 2: JSONP Fallback with a strict 3-second timeout
-        const script = document.createElement('script');
-        const callbackName = 'deezer_' + Math.random().toString(36).substr(2, 9);
-        
-        // Failsafe Timeout: If Deezer doesn't reply in 3 seconds, give up and use the album cover.
-        const timeout = setTimeout(() => {
-            cleanup();
+            
             resolve(null);
-        }, 3000);
-
-        function cleanup() {
-            if (window[callbackName]) delete window[callbackName];
-            if (script.parentNode) document.body.removeChild(script);
-        }
-        
-        window[callbackName] = function(response) {
-            clearTimeout(timeout);
-            cleanup();
-            if (response && response.data && response.data.length > 0) {
-                resolve(response.data[0].picture_xl);
-            } else {
-                resolve(null);
-            }
-        };
-        
-        script.onerror = function() {
-            clearTimeout(timeout);
-            cleanup();
+        } catch (error) {
+            console.warn("iTunes Artist Fetch Error:", error);
             resolve(null);
-        };
-        
-        script.src = `https://api.deezer.com/search/artist?q=${encodeURIComponent(primaryArtist)}&output=jsonp&callback=${callbackName}`;
-        document.body.appendChild(script);
+        }
     });
 }
 
