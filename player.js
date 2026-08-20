@@ -213,6 +213,7 @@ function nextTrack(isAutoAdvance = false) {
         return;
     }
 
+    // Handle Repeat One
     if (typeof repeatMode !== 'undefined' && repeatMode === 2 && isAutoAdvance && audioEl) {
         audioEl.currentTime = 0; 
         audioEl.play().catch(e => {}); 
@@ -221,7 +222,10 @@ function nextTrack(isAutoAdvance = false) {
     
     if (typeof currentPlaylistTracks === 'undefined' || currentPlaylistTracks.length === 0) return;
 
-    const currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
+    // Fortified Index Tracking
+    let currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
+    if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
+
     let nextIndexInPlaylist;
 
     if (typeof isShuffle !== 'undefined' && isShuffle && currentPlaylistTracks.length > 1) {
@@ -232,7 +236,7 @@ function nextTrack(isAutoAdvance = false) {
         nextIndexInPlaylist = currentIndexInPlaylist + 1;
         if (nextIndexInPlaylist >= currentPlaylistTracks.length) {
             if (typeof repeatMode !== 'undefined' && repeatMode === 1) {
-                nextIndexInPlaylist = 0;
+                nextIndexInPlaylist = 0; // Loop back to start
             } else { 
                 if (audioEl) audioEl.pause(); 
                 const playIcon = document.getElementById('playIcon');
@@ -243,7 +247,7 @@ function nextTrack(isAutoAdvance = false) {
     }
     
     const originalIndex = allTracks.findIndex(t => t.id === currentPlaylistTracks[nextIndexInPlaylist].id);
-    loadTrack(originalIndex, true);
+    if (originalIndex !== -1) loadTrack(originalIndex, true);
 }
 
 function prevTrack() {
@@ -266,11 +270,68 @@ function prevTrack() {
     
     if (typeof currentPlaylistTracks === 'undefined' || currentPlaylistTracks.length === 0) return;
 
-    const currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
-    const prevIndexInPlaylist = (currentIndexInPlaylist - 1 + currentPlaylistTracks.length) % currentPlaylistTracks.length;
-    const originalIndex = allTracks.findIndex(t => t.id === currentPlaylistTracks[prevIndexInPlaylist].id);
+    // Fortified Index Tracking
+    let currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
+    if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
+
+    let prevIndexInPlaylist;
+
+    if (typeof isShuffle !== 'undefined' && isShuffle && currentPlaylistTracks.length > 1) {
+        do { 
+            prevIndexInPlaylist = Math.floor(Math.random() * currentPlaylistTracks.length); 
+        } while (prevIndexInPlaylist === currentIndexInPlaylist);
+    } else {
+        prevIndexInPlaylist = (currentIndexInPlaylist - 1 + currentPlaylistTracks.length) % currentPlaylistTracks.length;
+    }
     
-    loadTrack(originalIndex, true);
+    const originalIndex = allTracks.findIndex(t => t.id === currentPlaylistTracks[prevIndexInPlaylist].id);
+    if (originalIndex !== -1) loadTrack(originalIndex, true);
+}
+
+function toggleShuffle() {
+    if (typeof isShuffle !== 'undefined') {
+        isShuffle = !isShuffle;
+        const btn = document.getElementById('shuffleBtn');
+        if (btn) {
+            if (isShuffle) {
+                btn.classList.add('active');
+                btn.style.color = 'var(--accent, #00ffcc)';
+                btn.style.textShadow = '0 0 8px var(--accent, #00ffcc)';
+            } else {
+                btn.classList.remove('active');
+                btn.style.color = '';
+                btn.style.textShadow = '';
+            }
+        }
+    }
+}
+
+function toggleRepeat() {
+    if (typeof repeatMode !== 'undefined') {
+        repeatMode = (repeatMode + 1) % 3;
+        const btn = document.getElementById('repeatBtn');
+        if (!btn) return;
+        const icon = btn.querySelector('i');
+
+        btn.classList.remove('active');
+        btn.removeAttribute('data-repeat-one');
+        btn.style.color = '';
+        btn.style.textShadow = '';
+
+        if (repeatMode === 1) {
+            btn.classList.add('active');
+            if (icon) icon.className = 'fas fa-redo-alt';
+            btn.style.color = 'var(--accent, #00ffcc)';
+        } else if (repeatMode === 2) {
+            btn.classList.add('active');
+            if (icon) icon.className = 'fas fa-redo-alt';
+            btn.setAttribute('data-repeat-one', 'true');
+            btn.style.color = 'var(--success, #00e676)';
+        } else {
+            if (icon) icon.className = 'fas fa-redo-alt';
+            btn.style.color = 'var(--text-sub, #a7a7a7)';
+        }
+    }
 }
 
 // ==========================================
@@ -569,14 +630,12 @@ function drawSoundwave(dataArray, currentHue) {
     waveCtx.shadowBlur = 0;
 }
 
-// ==========================================
-// 7. LYRICS ENGINE
-// ==========================================
 function syncLyrics(currentTime) {
     const lyricsContent = document.getElementById('lyrics-content');
     if (!lyricsContent || currentLyrics.length === 0) return;
 
-    let activeIndex = -1;
+    // 1. Find the current active lyric index
+    let activeIndex = 0;
     for (let i = 0; i < currentLyrics.length; i++) {
         if (currentTime >= currentLyrics[i].time) {
             activeIndex = i;
@@ -585,19 +644,39 @@ function syncLyrics(currentTime) {
         }
     }
 
+    // 2. Calculate progress percentage for the active line (0% to 100%)
+    let lineProgress = 100;
+    const currentLyric = currentLyrics[activeIndex];
+    const nextLyric = currentLyrics[activeIndex + 1];
+
+    if (nextLyric) {
+        const lineDuration = nextLyric.time - currentLyric.time;
+        const elapsedInLine = currentTime - currentLyric.time;
+        // Clamp progress between 0 and 100
+        lineProgress = Math.max(0, Math.min(100, (elapsedInLine / lineDuration) * 100));
+    }
+
+    // 3. Render HTML structure with progress variable
     let html = '';
     currentLyrics.forEach((lyric, index) => {
+        let className = 'lyric-line';
+        let styleAttr = '';
+
         if (index === activeIndex) {
-            html += `<div style="color: #fff; font-size: 2rem; font-weight: bold; text-shadow: 0 0 10px var(--accent); transition: 0.3s; transform: scale(1.05);">${lyric.text}</div>`;
-        } else {
-            html += `<div style="transition: 0.3s; opacity: 0.5;">${lyric.text}</div>`;
+            className += ' active';
+            // Injects the CSS variable dynamically so the gradient moves smoothly
+            styleAttr = `style="--progress: ${lineProgress}%;"`;
         }
+
+        // Wrap the text in a <span> so the gradient fill targets the text cleanly
+        html += `<div class="${className}" ${styleAttr} onclick="jumpToLyric(${lyric.time})"><span>${lyric.text}</span></div>`;
     });
 
     if (lyricsContent.dataset.activeIndex !== activeIndex.toString()) {
         lyricsContent.innerHTML = html;
-        lyricsContent.dataset.activeIndex = activeIndex;
+        lyricsContent.dataset.activeIndex = activeIndex.toString();
         
+        // Smooth auto-scrolling
         const container = document.getElementById('lyrics-container');
         const activeElement = lyricsContent.children[activeIndex];
         if (activeElement && container) {
@@ -606,6 +685,20 @@ function syncLyrics(currentTime) {
                 behavior: 'smooth'
             });
         }
+    } else {
+        // If we are on the same line, update the progress variable live without re-rendering the whole DOM
+        const activeElement = lyricsContent.children[activeIndex];
+        if (activeElement) {
+            activeElement.style.setProperty('--progress', `${lineProgress}%`);
+        }
+    }
+}
+
+// BONUS: Click any lyric line to instantly jump the song to that exact timestamp!
+function jumpToLyric(targetTime) {
+    const audioEl = document.getElementById('audio');
+    if (audioEl && !isNaN(targetTime)) {
+        audioEl.currentTime = targetTime;
     }
 }
 
