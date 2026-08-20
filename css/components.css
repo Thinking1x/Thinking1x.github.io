@@ -590,3 +590,29 @@
 .storage-text { display: flex; justify-content: space-between; align-items: center; }
 .storage-bar-bg { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; overflow: hidden; }
 .storage-bar-fill { width: 84%; height: 100%; background: var(--accent); border-radius: 10px; }
+
+/* Base style for inactive future/past lyrics */
+.lyric-line {
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.3); 
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    margin: 16px 0;
+    cursor: pointer;
+    text-align: center;
+}
+
+/* Make the active line bigger and give it a glow */
+.lyric-line.active {
+    font-size: 2rem;
+    font-weight: 800;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    transform: scale(1.02);
+}
+
+/* THE MAGIC: The sweeping word-by-word gradient fill */
+.lyric-line.active span {
+    background: linear-gradient(90deg, #ffffff var(--progress, 0%), rgba(255, 255, 255, 0.3) var(--progress, 0%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

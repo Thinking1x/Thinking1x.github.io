@@ -83,6 +83,7 @@ async function loadTrack(i, autoplay = false) {
     if (cleanUrl.includes('&jwt=')) cleanUrl = cleanUrl.split('&jwt=')[0];
     if (cleanUrl.includes('?jwt=')) cleanUrl = cleanUrl.split('?jwt=')[0];
 
+    audioEl.crossOrigin = "anonymous";
     audioEl.src = cleanUrl;
     audioEl.preload = 'auto'; 
     audioEl.load(); 

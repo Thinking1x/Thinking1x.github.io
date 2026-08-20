@@ -353,28 +353,3 @@ input[type=range]:hover::-webkit-slider-thumb { opacity: 1; transform: scale(1.2
     .album-art, #npCover { width: 36px; height: 36px; }
     .buttons { gap: 8px; }
 }
-
-
-.lyric-line {
-    font-size: 1.6rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.3); /* Faded future/past lines */
-    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-    margin: 16px 0;
-    cursor: pointer;
-}
-
-.lyric-line.active {
-    color: #ffffff;
-    font-size: 2rem;
-    font-weight: 800;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-    transform: scale(1.02);
-}
-
-/* This creates the smooth word-filling gradient progress */
-.lyric-line.active span {
-    background: linear-gradient(90deg, #fff var(--progress, 0%), rgba(255, 255, 255, 0.3) var(--progress, 0%));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
