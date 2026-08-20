@@ -352,4 +352,3 @@ input[type=range]:hover::-webkit-slider-thumb { opacity: 1; transform: scale(1.2
     .shelf-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)) !important; }
     .album-art, #npCover { width: 36px; height: 36px; }
     .buttons { gap: 8px; }
-}

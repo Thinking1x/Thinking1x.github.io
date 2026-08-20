@@ -10,6 +10,8 @@ let userWantsUIGlow = localStorage.getItem('glowState') === null ? true : (local
 let showWaveform = true; 
 let isSwitchingTrack = false;
 let isSeeking = false;
+let showParticles = true;
+let showCinematicBg = true;
 
 let audioCtx, analyser, dataArray;
 let isVisualizerRunning = false;
@@ -567,31 +569,12 @@ function renderFrame() {
 // 6. DRAWING ROUTINES
 // ==========================================
 function drawParticles(currentHue, overallAverage) {
-    if (!snowCtx) return;
+    if (!snowCtx || !showParticles) return; // 👈 Add the !showParticles check here
     snowCtx.clearRect(0, 0, canvasW, canvasH);
     const pulse = overallAverage / 255; 
 
     for(let i = 0; i < MAX_PARTICLES; i++) {
-        let p = particles[i];
-        snowCtx.beginPath();
-        const responsiveSize = p.size + (pulse * 2.5); 
-        const speed = 0.3 + (pulse * 0.8); 
-        const alpha = 0.15 + (pulse * 0.3); 
-        
-        snowCtx.fillStyle = `hsla(${currentHue}, 80%, 75%, ${alpha})`;
-        snowCtx.arc(p.x, p.y, responsiveSize, 0, Math.PI * 2);
-        
-        p.y -= speed; 
-        p.x += Math.sin(p.sway) * 0.3; 
-        p.sway += 0.015;
-        
-        if (p.y < -10) {
-            p.y = canvasH + 10;
-            p.x = Math.random() * canvasW;
-        }
-        snowCtx.fill();
-    }
-}
+    // ... rest of the code remains the same
 
 function drawSoundwave(dataArray, currentHue) {
     if (!waveCtx || !showWaveform) return;
@@ -731,10 +714,10 @@ function toggleVisualizerMode() {
         isVisualizerRunning = false;
         const bg = document.getElementById('reactive-bg');
         if (bg) bg.style.boxShadow = 'none';
-        
+
         const snow = document.getElementById('snow-canvas');
         if (snow) snow.style.opacity = '0';
-        
+
         document.documentElement.style.setProperty('--beat-glow-alpha', '0');
         document.documentElement.style.setProperty('--cover-scale', '1');
     }
@@ -752,17 +735,17 @@ function toggleUIGlowMode() {
 function toggleTransparentMode() {
     let userWantsTransparent = document.getElementById('transparentToggleInput').checked;
     localStorage.setItem('transState', userWantsTransparent);
-    
+
     if (userWantsTransparent) {
         document.body.classList.add('glass-mode');
-        
+
         const smallPlayerCover = document.getElementById('npCover');
         const giantBackground = document.getElementById('cover-bg-image');
-        
+
         if (smallPlayerCover && smallPlayerCover.style.backgroundImage && giantBackground) {
             const rawCssUrl = smallPlayerCover.style.backgroundImage;
             const cleanUrl = rawCssUrl.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-            
+
             if (!cleanUrl.includes('music') && cleanUrl.length > 5) {
                 giantBackground.src = cleanUrl;
             }
@@ -775,4 +758,44 @@ function toggleTransparentMode() {
 function toggleHyperGlowMode() {
     let userWantsHyperGlow = document.getElementById('hyperGlowToggleInput').checked;
     localStorage.setItem('hyperState', userWantsHyperGlow);
+}
+
+// --- NEW NOW PLAYING DECK TOGGLES ---
+
+function toggleParticles() {
+    showParticles = !showParticles;
+    const btn = document.getElementById('particleToggleBtn');
+    const canvas = document.getElementById('snow-canvas');
+    
+    if (btn) btn.style.opacity = showParticles ? '1' : '0.4';
+    
+    if (!showParticles && canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
+function toggleCinematicBg() {
+    showCinematicBg = !showCinematicBg;
+    const btn = document.getElementById('bgToggleBtn');
+    const npBg = document.getElementById('np-background'); 
+    
+    if (btn) btn.style.opacity = showCinematicBg ? '1' : '0.4';
+    
+    if (npBg) {
+        // Adjust 0.4 to match whatever your default background opacity is set to
+        npBg.style.opacity = showCinematicBg ? '0.4' : '0'; 
+    }
+}
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+    }
 }
