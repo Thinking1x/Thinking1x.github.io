@@ -147,19 +147,30 @@ body.glass-mode .background-cover { display: block !important; }
 /* ==========================================
    6. NOW PLAYING CINEMATIC BACKDROP
 ========================================== */
+#nowPlayingView {
+    position: relative;
+    overflow: hidden; /* Contains the scaled image so it doesn't bleed out */
+}
+
 #np-background {
-    position: fixed;
+    position: absolute; /* Keeps it locked inside the Now Playing view */
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    z-index: -2; /* Keeps it strictly behind the UI */
+    z-index: 0; /* Brings it in front of the black body background */
     opacity: 0.4; /* Controlled by your JS toggle */
     filter: blur(25px) brightness(0.5);
     transform: scale(1.1); /* Hides the white blurred edges */
     transition: opacity 0.5s ease-in-out;
     pointer-events: none;
+}
+
+/* Ensure the Now Playing content stays in front of the background */
+.np-container {
+    position: relative;
+    z-index: 10;
 }
 
 /* Ensure the Now Playing content stays in front of the background */
