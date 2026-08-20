@@ -424,6 +424,32 @@ async function fetchCoverArt(trackName, artistName) {
         return null;
     }
 }
+// ==========================================
+// DEEZER API ARTIST PICTURE MATCHER (JSONP)
+// ==========================================
+function fetchArtistImage(artistName) {
+    return new Promise((resolve) => {
+        // Clean up features/collabs so we just search the main artist (e.g., "JENNIE x Tame Impala" -> "JENNIE")
+        const primaryArtist = artistName.split(/&|feat\.?|ft\.?| x |,/i)[0].trim();
+
+        const script = document.createElement('script');
+        const callbackName = 'deezer_' + Math.random().toString(36).substr(2, 9);
+        
+        window[callbackName] = function(response) {
+            delete window[callbackName];
+            document.body.removeChild(script);
+            
+            if (response && response.data && response.data.length > 0) {
+                resolve(response.data[0].picture_xl); // Grabs the high-res artist profile picture!
+            } else {
+                resolve(null);
+            }
+        };
+        
+        script.src = `https://api.deezer.com/search/artist?q=${encodeURIComponent(primaryArtist)}&output=jsonp&callback=${callbackName}`;
+        document.body.appendChild(script);
+    });
+}
 
 // ==========================================
 // ADMIN FUNCTIONS (Security Clearance)

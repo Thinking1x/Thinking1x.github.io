@@ -416,20 +416,43 @@ function renderDashboard() {
         }
     }
 
-    // 2. Render Top Artists (Circular Avatars)
+// 2. Render Top Artists (Circular Avatars with Deezer API)
     if (artistsGrid) {
         const topArtists = typeof getTopArtists === 'function' ? getTopArtists().slice(0, 10) : [];
         if (topArtists.length > 0) {
-            artistsGrid.innerHTML = topArtists.map(artist => `
-                <div class="music-card" style="align-items: center; text-align: center;">
+            
+            // Step A: Immediately render the UI with blurred placeholders
+            artistsGrid.innerHTML = topArtists.map((artist, index) => `
+                <div class="music-card" style="align-items: center; text-align: center; scroll-snap-align: start;">
                     <div class="card-cover-wrapper" style="border-radius: 50% !important; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
-                        <img src="${artist.cover}" class="card-cover" alt="Artist Avatar" style="border-radius: 50% !important;">
+                        <img id="artist-img-${index}" src="${artist.cover}" class="card-cover" alt="Artist Avatar" style="border-radius: 50% !important; filter: blur(8px); transition: filter 0.5s ease, opacity 0.5s ease;">
                     </div>
                     <div class="card-meta" style="align-items: center;">
                         <span class="card-title" style="font-size: 0.95rem;">${artist.name}</span>
                         <span class="card-subtitle" style="color: var(--accent) !important;">${artist.totalPlays} Plays</span>
                     </div>
                 </div>`).join('');
+
+            // Step B: Quietly fetch the real faces in the background and swap them in
+            topArtists.forEach(async (artist, index) => {
+                const imgEl = document.getElementById(`artist-img-${index}`);
+                if (imgEl) {
+                    const realImage = await fetchArtistImage(artist.name);
+                    if (realImage) {
+                        // Create a seamless crossfade
+                        imgEl.style.opacity = '0';
+                        setTimeout(() => {
+                            imgEl.src = realImage;
+                            imgEl.style.filter = 'blur(0px)';
+                            imgEl.style.opacity = '1';
+                        }, 200);
+                    } else {
+                        // If no image is found on Deezer, unblur the album cover as a fallback
+                        imgEl.style.filter = 'blur(0px)';
+                    }
+                }
+            });
+            
         } else {
             artistsGrid.innerHTML = `<p style="color: var(--text-sub); padding: 10px;">Play some tracks to generate data!</p>`;
         }
