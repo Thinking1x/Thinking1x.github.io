@@ -468,24 +468,30 @@
 }
 
 /* ==========================================
-   ARTIST PAGE (SPOTIFY LAYOUT)
+   ARTIST PAGE (CLEAN SPOTIFY LAYOUT)
 ========================================== */
+#artistView {
+  padding: 0 10px 40px 10px;
+}
+
 .artist-hero-banner {
   position: relative;
-  height: 320px;
-  margin: -20px -24px 20px -24px;
+  height: 300px;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
   background-size: cover;
-  background-position: center 25%;
+  background-position: center;
   display: flex;
   align-items: flex-end;
   padding: 30px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 24px;
 }
 
 .artist-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(5, 5, 8, 0.2) 0%, rgba(5, 5, 8, 0.85) 80%, rgba(5, 5, 8, 1) 100%);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.1) 0%, rgba(5, 5, 8, 0.8) 75%, rgba(5, 5, 8, 0.95) 100%);
   z-index: 1;
 }
 
@@ -494,12 +500,12 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .artist-verified-badge {
   color: var(--accent, #00e5ff);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -508,18 +514,20 @@
 }
 
 .artist-name-title {
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: 900;
   color: #fff;
-  letter-spacing: -1.5px;
-  line-height: 1;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  letter-spacing: -1px;
+  line-height: 1.1;
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+  margin: 0;
 }
 
 .artist-stats-sub {
   color: var(--text-sub, #a7a7a7);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
+  margin: 0;
 }
 
 /* Action Bar */
@@ -527,12 +535,12 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-bottom: 30px;
+  margin-bottom: 35px;
 }
 
 .artist-play-btn {
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: var(--accent, #00e5ff);
   color: #000;
@@ -540,14 +548,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 229, 255, 0.3);
+  box-shadow: 0 6px 18px rgba(0, 229, 255, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .artist-play-btn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 10px 25px rgba(0, 229, 255, 0.5);
+  transform: scale(1.06);
+  box-shadow: 0 8px 22px rgba(0, 229, 255, 0.5);
 }
 
 .artist-pill-btn {
@@ -572,13 +580,13 @@
 /* 2-Column Body Layout */
 .artist-body-grid {
   display: grid;
-  grid-template-columns: 1.8fr 1fr;
-  gap: 40px;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 30px;
   margin-bottom: 40px;
 }
 
 .section-heading {
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 800;
   margin-bottom: 16px;
   color: #fff;
@@ -588,14 +596,14 @@
 .artist-track-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .artist-track-row {
   display: grid;
-  grid-template-columns: 30px 48px 1fr 90px;
+  grid-template-columns: 24px 40px 1fr 80px;
   align-items: center;
-  padding: 8px 12px;
+  padding: 8px 10px;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -606,13 +614,13 @@
 }
 
 .artist-row-num {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-sub);
   text-align: center;
 }
 .artist-row-cover {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 4px;
   object-fit: cover;
 }
@@ -624,14 +632,14 @@
 .artist-row-title {
   color: #fff;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .artist-row-plays {
   color: var(--text-sub);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-align: right;
 }
 
@@ -639,10 +647,10 @@
 .artist-spotlight-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
-  padding: 18px;
+  border-radius: 10px;
+  padding: 14px;
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
   cursor: pointer;
   transition: background 0.2s ease, transform 0.2s ease;
@@ -652,15 +660,20 @@
   transform: translateY(-2px);
 }
 .artist-spotlight-cover {
-  width: 90px;
-  height: 90px;
-  border-radius: 8px;
+  width: 75px;
+  height: 75px;
+  border-radius: 6px;
   object-fit: cover;
+}
+
+/* Discography Section */
+.artist-discography-section {
+  margin-top: 20px;
 }
 
 /* Responsive adjustment */
 @media (max-width: 900px) {
-  .artist-name-title { font-size: 2.4rem; }
+  .artist-name-title { font-size: 2.2rem; }
   .artist-body-grid { grid-template-columns: 1fr; }
-  .artist-hero-banner { height: 240px; }
+  .artist-hero-banner { height: 220px; }
 }
