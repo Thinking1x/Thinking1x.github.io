@@ -12,6 +12,8 @@ let isSwitchingTrack = false;
 let isSeeking = false;
 let showParticles = true;
 let showCinematicBg = true;
+let upNextShown = false;
+let lockedNextTrackIndex = -1;
 
 let audioCtx, analyser, dataArray;
 let isVisualizerRunning = false;
@@ -63,6 +65,8 @@ function parseLRC(lrcText) {
 }
 
 async function loadTrack(i, autoplay = false) {
+    lockedNextTrackIndex = -1;
+    hideUpNextNotification();
     const audioEl = document.getElementById('audio');
     if (!audioEl) return;
     
@@ -216,33 +220,26 @@ function nextTrack(isAutoAdvance = false) {
         return;
     }
     
-    if (typeof currentPlaylistTracks === 'undefined' || currentPlaylistTracks.length === 0) return;
-
-    let currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
-    if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
-
-    let nextIndexInPlaylist;
-
-    if (typeof isShuffle !== 'undefined' && isShuffle && currentPlaylistTracks.length > 1) {
-        do { 
-            nextIndexInPlaylist = Math.floor(Math.random() * currentPlaylistTracks.length); 
-        } while (nextIndexInPlaylist === currentIndexInPlaylist);
-    } else {
-        nextIndexInPlaylist = currentIndexInPlaylist + 1;
-        if (nextIndexInPlaylist >= currentPlaylistTracks.length) {
-            if (typeof repeatMode !== 'undefined' && repeatMode === 1) {
-                nextIndexInPlaylist = 0; 
-            } else { 
-                if (audioEl) audioEl.pause(); 
-                const playIcon = document.getElementById('playIcon');
-                if (playIcon) playIcon.className = 'fas fa-play'; 
-                return; 
-            }
-        }
-    }
+    let targetIndex;
     
-    const originalIndex = allTracks.findIndex(t => t.id === currentPlaylistTracks[nextIndexInPlaylist].id);
-    if (originalIndex !== -1) loadTrack(originalIndex, true);
+    // THE MAGIC: If the toast notification locked a song in, play THAT exact song.
+    if (lockedNextTrackIndex !== -1) {
+        targetIndex = lockedNextTrackIndex;
+        lockedNextTrackIndex = -1; // Reset memory
+    } else {
+        targetIndex = peekNextTrackIndex(); // Otherwise, calculate normally
+    }
+
+    // Hide the notification immediately when changing tracks
+    hideUpNextNotification();
+
+    if (targetIndex !== -1) {
+        loadTrack(targetIndex, true);
+    } else {
+        if (audioEl) audioEl.pause(); 
+        const playIcon = document.getElementById('playIcon');
+        if (playIcon) playIcon.className = 'fas fa-play'; 
+    }
 }
 
 function prevTrack() {
@@ -360,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (totalTimeEl) totalTimeEl.innerText = formatTime(audioEl.duration); 
         });
 
-        audioEl.addEventListener('timeupdate', () => {
+       audioEl.addEventListener('timeupdate', () => {
             if (audioEl.duration && !isSeeking) {
                 if (seekbarEl) seekbarEl.value = (audioEl.currentTime / audioEl.duration) * 100;
                 
@@ -368,6 +365,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentTimeEl) currentTimeEl.innerText = formatTime(audioEl.currentTime);
                 
                 syncLyrics(audioEl.currentTime); 
+                
+                // 👇 NEW: UP NEXT TRIGGER (At 10 seconds remaining)
+                const timeLeft = audioEl.duration - audioEl.currentTime;
+                if (timeLeft <= 10 && timeLeft > 0 && !upNextShown) {
+                    showUpNextNotification();
+                }
             }
         });
     }
@@ -799,4 +802,57 @@ function toggleFullScreen() {
             document.exitFullscreen();
         }
     }
+}
+// ==========================================
+// 9. UP NEXT PREDICTION ENGINE
+// ==========================================
+function peekNextTrackIndex() {
+    if (typeof currentPlaylistTracks === 'undefined' || currentPlaylistTracks.length === 0) return -1;
+    
+    let currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
+    if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
+
+    let nextIndexInPlaylist;
+
+    if (typeof isShuffle !== 'undefined' && isShuffle && currentPlaylistTracks.length > 1) {
+        do { 
+            nextIndexInPlaylist = Math.floor(Math.random() * currentPlaylistTracks.length); 
+        } while (nextIndexInPlaylist === currentIndexInPlaylist);
+    } else {
+        nextIndexInPlaylist = currentIndexInPlaylist + 1;
+        if (nextIndexInPlaylist >= currentPlaylistTracks.length) {
+            if (typeof repeatMode !== 'undefined' && repeatMode === 1) nextIndexInPlaylist = 0;
+            else return -1;
+        }
+    }
+    return allTracks.findIndex(t => t.id === currentPlaylistTracks[nextIndexInPlaylist].id);
+}
+
+function showUpNextNotification() {
+    lockedNextTrackIndex = peekNextTrackIndex();
+    if (lockedNextTrackIndex === -1) return;
+    
+    const nextTrack = allTracks[lockedNextTrackIndex];
+    const popup = document.getElementById('upNextPopup');
+    if (!popup) return;
+    
+    document.getElementById('upNextTitle').innerText = nextTrack.name || 'Unknown Track';
+    document.getElementById('upNextArtist').innerText = nextTrack.artist || 'Unknown Artist';
+    
+    const coverEl = document.getElementById('upNextCover');
+    if (nextTrack.cover && !nextTrack.cover.includes('placeholder') && nextTrack.cover !== 'NULL') {
+        coverEl.src = nextTrack.cover;
+        coverEl.style.display = 'block';
+    } else {
+        coverEl.style.display = 'none';
+    }
+    
+    popup.classList.add('show');
+    upNextShown = true;
+}
+
+function hideUpNextNotification() {
+    const popup = document.getElementById('upNextPopup');
+    if (popup) popup.classList.remove('show');
+    upNextShown = false;
 }
