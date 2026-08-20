@@ -88,7 +88,7 @@ async function loadTrack(i, autoplay = false) {
     audioEl.src = cleanUrl;
     audioEl.preload = 'auto'; 
     audioEl.load(); 
-
+    incrementPlayCount(track.id, track.playCount);
     const totalTimeEl = document.getElementById('totalTime');
     const currentTimeEl = document.getElementById('currentTime');
     const seekbarEl = document.getElementById('seekbar');

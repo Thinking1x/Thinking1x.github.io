@@ -39,7 +39,8 @@ async function fetchTracks() {
                 genre: doc.genre,
                 file: jwtToken ? `${doc.fileUrl}&jwt=${jwtToken}` : doc.fileUrl,
                 cover: finalCover,
-                rawLrcText: doc.rawLrcText || "" //  
+                rawLrcText: doc.rawLrcText ||, ""
+                playCount: doc.playCount || 0   
             };
         });
 
@@ -54,6 +55,8 @@ async function fetchTracks() {
         }
 
         if (typeof renderTrackList === 'function') renderTrackList();
+
+        if (typeof renderDashboard === 'function') renderDashboard();
         
         // ✅ Render genre shelves — tracks are ready
         if (typeof renderGenreShelves === 'function') renderGenreShelves();
@@ -529,4 +532,62 @@ async function patchMissingCovers() {
     } catch (error) {
         console.error("Patcher Error:", error);
     }
+}
+// ==========================================
+// TRACKING & ANALYTICS (Play Counts)
+// ==========================================
+
+// Call this function from player.js inside nextTrack() or when a song finishes
+async function incrementPlayCount(trackId, currentCount) {
+    // Failsafe in case currentCount is undefined
+    const newCount = (currentCount || 0) + 1; 
+
+    try {
+        await databases.updateDocument(DATABASE_ID, COLLECTION_ID, trackId, {
+            playCount: newCount
+        });
+        
+        // Update the local array so the UI reflects it immediately without refreshing
+        const trackIndex = allTracks.findIndex(t => t.id === trackId);
+        if (trackIndex !== -1) {
+            allTracks[trackIndex].playCount = newCount;
+        }
+        
+    } catch (error) {
+        console.error("Failed to update play count:", error);
+    }
+}
+
+// ==========================================
+// ARTIST & TRENDING LOGIC
+// ==========================================
+
+// Groups all tracks by artist and sorts them by total play counts
+function getTopArtists() {
+    const artistMap = {};
+
+    allTracks.forEach(track => {
+        if (!artistMap[track.artist]) {
+            artistMap[track.artist] = {
+                name: track.artist,
+                totalPlays: 0,
+                cover: track.cover, // Uses their first detected track cover as their avatar
+                tracks: []
+            };
+        }
+        
+        artistMap[track.artist].tracks.push(track);
+        artistMap[track.artist].totalPlays += (track.playCount || 0);
+    });
+
+    // Convert the object map into an array and sort it from highest plays to lowest
+    const sortedArtists = Object.values(artistMap).sort((a, b) => b.totalPlays - a.totalPlays);
+    return sortedArtists;
+}
+
+// Returns the top 10 most played tracks across the entire server
+function getTrendingTracks() {
+    return [...allTracks]
+        .sort((a, b) => (b.playCount || 0) - (a.playCount || 0))
+        .slice(0, 10);
 }

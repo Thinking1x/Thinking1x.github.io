@@ -416,3 +416,66 @@ async function handleGrantAccess(userId, btnElement) {
     btnElement.style.color = "#fff";
     btnElement.style.borderColor = "var(--success)";
 }
+// ==========================================
+// DASHBOARD RENDERING (Spotify-Style Shelves)
+// ==========================================
+
+function renderDashboard() {
+    const trendingGrid = document.getElementById('trendingGrid');
+    const artistsGrid = document.getElementById('artistsGrid');
+    const recentGrid = document.getElementById('recentGrid');
+
+    // 1. Render Trending Tracks (Sorted by Play Count)
+    if (trendingGrid) {
+        const topTracks = getTrendingTracks();
+        trendingGrid.innerHTML = topTracks.map(track => {
+            const originalIndex = allTracks.findIndex(t => t.id === track.id);
+            return `
+            <div class="music-card" onclick="loadTrack(${originalIndex}, true)">
+                <div class="card-cover-wrapper">
+                    <img src="${track.cover}" class="card-cover" alt="Cover">
+                    <button class="card-play-btn"><i class="fas fa-play"></i></button>
+                </div>
+                <div class="card-meta">
+                    <span class="card-title">${track.name}</span>
+                    <span class="card-subtitle">${track.playCount || 0} Plays</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // 2. Render Top Artists (Circular Avatars)
+    if (artistsGrid) {
+        const topArtists = getTopArtists().slice(0, 10); // Show top 10
+        artistsGrid.innerHTML = topArtists.map(artist => `
+            <div class="music-card" style="align-items: center; text-align: center;">
+                <div class="card-cover-wrapper" style="border-radius: 50% !important; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+                    <img src="${artist.cover}" class="card-cover" alt="Artist Avatar" style="border-radius: 50% !important;">
+                </div>
+                <div class="card-meta" style="align-items: center;">
+                    <span class="card-title" style="font-size: 0.95rem;">${artist.name}</span>
+                    <span class="card-subtitle" style="color: var(--accent) !important;">${artist.totalPlays} Total Plays</span>
+                </div>
+            </div>`).join('');
+    }
+
+    // 3. Render Recently Transmitted
+    if (recentGrid) {
+        // Assuming allTracks is already ordered by upload date (newest/oldest) based on your Appwrite query
+        const recentTracks = allTracks.slice(0, 10); 
+        recentGrid.innerHTML = recentTracks.map(track => {
+            const originalIndex = allTracks.findIndex(t => t.id === track.id);
+            return `
+            <div class="music-card" onclick="loadTrack(${originalIndex}, true)">
+                <div class="card-cover-wrapper">
+                    <img src="${track.cover}" class="card-cover" alt="Cover">
+                    <button class="card-play-btn"><i class="fas fa-play"></i></button>
+                </div>
+                <div class="card-meta">
+                    <span class="card-title">${track.name}</span>
+                    <span class="card-subtitle">${track.artist}</span>
+                </div>
+            </div>`;
+        }).join('');
+    }
+}
