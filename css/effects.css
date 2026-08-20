@@ -144,3 +144,66 @@ body.glass-mode .background-cover { display: block !important; }
 .modal-overlay.hidden .modal-content {
     transform: scale(0.95) translateY(20px);
 }
+/* ==========================================
+   6. NOW PLAYING CINEMATIC BACKDROP
+========================================== */
+#np-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -2; /* Keeps it strictly behind the UI */
+    opacity: 0.4; /* Controlled by your JS toggle */
+    filter: blur(25px) brightness(0.5);
+    transform: scale(1.1); /* Hides the white blurred edges */
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+}
+
+/* Ensure the Now Playing content stays in front of the background */
+#nowPlayingView {
+    position: relative;
+    z-index: 10;
+}
+
+/* ==========================================
+   7. CINEMATIC LYRICS (Beat-Reactive Gradient)
+========================================== */
+.lyric-line {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5); 
+    filter: blur(3px); 
+    transform: scale(0.95);
+    transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+    margin: 18px 0;
+    cursor: pointer;
+    text-align: center;
+}
+
+.lyric-line.active {
+    font-size: 2.2rem;
+    font-weight: 800;
+    
+    /* Smooth punch forward on the heavy beat */
+    transform: scale(calc(1.05 + (var(--lyric-beat-state, 0) * 0.05)));
+
+    /* The Magic Gradient: Crisp white fading into the dynamic visualizer color */
+    background: linear-gradient(135deg, #ffffff 20%, hsla(var(--beat-hue, 180), 100%, 70%, calc(0.3 + (var(--lyric-beat-state, 0) * 0.7))));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    /* Expanding neon drop-shadow glow when the bass hits */
+    filter: blur(0px) drop-shadow(0 0 calc(10px + (var(--lyric-beat-state, 0) * 20px)) hsla(var(--beat-hue, 180), 100%, 60%, calc(0.2 + (var(--lyric-beat-state, 0) * 0.6))));
+
+    transition: transform 0.1s ease-out, filter 0.1s ease-out;
+}
+
+/* Clean hover state so users know they can click to jump */
+.lyric-line:hover {
+    color: rgba(255, 255, 255, 0.9);
+    -webkit-text-fill-color: rgba(255, 255, 255, 0.9);
+    filter: blur(0px);
+}
