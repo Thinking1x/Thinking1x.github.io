@@ -558,9 +558,26 @@ async function openArtistPage(artistName) {
         imgPreloader.src = realArtistImg;
         imgPreloader.onload = () => {
           heroBanner.style.backgroundImage = `url('${realArtistImg}')`;
+          if (bioCard) bioCard.style.backgroundImage = `url('${realArtistImg}')`;
         };
       }
     });
+  }
+  // 3.5. Render Artist About / Bio Section
+  const bioCard = document.getElementById('artistBioCard');
+  const bioListeners = document.getElementById('artistBioListeners');
+  const bioText = document.getElementById('artistBioText');
+
+  if (bioListeners) {
+    bioListeners.innerText = `${totalPlays.toLocaleString()} total server streams`;
+  }
+  if (bioText) {
+    bioText.innerText = `${artistName} is an active transmitting artist featured across ${trackCount} unique signal files on Thinking's Media Server. Blending dynamic style and sonic delivery, their audio transmissions shape the core wave culture of the network.`;
+  }
+
+  // Use the hero banner's background image for the bio card too
+  if (bioCard) {
+    bioCard.style.backgroundImage = heroBanner.style.backgroundImage || `url('${currentArtistTracks[0].cover}')`;
   }
 
   // 5. Render Top Popular Tracks (Ranked by plays)
