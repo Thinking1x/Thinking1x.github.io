@@ -526,7 +526,6 @@ function renderFrame() {
         const intensity = (bassAverage - 180) / 75;
         const blurSize = 150 + (intensity * 150); 
         const spreadSize = 20 + (intensity * 40); 
-        root.style.setProperty('--lyric-beat-state', '1');
         
         if (bg) bg.style.boxShadow = `inset 0 0 ${blurSize}px ${spreadSize}px hsla(${colorHue}, 100%, 55%, ${0.15 + (intensity * 0.2)})`;
         root.style.setProperty('--track-beat-alpha', 0.2 + (intensity * 0.6));
@@ -541,7 +540,6 @@ function renderFrame() {
         const chillLevel = Math.max(overallAverage, 1) / 120;
         const blurSize = 100 + (chillLevel * 100);
         const spreadSize = 10 + (chillLevel * 20);
-        root.style.setProperty('--lyric-beat-state', '0');
         
         if (bg) bg.style.boxShadow = `inset 0 0 ${blurSize}px ${spreadSize}px hsla(${colorHue}, 100%, 50%, ${0.05 + (chillLevel * 0.1)})`;
         root.style.setProperty('--track-beat-alpha', 0.05 + (chillLevel * 0.15));
