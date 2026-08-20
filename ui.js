@@ -421,17 +421,17 @@ function renderDashboard() {
         const topArtists = typeof getTopArtists === 'function' ? getTopArtists().slice(0, 10) : [];
         if (topArtists.length > 0) {
             
-            // Step A: Immediately render the UI with blurred placeholders
-            artistsGrid.innerHTML = topArtists.map((artist, index) => `
-                <div class="music-card" style="align-items: center; text-align: center; scroll-snap-align: start;">
-                    <div class="card-cover-wrapper" style="border-radius: 50% !important; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
-                        <img id="artist-img-${index}" src="${artist.cover}" class="card-cover" alt="Artist Avatar" style="border-radius: 50% !important; filter: blur(8px); transition: filter 0.5s ease, opacity 0.5s ease;">
-                    </div>
-                    <div class="card-meta" style="align-items: center;">
-                        <span class="card-title" style="font-size: 0.95rem;">${artist.name}</span>
-                        <span class="card-subtitle" style="color: var(--accent) !important;">${artist.totalPlays} Plays</span>
-                    </div>
-                </div>`).join('');
+
+artistsGrid.innerHTML = topArtists.map((artist, index) => `
+    <div class="music-card" onclick="openArtistPage('${artist.name.replace(/'/g, "\\'")}')" style="align-items: center; text-align: center; cursor: pointer;">
+        <div class="card-cover-wrapper" style="border-radius: 50% !important; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+            <img id="artist-img-${index}" src="${artist.cover}" class="card-cover" alt="Artist Avatar" style="border-radius: 50% !important;">
+        </div>
+        <div class="card-meta" style="align-items: center;">
+            <span class="card-title" style="font-size: 0.95rem;">${artist.name}</span>
+            <span class="card-subtitle" style="color: var(--accent) !important;">${artist.totalPlays} Plays</span>
+        </div>
+    </div>`).join('');
 
             // Step B: Quietly fetch the real faces in the background and swap them in
             topArtists.forEach(async (artist, index) => {
@@ -476,4 +476,116 @@ function renderDashboard() {
             </div>`;
         }).join('');
     }
+}
+
+let currentArtistTracks = [];
+
+// ==========================================
+// OPEN ARTIST PROFILE PAGE
+// ==========================================
+async function openArtistPage(artistName) {
+  if (!allTracks || allTracks.length === 0) return;
+
+  // 1. Filter all songs by this artist
+  currentArtistTracks = allTracks.filter(
+    t => t.artist && t.artist.trim().toLowerCase() === artistName.trim().toLowerCase()
+  );
+  if (currentArtistTracks.length === 0) return;
+
+  // 2. Hide all other views and show artistView
+  const views = ['homeView', 'databaseView', 'nowPlayingView', 'artistView'];
+  views.forEach(v => {
+    const el = document.getElementById(v);
+    if (el) el.style.display = (v === 'artistView') ? 'block' : 'none';
+  });
+
+  // Scroll to top
+  const mainView = document.querySelector('.main-view');
+  if (mainView) mainView.scrollTop = 0;
+
+  // 3. Calculate metrics
+  const totalPlays = currentArtistTracks.reduce((sum, t) => sum + (t.playCount || 0), 0);
+  const trackCount = currentArtistTracks.length;
+
+  document.getElementById('artistPageName').innerText = artistName;
+  document.getElementById('artistPageStats').innerText = `${totalPlays.toLocaleString()} Total Plays • ${trackCount} Signals Transmitted`;
+
+  // 4. Set Hero Banner Background with Deezer Image fallback
+  const heroBanner = document.getElementById('artistHeroBanner');
+  heroBanner.style.backgroundImage = `url('${currentArtistTracks[0].cover}')`;
+
+  if (typeof fetchArtistImage === 'function') {
+    fetchArtistImage(artistName).then(realArtistImg => {
+      if (realArtistImg) {
+        heroBanner.style.backgroundImage = `url('${realArtistImg}')`;
+      }
+    });
+  }
+
+  // 5. Render Top Popular Tracks (Ranked by plays)
+  const popularTracks = [...currentArtistTracks]
+    .sort((a, b) => (b.playCount || 0) - (a.playCount || 0))
+    .slice(0, 5);
+
+  const popularList = document.getElementById('artistPopularList');
+  if (popularList) {
+    popularList.innerHTML = popularTracks.map((track, i) => {
+      const globalIndex = allTracks.findIndex(t => t.id === track.id);
+      return `
+        <div class="artist-track-row" onclick="loadTrack(${globalIndex}, true)">
+          <div class="artist-row-num">${i + 1}</div>
+          <img src="${track.cover}" class="artist-row-cover" alt="Cover">
+          <div class="artist-row-info">
+            <span class="artist-row-title">${track.name}</span>
+          </div>
+          <div class="artist-row-plays">${(track.playCount || 0).toLocaleString()} plays</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 6. Render Artist Spotlight Card (Top Song)
+  const spotlightCard = document.getElementById('artistSpotlightCard');
+  if (spotlightCard && popularTracks.length > 0) {
+    const topTrack = popularTracks[0];
+    const topTrackGlobalIdx = allTracks.findIndex(t => t.id === topTrack.id);
+    spotlightCard.onclick = () => loadTrack(topTrackGlobalIdx, true);
+    spotlightCard.innerHTML = `
+      <img src="${topTrack.cover}" class="artist-spotlight-cover" alt="Spotlight">
+      <div>
+        <span style="font-size:0.75rem; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px;">Top Release</span>
+        <h3 style="color:#fff; margin:4px 0; font-size:1.1rem;">${topTrack.name}</h3>
+        <p style="color:var(--text-sub); font-size:0.85rem; margin:0;">${topTrack.genre || 'Single'}</p>
+      </div>
+    `;
+  }
+
+  // 7. Render All Transmissions Shelf
+  const discographyGrid = document.getElementById('artistDiscographyGrid');
+  if (discographyGrid) {
+    discographyGrid.innerHTML = currentArtistTracks.map(track => {
+      const globalIndex = allTracks.findIndex(t => t.id === track.id);
+      return `
+        <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
+          <div class="card-cover-wrapper">
+            <img src="${track.cover}" class="card-cover" alt="Cover">
+            <button class="card-play-btn"><i class="fas fa-play"></i></button>
+          </div>
+          <div class="card-meta">
+            <span class="card-title">${track.name}</span>
+            <span class="card-subtitle">${track.genre || 'Signal'}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
+// Play all songs by this artist
+function playArtistAll() {
+  if (!currentArtistTracks || currentArtistTracks.length === 0) return;
+  const firstTrackIndex = allTracks.findIndex(t => t.id === currentArtistTracks[0].id);
+  if (firstTrackIndex !== -1) {
+    loadTrack(firstTrackIndex, true);
+  }
 }

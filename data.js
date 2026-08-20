@@ -425,25 +425,56 @@ async function fetchCoverArt(trackName, artistName) {
     }
 }
 // ==========================================
-// DEEZER API ARTIST PICTURE MATCHER (JSONP)
+// DEEZER API ARTIST PICTURE MATCHER (WITH FAILSAFES)
 // ==========================================
 function fetchArtistImage(artistName) {
-    return new Promise((resolve) => {
-        // Clean up features/collabs so we just search the main artist (e.g., "JENNIE x Tame Impala" -> "JENNIE")
+    return new Promise(async (resolve) => {
         const primaryArtist = artistName.split(/&|feat\.?|ft\.?| x |,/i)[0].trim();
+        
+        // ATTEMPT 1: Try Deezer via a reliable CORS Proxy
+        try {
+            const proxyUrl = `https://api.allorigins.win/raw?url=`;
+            const deezerUrl = `https://api.deezer.com/search/artist?q=${encodeURIComponent(primaryArtist)}`;
+            
+            const response = await fetch(proxyUrl + encodeURIComponent(deezerUrl));
+            const data = await response.json();
+            
+            if (data && data.data && data.data.length > 0) {
+                return resolve(data.data[0].picture_xl);
+            }
+        } catch (err) {
+            console.warn("CORS proxy failed, attempting JSONP fallback...");
+        }
 
+        // ATTEMPT 2: JSONP Fallback with a strict 3-second timeout
         const script = document.createElement('script');
         const callbackName = 'deezer_' + Math.random().toString(36).substr(2, 9);
         
+        // Failsafe Timeout: If Deezer doesn't reply in 3 seconds, give up and use the album cover.
+        const timeout = setTimeout(() => {
+            cleanup();
+            resolve(null);
+        }, 3000);
+
+        function cleanup() {
+            if (window[callbackName]) delete window[callbackName];
+            if (script.parentNode) document.body.removeChild(script);
+        }
+        
         window[callbackName] = function(response) {
-            delete window[callbackName];
-            document.body.removeChild(script);
-            
+            clearTimeout(timeout);
+            cleanup();
             if (response && response.data && response.data.length > 0) {
-                resolve(response.data[0].picture_xl); // Grabs the high-res artist profile picture!
+                resolve(response.data[0].picture_xl);
             } else {
                 resolve(null);
             }
+        };
+        
+        script.onerror = function() {
+            clearTimeout(timeout);
+            cleanup();
+            resolve(null);
         };
         
         script.src = `https://api.deezer.com/search/artist?q=${encodeURIComponent(primaryArtist)}&output=jsonp&callback=${callbackName}`;

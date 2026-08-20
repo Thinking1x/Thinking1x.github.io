@@ -160,6 +160,57 @@
         <div class="hud-main-container">
           
           <main class="hud-feed-canvas">
+            <!-- ARTIST PROFILE VIEW -->
+<div id="artistView" style="display: none;">
+  <!-- 1. HERO BANNER -->
+  <div class="artist-hero-banner" id="artistHeroBanner">
+    <div class="artist-hero-overlay"></div>
+    <div class="artist-hero-content">
+      <div class="artist-verified-badge"><i class="fas fa-check-circle"></i> Verified Artist</div>
+      <h1 class="artist-name-title" id="artistPageName">Artist Name</h1>
+      <p class="artist-stats-sub" id="artistPageStats">0 Total Plays • 0 Signals Transmitted</p>
+    </div>
+  </div>
+
+  <!-- 2. ACTION CONTROLS -->
+  <div class="artist-action-bar">
+    <button class="artist-play-btn" id="artistPlayAllBtn" onclick="playArtistAll()">
+      <i class="fas fa-play"></i>
+    </button>
+    <button class="artist-pill-btn" onclick="switchView('home')">
+      <i class="fas fa-chevron-left"></i> Back to Discover
+    </button>
+  </div>
+
+  <!-- 3. MAIN 2-COLUMN BODY -->
+  <div class="artist-body-grid">
+    <!-- Left Column: Popular Signals -->
+    <div class="artist-popular-section">
+      <h2 class="section-heading">Popular Signals</h2>
+      <div class="artist-track-list" id="artistPopularList">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Right Column: Artist Pick / Highlight -->
+    <div class="artist-pick-section">
+      <h2 class="section-heading">Artist Spotlight</h2>
+      <div class="artist-spotlight-card" id="artistSpotlightCard">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. RELEASES / SHELF -->
+  <div class="artist-discography-section">
+    <div class="shelf-header">
+      <h2>All Transmissions</h2>
+    </div>
+    <div class="shelf-grid" id="artistDiscographyGrid">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</div>
     <header class="hud-promo-banner">
         <span class="banner-badge">SYSTEM</span>
         <p class="banner-text">Welcome to <strong>Thinking's Media Server</strong>. All audio signals are operational.</p>
