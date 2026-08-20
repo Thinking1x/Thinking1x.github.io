@@ -1,14 +1,14 @@
 /* ==========================================
-   HUD.CSS — SoundCloud-Style Home Layout
+   HUD.CSS — Media Server Home Layout
    Load AFTER styles.css so these win.
 ========================================== */
 
 /* ==========================================
-   0. FORCE RESET — beat style.css conflicts
+   0. FORCE RESET — Blend with App Shell
 ========================================== */
 .main-view {
-    /* Flat professional dark background, no glassy gradients */
-    background: var(--bg-base) !important;
+    /* Let the global cinematic background shine through */
+    background: transparent !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     padding: 20px 24px !important;
@@ -61,8 +61,8 @@
 }
 
 .banner-badge {
-    background-color: var(--accent, #ff5500);
-    color: #fff; /* White looks cleaner on orange */
+    background-color: var(--accent, #00e5ff);
+    color: #000; /* Dark text looks cleaner on bright neon */
     padding: 3px 8px;
     font-size: 0.7rem;
     font-weight: 800;
@@ -82,69 +82,79 @@
 .banner-text strong { color: var(--text-main, #fff); }
 
 /* ==========================================
-   3. SECTION SHELVES
+   3. SECTION SHELVES (Spotify Style Horizontal Scroll)
 ========================================== */
 .hud-shelf {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
 }
 
 .shelf-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
 }
 
 .shelf-header h2 {
     font-size: 1.25rem;
     color: var(--text-main, #fff);
     margin: 0;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: -0.2px;
 }
 
 .shelf-header .view-all {
-    color: var(--text-sub, #777);
+    color: var(--text-sub, #999);
     text-decoration: none;
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 600;
     transition: color 0.15s;
 }
 
 .shelf-header .view-all:hover { color: var(--text-main, #fff); }
 
 .shelf-grid {
-    display: grid !important;
-    /* This tells the grid to fit as many cards as possible, minimum 130px wide, stretching to fill gaps */
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
-    gap: 18px !important;
-    overflow: hidden !important; 
-    padding-bottom: 0 !important;
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    gap: 20px !important;
+    padding-bottom: 12px !important;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    /* Hide scrollbar for a cleaner look */
+    scrollbar-width: none; 
 }
+
+.shelf-grid::-webkit-scrollbar { display: none; }
 
 /* ==========================================
-   4. MUSIC CARDS (Responsive)
+   4. MUSIC CARDS (Responsive & Locked Width)
 ========================================== */
 .music-card {
-    width: 100% !important; /* Take up the full grid cell */
+    flex: 0 0 150px !important; /* Locks width to 150px, prevents shrinking */
+    width: 150px !important;
     display: flex;
     flex-direction: column;
-    gap: 9px;
+    gap: 10px;
     cursor: pointer;
-    transition: opacity 0.18s;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    scroll-snap-align: start; /* Snaps into place when scrolling */
 }
 
-.music-card:hover { opacity: 0.82; }
+.music-card:hover { 
+    opacity: 1; 
+    transform: translateY(-4px); 
+}
 
 .card-cover-wrapper {
     position: relative;
-    width: 100% !important; /* Scale to the grid cell width */
-    height: auto !important; 
-    aspect-ratio: 1 / 1 !important; /* Forces a perfect square at any size! */
-    border-radius: 4px !important;
+    width: 100% !important;
+    aspect-ratio: 1 / 1 !important; /* Forces perfect square */
+    border-radius: 8px !important; /* Slightly rounder edges */
     overflow: hidden;
-    background-color: #1a1a1a;
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.4);
 }
 
 .card-cover {
@@ -153,13 +163,13 @@
     object-fit: cover;
     transition: transform 0.28s ease;
     display: block;
-    background: #1a1a1a !important; /* Flat dark fallback */
-    border: 1px solid #333 !important; /* Subtle inner border */
+    background: #1a1a1a !important; 
+    border: 1px solid rgba(255, 255, 255, 0.05) !important; 
 }
 
 .music-card:hover .card-cover { transform: scale(1.05); }
 
-/* Play button — SoundCloud Orange, reveals on hover */
+/* Play button — Reveals on hover */
 .card-play-btn {
     position: absolute !important;
     bottom: 10px !important;
@@ -169,9 +179,9 @@
     width: 38px !important;
     height: 38px !important;
     border-radius: 50% !important;
-    background-color: var(--accent, #ff5500) !important;
+    background-color: var(--accent, #00e5ff) !important;
     border: none !important;
-    color: #fff !important;
+    color: #000 !important;
     cursor: pointer;
     opacity: 0;
     transform: translateY(6px) !important;
@@ -180,6 +190,7 @@
     align-items: center;
     justify-content: center;
     font-size: 0.85rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .music-card:hover .card-play-btn {
@@ -188,7 +199,7 @@
 }
 
 .card-play-btn:hover {
-    background-color: var(--accent-hover, #e04a00) !important;
+    background-color: #00b3cc !important;
     transform: translateY(0) scale(1.1) !important;
 }
 
@@ -307,7 +318,6 @@
     margin-bottom: 14px;
 }
 
-/* 4-column grid = SoundCloud "Artist Tools" */
 .tools-icon-grid {
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
@@ -315,7 +325,7 @@
 }
 
 .tool-tile {
-    background-color: #1c1c1c !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
     color: #bbb !important;
     padding: 14px 6px 10px !important;
@@ -339,13 +349,13 @@
 }
 
 .tool-tile:hover {
-    background-color: #252525 !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
     color: #fff !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
 }
 
 .tool-tile:hover .tile-icon {
-    color: var(--accent, #ff5500) !important;
+    color: var(--accent, #00e5ff) !important;
 }
 
 /* ==========================================
@@ -357,7 +367,7 @@
     grid-template-rows: 1fr 1fr !important;
     width: 100% !important;
     height: 100% !important;
-    background-color: #1a1a1a;
+    background-color: rgba(255, 255, 255, 0.05);
 }
 
 .mosaic-cover img {
@@ -402,7 +412,7 @@
 .storage-bar-bg {
     width: 100%;
     height: 6px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -410,9 +420,9 @@
 .storage-bar-fill {
     width: 84%; 
     height: 100%;
-    background: var(--accent, #ff5500);
+    background: var(--accent, #00e5ff);
     border-radius: 10px;
-    /* Removed the glowing box-shadow for a clean matte finish */
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
 }
 
 /* ==========================================
@@ -435,8 +445,8 @@
 @media (max-width: 600px) {
     .hud-feed-canvas { gap: 26px; padding: 8px 0 16px 0; }
     .shelf-header h2  { font-size: 1.05rem; }
-    .music-card       { flex: 0 0 130px !important; width: 130px; }
-    .card-cover-wrapper { width: 130px !important; height: 130px !important; }
+    .music-card       { flex: 0 0 130px !important; width: 130px !important; }
+    .card-cover-wrapper { width: 130px !important; aspect-ratio: 1 / 1 !important; }
     .tools-icon-grid  { gap: 6px !important; }
     .tool-tile        { padding: 10px 4px 8px !important; font-size: 0.62rem !important; }
 }

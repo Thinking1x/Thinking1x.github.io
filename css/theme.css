@@ -1,54 +1,57 @@
 /* =============================================
-   DESIGN TOKENS (PREMIUM DARK THEME)
+   DESIGN TOKENS (CINEMATIC NEON THEME)
 ============================================= */
 :root {
-  --bg-base:       #121212;
-  --bg-elevated:   #181818;
-  --bg-highlight:  #282828;
+  /* Deep Cinematic Backgrounds */
+  --bg-base:       #050508;
+  --bg-elevated:   #0a0a0f;
+  --bg-highlight:  #14141e;
   
-  --accent:        #ff5500;
-  --accent-hover:  #ff7326;
-  --success:       #1db954;
-  --error:         #e22134;
+  /* Neon Cyberpunk Accents */
+  --accent:        #00e5ff;
+  --accent-hover:  #00b3cc;
+  --success:       #00e676; 
+  --error:         #ff3366; 
   
+  /* Typography Colors */
   --text-main:     #ffffff;
   --text-sub:      #a7a7a7;
 
+  /* Global Dimensions */
   --sidebar-width: 240px; 
   --player-height: 90px;
 }
 
 /* =============================================
-   RESET & BASE
+   RESET & BASE TYPOGRAPHY
 ============================================= */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background: var(--bg-base);
+html, body {
+  /* Added font-smoothing for crisp, premium text rendering */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg-base) !important;
   color: var(--text-main);
   height: 100vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-html, body {
-    background: #0d0d1e !important; 
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .hidden { display: none !important; }
 
 /* =============================================
-   ANIMATIONS
+   PREMIUM ANIMATIONS
 ============================================= */
 @keyframes fadeOutUp {
-  0%   { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(1.05); visibility: hidden; }
+  0%   { opacity: 1; transform: scale(1) translateY(0); }
+  100% { opacity: 0; transform: scale(1.02) translateY(-10px); visibility: hidden; }
 }
 @keyframes fadeInUp {
-  0%   { opacity: 0; transform: translateY(30px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0%   { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
 }
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
@@ -56,26 +59,25 @@ html, body {
   40%, 80%  { transform: translateX(5px); }
 }
 
-.animate-out  { animation: fadeOutUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.animate-in   { animation: fadeInUp  0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-out  { animation: fadeOutUp 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+.animate-in   { animation: fadeInUp  0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
 .shake-error  { animation: shake 0.4s ease-in-out; }
 
 /* ==========================================
    CUSTOM SLEEK SCROLLBAR
-   ========================================== */
+========================================== */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 ::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2); 
-    border-radius: 10px;
+    background: transparent; 
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 204, 0.3);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     transition: background 0.3s ease;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 204, 0.8);
+    background: rgba(255, 255, 255, 0.25);
 }

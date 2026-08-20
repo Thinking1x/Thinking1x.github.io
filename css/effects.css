@@ -1,5 +1,9 @@
 /* ==========================================
-   REACTIVE AUDIO BACKGROUND (Edge Vignette Glow)
+   EFFECTS.CSS — Premium Visuals & Reactive UI
+========================================== */
+
+/* ==========================================
+   1. AUDIO REACTIVE CANVAS (Do Not Remove)
 ========================================== */
 #reactive-bg {
     position: fixed;
@@ -12,6 +16,7 @@
     box-shadow: inset 0 0 var(--visualizer-size, 50px) var(--visualizer-spread, 10px) var(--visualizer-color, transparent);
     transition: box-shadow 0.05s linear;
 }
+
 #snow-canvas {
     position: fixed;
     top: 0;
@@ -24,144 +29,118 @@
 }
 
 /* ==========================================
-   TRANSPARENT (FLAT) MODE - CLEAN ROLLBACK
+   2. GLASS MODE (Cinematic Transparent Mode)
 ========================================== */
-html, body.glass-mode { background: #09090e !important; }
+html, body.glass-mode { background: #050508 !important; }
 
 body.glass-mode .sidebar,
-body.glass-mode .main-view,
-body.glass-mode .player-bar {
-    background: rgba(0, 0, 0, var(--track-beat-alpha, 0.15)) !important; 
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-color: rgba(255, 255, 255, 0.05);
-    transition: background 0s !important; 
-}
-body.glass-mode #mainPage { background: transparent !important; }
-body.glass-mode .main-view .track,
-body.glass-mode .main-view .track-list-header,
-body.glass-mode .main-view .track[style*="background"] {
-    background-color: transparent !important;
-    background: transparent !important;
-}
-body.glass-mode .main-view .track,
-body.glass-mode .main-view .track-list-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-}
-body.glass-mode .main-view .track:hover {
-    background: rgba(0, 229, 255, 0.15) !important;
-    box-shadow: inset 3px 0 0 var(--accent) !important;
-}
-body.glass-mode .main-view .track.active {
-    background: rgba(0, 229, 255, 0.2) !important;
-    box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(0, 229, 255, 0.15) !important;
-}
 body.glass-mode .top-toggles-bar {
-    background: rgba(0, 0, 0, var(--track-beat-alpha, 0.15)) !important; 
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background: rgba(10, 10, 15, 0.4) !important; 
+    backdrop-filter: blur(20px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+    border-color: rgba(255, 255, 255, 0.05);
 }
-.background-cover {
-    display: none !important; 
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: -999 !important; 
-    pointer-events: none;
+
+body.glass-mode .player {
+    background: rgba(5, 5, 10, 0.6) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
+
 body.glass-mode .background-cover { display: block !important; }
+
 #cover-bg-image {
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important; 
-    opacity: 0.4 !important; 
-    filter: blur(12px) !important; 
-    transform: scale(1.1) !important;
-    transition: opacity 0.3s ease;
+    opacity: 0.3 !important; 
+    filter: blur(35px) saturate(150%) brightness(0.7) !important; 
+    transform: scale(1.2) !important; /* High scale to hide blurred edges completely */
+    transition: opacity 0.6s ease;
 }
 
 /* ==========================================
-   TARGETED VIBE & LAUNCHPAD UI
+   3. PROFESSIONAL TRACK LIST INTERACTIONS
+========================================== */
+.track { 
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); 
+    border-radius: 8px;
+    border-left: 3px solid transparent; /* Placeholder for smooth active state */
+}
+
+/* Sleek Hover Indent Effect */
+.track:hover { 
+    background: rgba(255, 255, 255, 0.04) !important;  
+    transform: translateX(4px); 
+}
+
+/* Elegant Active State */
+.track.active { 
+    background: rgba(255, 255, 255, 0.08) !important; 
+    border-left: 3px solid var(--accent) !important; 
+    transform: translateX(8px);
+}
+
+/* Glowing text for the currently playing song */
+.track.active .track-title { 
+    color: #ffffff !important; 
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.4) !important; 
+}
+.track.active .track-num { 
+    color: var(--accent) !important; 
+}
+
+/* ==========================================
+   4. AUDIO BEAT REACTIVE UI (Subtle Glows)
 ========================================== */
 #playIcon {
-    filter: drop-shadow(0 0 var(--beat-glow-spread, 0px) hsla(var(--beat-hue, 180), 100%, 60%, var(--beat-glow-alpha, 0)));
+    /* Soft pulse synced to the bass */
+    filter: drop-shadow(0 0 var(--beat-glow-spread, 0px) hsla(var(--beat-hue, 180), 100%, 70%, calc(var(--beat-glow-alpha, 0) * 0.5)));
     transition: filter 0.05s linear;
 }
-.album-art { transform: scale(var(--cover-scale, 1)); transition: transform 0.05s linear; }
 
-.track { transition: background-color 0.3s ease, box-shadow 0.3s ease; }
-.track:hover { 
-  background: rgba(0, 229, 255, 0.15) !important;  
-  box-shadow: inset 3px 0 0 var(--accent) !important;
+/* Album Art Lift & Beat Bump */
+.album-art { 
+    transform: scale(var(--cover-scale, 1)); 
+    transition: transform 0.05s linear, box-shadow 0.3s ease; 
 }
-.track.active { 
-  background: rgba(0, 229, 255, 0.2) !important; 
-  box-shadow: inset 3px 0 0 var(--accent), 0 0 12px rgba(0, 229, 255, 0.15) !important;
-  border-left: 4px solid var(--accent) !important; 
-}
-.track.active .track-title { color: var(--accent) !important; text-shadow: 0 0 8px rgba(0, 229, 255, 0.4) !important; }
-.track.active .track-num { color: var(--accent) !important; }
 
-.launchpad-flash {
-    background-color: hsla(var(--beat-hue, 180), 100%, 60%, 0.4) !important;
-    box-shadow: inset 0 0 20px hsla(var(--beat-hue, 180), 100%, 60%, 0.6);
-    border-radius: 4px;
-    transition: background-color 0s, box-shadow 0s; 
-}
-.launchpad-flash.hyper-glow {
-    background-color: hsla(var(--beat-hue, 180), 100%, 75%, 0.8) !important;
-    box-shadow: 0 0 35px hsla(var(--beat-hue, 180), 100%, 60%, 0.9),
-                inset 0 0 15px hsla(var(--beat-hue, 180), 100%, 90%, 1) !important;
-    transform: scale(1.01); 
-    border-radius: 4px;
-    z-index: 6;
-    position: relative;
-    transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0s, background-color 0s !important; 
-}
-.keyboard-flash {
-    background-color: hsla(var(--kb-hue, 180), 100%, 75%, 0.8) !important;
-    box-shadow: 0 0 35px hsla(var(--kb-hue, 180), 100%, 60%, 0.9),
-                inset 0 0 15px hsla(var(--kb-hue, 180), 100%, 90%, 1) !important;
-    border-radius: 4px;
-    z-index: 10;
-    position: relative;
-    transition: none !important; 
-    transform: none !important;
-    animation: none !important;
+/* Cinematic Shadow on Hover */
+.now-playing:hover .album-art {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6), 0 0 20px hsla(var(--beat-hue, 180), 100%, 50%, 0.2);
 }
 
 /* ==========================================
-   RHYTHM GAME INDICATORS (Beat-Synced Hints)
+   5. BUTTON & MODAL ELEVATIONS
 ========================================== */
-.track:nth-child(1)::after { content: "A"; }
-.track:nth-child(2)::after { content: "S"; }
-.track:nth-child(3)::after { content: "D"; }
-.track:nth-child(4)::after { content: "F"; }
-.track:nth-child(5)::after { content: "J"; }
-.track:nth-child(6)::after { content: "K"; }
-.track:nth-child(7)::after { content: "L"; }
-.track:nth-child(8)::after { content: ";"; }
-
-.track:nth-child(-n+8)::after {
-    position: absolute;
-    right: 60px; 
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: rgba(255, 255, 255, 0.8);
-    text-shadow: 0 0 15px #00E5FF, 0 0 30px #00E5FF;
-    pointer-events: none;
-    opacity: var(--track-beat-alpha, 0.1); 
-    transition: opacity 0.05s ease;
+/* Premium hover lift for tool tiles and buttons */
+.tool-tile, .btn-save, .btn-cancel {
+    transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1) !important;
 }
-.track.keyboard-flash::after {
-    opacity: 1 !important;
-    color: #ffffff;
-    text-shadow: 0 0 20px #ffffff, 0 0 40px #ffffff;
-    transform: translateY(-50%) scale(1.3);
-    transition: transform 0.05s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+
+.tool-tile:hover, .btn-save:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+.tool-tile:active, .btn-save:active, .btn-cancel:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* Fade in for modals */
+.modal-overlay {
+    transition: opacity 0.3s ease, backdrop-filter 0.3s ease;
+}
+.modal-overlay.hidden {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    pointer-events: none;
+}
+.modal-content {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.modal-overlay.hidden .modal-content {
+    transform: scale(0.95) translateY(20px);
 }
