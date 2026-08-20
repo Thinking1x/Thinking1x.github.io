@@ -38,10 +38,7 @@ let currentLyrics = [
 function parseLRC(lrcText) {
     const lines = lrcText.split('\n');
     const parsedLyrics = [];
-    // Matches standard [mm:ss.xx] or [mm:ss.xxx] formatting
     const timeRegEx = /\[(\d{2}):(\d{2})\.(\d{1,3})\]/;
-
-    // Global time offset if you need to shift everything forward or backward globally (in seconds)
     const timeOffset = 0.0; 
 
     lines.forEach(line => {
@@ -51,7 +48,6 @@ function parseLRC(lrcText) {
             const seconds = parseInt(match[2], 10);
             const rawMilli = match[3];
             
-            // Intelligently normalizes fractional seconds (e.g., .1 becomes 100ms, .10 becomes 100ms, .05 becomes 50ms)
             const milliseconds = parseInt(rawMilli.padEnd(3, '0'), 10);
             
             let timeInSeconds = (minutes * 60) + seconds + (milliseconds / 1000) + timeOffset;
@@ -72,7 +68,6 @@ async function loadTrack(i, autoplay = false) {
     
     if (typeof allTracks === 'undefined' || !allTracks || i < 0 || i >= allTracks.length) return;
     
-    // Updates the global variable residing in your config/data file
     currentTrackIndex = i;
     const track = allTracks[i];
 
@@ -129,7 +124,6 @@ async function loadTrack(i, autoplay = false) {
         currentLyrics = [{ time: 0, text: "No lyrics detected in database." }];
     }
 
-    // Reset the DOM to force the lyrics engine to clear the old song
     const lyricsContent = document.getElementById('lyrics-content');
     if (lyricsContent) {
         lyricsContent.dataset.activeIndex = "-1";
@@ -216,7 +210,6 @@ function nextTrack(isAutoAdvance = false) {
         return;
     }
 
-    // Handle Repeat One
     if (typeof repeatMode !== 'undefined' && repeatMode === 2 && isAutoAdvance && audioEl) {
         audioEl.currentTime = 0; 
         audioEl.play().catch(e => {}); 
@@ -225,7 +218,6 @@ function nextTrack(isAutoAdvance = false) {
     
     if (typeof currentPlaylistTracks === 'undefined' || currentPlaylistTracks.length === 0) return;
 
-    // Fortified Index Tracking
     let currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
     if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
 
@@ -239,7 +231,7 @@ function nextTrack(isAutoAdvance = false) {
         nextIndexInPlaylist = currentIndexInPlaylist + 1;
         if (nextIndexInPlaylist >= currentPlaylistTracks.length) {
             if (typeof repeatMode !== 'undefined' && repeatMode === 1) {
-                nextIndexInPlaylist = 0; // Loop back to start
+                nextIndexInPlaylist = 0; 
             } else { 
                 if (audioEl) audioEl.pause(); 
                 const playIcon = document.getElementById('playIcon');
@@ -273,7 +265,6 @@ function prevTrack() {
     
     if (typeof currentPlaylistTracks === 'undefined' || currentPlaylistTracks.length === 0) return;
 
-    // Fortified Index Tracking
     let currentIndexInPlaylist = currentPlaylistTracks.findIndex(t => t.id === allTracks[currentTrackIndex]?.id);
     if (currentIndexInPlaylist === -1) currentIndexInPlaylist = 0;
 
@@ -569,12 +560,31 @@ function renderFrame() {
 // 6. DRAWING ROUTINES
 // ==========================================
 function drawParticles(currentHue, overallAverage) {
-    if (!snowCtx || !showParticles) return; // 👈 Add the !showParticles check here
+    if (!snowCtx || !showParticles) return; 
     snowCtx.clearRect(0, 0, canvasW, canvasH);
     const pulse = overallAverage / 255; 
 
     for(let i = 0; i < MAX_PARTICLES; i++) {
-    // ... rest of the code remains the same
+        let p = particles[i];
+        snowCtx.beginPath();
+        const responsiveSize = p.size + (pulse * 2.5); 
+        const speed = 0.3 + (pulse * 0.8); 
+        const alpha = 0.15 + (pulse * 0.3); 
+        
+        snowCtx.fillStyle = `hsla(${currentHue}, 80%, 75%, ${alpha})`;
+        snowCtx.arc(p.x, p.y, responsiveSize, 0, Math.PI * 2);
+        
+        p.y -= speed; 
+        p.x += Math.sin(p.sway) * 0.3; 
+        p.sway += 0.015;
+        
+        if (p.y < -10) {
+            p.y = canvasH + 10;
+            p.x = Math.random() * canvasW;
+        }
+        snowCtx.fill();
+    }
+}
 
 function drawSoundwave(dataArray, currentHue) {
     if (!waveCtx || !showWaveform) return;
@@ -618,7 +628,6 @@ function syncLyrics(currentTime) {
     const lyricsContent = document.getElementById('lyrics-content');
     if (!lyricsContent || currentLyrics.length === 0) return;
 
-    // 1. Find the current active lyric index
     let activeIndex = 0;
     for (let i = 0; i < currentLyrics.length; i++) {
         if (currentTime >= currentLyrics[i].time) {
@@ -628,7 +637,6 @@ function syncLyrics(currentTime) {
         }
     }
 
-    // 2. Calculate progress percentage for the active line (0% to 100%)
     let lineProgress = 100;
     const currentLyric = currentLyrics[activeIndex];
     const nextLyric = currentLyrics[activeIndex + 1];
@@ -636,11 +644,9 @@ function syncLyrics(currentTime) {
     if (nextLyric) {
         const lineDuration = nextLyric.time - currentLyric.time;
         const elapsedInLine = currentTime - currentLyric.time;
-        // Clamp progress between 0 and 100
         lineProgress = Math.max(0, Math.min(100, (elapsedInLine / lineDuration) * 100));
     }
 
-    // 3. Render HTML structure with progress variable
     let html = '';
     currentLyrics.forEach((lyric, index) => {
         let className = 'lyric-line';
@@ -648,11 +654,9 @@ function syncLyrics(currentTime) {
 
         if (index === activeIndex) {
             className += ' active';
-            // Injects the CSS variable dynamically so the gradient moves smoothly
             styleAttr = `style="--progress: ${lineProgress}%;"`;
         }
 
-        // Wrap the text in a <span> so the gradient fill targets the text cleanly
         html += `<div class="${className}" ${styleAttr} onclick="jumpToLyric(${lyric.time})"><span>${lyric.text}</span></div>`;
     });
 
@@ -660,7 +664,6 @@ function syncLyrics(currentTime) {
         lyricsContent.innerHTML = html;
         lyricsContent.dataset.activeIndex = activeIndex.toString();
         
-        // Smooth auto-scrolling
         const container = document.getElementById('lyrics-container');
         const activeElement = lyricsContent.children[activeIndex];
         if (activeElement && container) {
@@ -670,7 +673,6 @@ function syncLyrics(currentTime) {
             });
         }
     } else {
-        // If we are on the same line, update the progress variable live without re-rendering the whole DOM
         const activeElement = lyricsContent.children[activeIndex];
         if (activeElement) {
             activeElement.style.setProperty('--progress', `${lineProgress}%`);
@@ -678,7 +680,6 @@ function syncLyrics(currentTime) {
     }
 }
 
-// BONUS: Click any lyric line to instantly jump the song to that exact timestamp!
 function jumpToLyric(targetTime) {
     const audioEl = document.getElementById('audio');
     if (audioEl && !isNaN(targetTime)) {
@@ -783,7 +784,6 @@ function toggleCinematicBg() {
     if (btn) btn.style.opacity = showCinematicBg ? '1' : '0.4';
     
     if (npBg) {
-        // Adjust 0.4 to match whatever your default background opacity is set to
         npBg.style.opacity = showCinematicBg ? '0.4' : '0'; 
     }
 }
