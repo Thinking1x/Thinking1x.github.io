@@ -499,6 +499,9 @@ let currentArtistTracks = [];
 // ==========================================
 // OPEN ARTIST PROFILE PAGE
 // ==========================================
+// ==========================================
+// ARTIST PAGE VIEW ROUTER & RENDERER
+// ==========================================
 async function openArtistPage(artistName) {
   if (!allTracks || allTracks.length === 0) return;
 
@@ -508,16 +511,30 @@ async function openArtistPage(artistName) {
   );
   if (currentArtistTracks.length === 0) return;
 
-  // 2. Hide all other views and show artistView
-  const views = ['homeView', 'databaseView', 'nowPlayingView', 'artistView'];
-  views.forEach(v => {
-    const el = document.getElementById(v);
-    if (el) el.style.display = (v === 'artistView') ? 'block' : 'none';
+  // 2. Hide all views and show artistView using your master router logic
+  const views = {
+    'home': 'homeView',
+    'database': 'databaseView',
+    'nowPlaying': 'nowPlayingView',
+    'artist': 'artistView'
+  };
+
+  Object.values(views).forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = (id === 'artistView') ? 'block' : 'none';
   });
 
-  // Scroll to top
+  // Remove active state from sidebar since artist view is custom
+  document.querySelectorAll('.nav-links .nav-item').forEach(el => el.classList.remove('active'));
+  
+  const viewTitle = document.getElementById('viewTitle');
+  if (viewTitle) viewTitle.innerText = artistName;
+
+  // Scroll main view smoothly to the top
   const mainView = document.querySelector('.main-view');
-  if (mainView) mainView.scrollTop = 0;
+  if (mainView) {
+    mainView.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   // 3. Calculate metrics
   const totalPlays = currentArtistTracks.reduce((sum, t) => sum + (t.playCount || 0), 0);
@@ -526,14 +543,22 @@ async function openArtistPage(artistName) {
   document.getElementById('artistPageName').innerText = artistName;
   document.getElementById('artistPageStats').innerText = `${totalPlays.toLocaleString()} Total Plays • ${trackCount} Signals Transmitted`;
 
-  // 4. Set Hero Banner Background with Deezer Image fallback
+  // 4. Set Hero Banner Background with smooth image preloading
   const heroBanner = document.getElementById('artistHeroBanner');
+  
+  // Set immediate fallback baseline using the track's album cover
   heroBanner.style.backgroundImage = `url('${currentArtistTracks[0].cover}')`;
 
+  // Fetch the high-res artist portrait in the background
   if (typeof fetchArtistImage === 'function') {
     fetchArtistImage(artistName).then(realArtistImg => {
       if (realArtistImg) {
-        heroBanner.style.backgroundImage = `url('${realArtistImg}')`;
+        // Preload image silently to avoid any sudden visual flickering
+        const imgPreloader = new Image();
+        imgPreloader.src = realArtistImg;
+        imgPreloader.onload = () => {
+          heroBanner.style.backgroundImage = `url('${realArtistImg}')`;
+        };
       }
     });
   }
