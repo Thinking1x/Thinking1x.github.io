@@ -7,51 +7,67 @@
 // UI — VIEWS & NAVIGATION
 // ==========================================
 
+// ==========================================
+// MASTER ROUTER (NAVIGATION)
+// ==========================================
 window.switchView = function(viewName) {
-    const homeView = document.getElementById('homeView');
-    const databaseView = document.getElementById('databaseView');
-    const nowPlayingView = document.getElementById('nowPlayingView'); // NEW: Soundwave view
-    const viewTitle = document.getElementById('viewTitle');
-    
-    const navHome = document.getElementById('navHome');
-    const navAllTracks = document.getElementById('navAllTracks');
-    const navNowPlaying = document.getElementById('navNowPlaying'); // NEW: Nav button
+    // 1. Define all possible screens in the app
+    const views = {
+        'home': 'homeView',
+        'database': 'databaseView',
+        'nowPlaying': 'nowPlayingView',
+        'artist': 'artistView' // The new artist page!
+    };
 
-    // 1. Hide all views
-    if (homeView) homeView.style.display = 'none';
-    if (databaseView) databaseView.style.display = 'none';
-    if (nowPlayingView) nowPlayingView.style.display = 'none';
+    // 2. Hide EVERY screen strictly
+    Object.values(views).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
 
-    // 2. Remove active state from all sidebar navigation items
+    // 3. Remove active state from all sidebar navigation items
     document.querySelectorAll('.nav-links .nav-item').forEach(el => el.classList.remove('active'));
 
-    // 3. Route to the requested view
+    const viewTitle = document.getElementById('viewTitle');
+
+    // 4. Route to the requested view and show it
     if (viewName === 'home') {
-        if (homeView) homeView.style.display = 'block';
-        if (navHome) navHome.classList.add('active');
+        const el = document.getElementById('homeView');
+        if (el) el.style.display = 'block';
+        const nav = document.getElementById('navHome');
+        if (nav) nav.classList.add('active');
         if (viewTitle) viewTitle.innerText = "Discover Signals"; 
-        
+
     } else if (viewName === 'database') {
-        if (databaseView) databaseView.style.display = 'block';
-        
-        // Only highlight the main database button if we aren't looking at a specific playlist
-        if (currentViewPlaylistIndex === -1 && navAllTracks) {
-            navAllTracks.classList.add('active');
+        const el = document.getElementById('databaseView');
+        if (el) el.style.display = 'block';
+        const nav = document.getElementById('navAllTracks');
+        if (currentViewPlaylistIndex === -1 && nav) {
+            nav.classList.add('active');
             if (viewTitle) viewTitle.innerText = "All Tracks";
         }
-        
+
     } else if (viewName === 'nowPlaying') {
-        if (nowPlayingView) nowPlayingView.style.display = 'block';
-        if (navNowPlaying) navNowPlaying.classList.add('active');
+        const el = document.getElementById('nowPlayingView');
+        if (el) el.style.display = 'flex'; // Uses flex to center the lyrics
+        const nav = document.getElementById('navNowPlaying');
+        if (nav) nav.classList.add('active');
         if (viewTitle) viewTitle.innerText = "Now Playing";
         
-        // CRITICAL: The canvas will render at 0px width if it is drawn while hidden (display: none).
-        // This forces the soundwave to recalculate its width the moment the view becomes visible.
+        // CRITICAL: Forces the soundwave to recalculate its width
         const waveCanvas = document.getElementById('soundwave-canvas');
         if (typeof resizeWaveCanvas === 'function' && waveCanvas) {
             resizeWaveCanvas(waveCanvas);
         }
+
+    } else if (viewName === 'artist') {
+        const el = document.getElementById('artistView');
+        if (el) el.style.display = 'block';
     }
+
+    // 5. Instantly scroll back to the top of the page
+    const mainView = document.querySelector('.main-view');
+    if (mainView) mainView.scrollTop = 0;
 };
 
 // ==========================================
