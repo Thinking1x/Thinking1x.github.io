@@ -203,59 +203,24 @@ function renderGenreShelves() {
     const canvas = document.querySelector('.hud-feed-canvas');
     if (!canvas) return;
 
-    // Remove old dynamic shelves
-    document.querySelectorAll('.hud-shelf').forEach(shelf => shelf.remove());
-
     if (!allTracks || allTracks.length === 0) return;
 
-    // --- 1. RECENTLY TRANSMITTED SHELF ---
-    const recentTracks = [...allTracks].reverse().slice(0, 6);
-
-    if (recentTracks.length > 0) {
-        const recentShelf = document.createElement('section');
-        recentShelf.className = 'hud-shelf dynamic-shelf';
-        
-        let recentHTML = '';
-        recentTracks.forEach(track => {
-            const globalIndex = allTracks.findIndex(t => t.id === track.id);
-            const hasCover = track.cover && !track.cover.includes('placeholder') && track.cover !== 'NULL';
-            
-            let coverArtHTML = hasCover 
-                ? `<img src="${track.cover}" alt="Cover" class="card-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                   <div class="card-cover" style="display:none; justify-content:center; align-items:center; background:#1a1a1a; border: 1px solid #333; width: 100%; height: 100%;">
-                       <i class="fas fa-compact-disc" style="font-size:2.5rem; color:rgba(255,255,255,0.15);"></i>
-                   </div>`
-                : `<div class="card-cover" style="display:flex; justify-content:center; align-items:center; background:#1a1a1a; border: 1px solid #333; width: 100%; height: 100%;">
-                       <i class="fas fa-compact-disc" style="font-size:2.5rem; color:rgba(255,255,255,0.15);"></i>
-                   </div>`;
-
-            recentHTML += `
-                <div class="music-card" onclick="loadTrack(${globalIndex}, true)">
-                    <div class="card-cover-wrapper">
-                        ${coverArtHTML}
-                        <button class="card-play-btn"><i class="fas fa-play"></i></button>
-                    </div>
-                    <div class="card-meta">
-                        <span class="card-title">${track.name}</span>
-                        <span class="card-subtitle">${track.artist}</span>
-                    </div>
-                </div>
-            `;
-        });
-
-        recentShelf.innerHTML = `
-            <div class="shelf-header">
-                <h2>Recently Transmitted</h2>
-                <a href="#" class="view-all" onclick="showAllTracks()">View Database</a>
-            </div>
-            <div class="shelf-grid">
-                ${recentHTML}
-            </div>
-        `;
-        canvas.appendChild(recentShelf);
+    // 1. Create a safe, dedicated container for the genre shelves so they don't overwrite the top dashboards
+    let genreContainer = document.getElementById('dynamic-genres-container');
+    if (!genreContainer) {
+        genreContainer = document.createElement('div');
+        genreContainer.id = 'dynamic-genres-container';
+        // Add a little space between the main dashboard and the genres
+        genreContainer.style.display = 'flex';
+        genreContainer.style.flexDirection = 'column';
+        genreContainer.style.gap = '36px'; 
+        canvas.appendChild(genreContainer);
+    } else {
+        // Only clear the dynamic genres upon refresh, leaving the top shelves intact!
+        genreContainer.innerHTML = ''; 
     }
 
-    // --- 2. DYNAMIC GENRE SHELVES ---
+    // 2. Build the genre shelves
     const uniqueGenres = [...new Set(allTracks.map(track => {
         return track.genre ? track.genre.trim().toUpperCase() : 'UNCATEGORIZED';
     }))];
@@ -310,7 +275,7 @@ function renderGenreShelves() {
             </div>
         `;
 
-        canvas.appendChild(shelf);
+        genreContainer.appendChild(shelf);
     });
 }
 
