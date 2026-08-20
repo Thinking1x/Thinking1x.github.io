@@ -781,13 +781,14 @@ function toggleCinematicBg() {
     const btn = document.getElementById('bgToggleBtn');
     const npBg = document.getElementById('np-background'); 
     
+    // Updates the button's visual state
     if (btn) btn.style.opacity = showCinematicBg ? '1' : '0.4';
     
+    // Fades the art cover in and out smoothly
     if (npBg) {
         npBg.style.opacity = showCinematicBg ? '0.4' : '0'; 
     }
 }
-
 function toggleFullScreen() {
     if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(err => {

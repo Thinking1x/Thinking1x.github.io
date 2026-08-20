@@ -6,11 +6,66 @@
   <title>Thinking's Media Server</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/effects.css">
-<link rel="stylesheet" href="css/effects.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/effects.css">
+  
+  <!-- BULLETPROOF LAYOUT FIXES & CINEMATIC LYRICS -->
+  <style>
+    /* 1. Perfect layering for the Now Playing background */
+    #np-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+        z-index: -2; 
+        opacity: 0.4; 
+        filter: blur(25px) brightness(0.5); 
+        transform: scale(1.1); /* Hides ugly blurred edges */
+        transition: opacity 0.5s ease-in-out;
+        pointer-events: none;
+    }
+
+    /* 2. Global background layers */
+    #reactive-bg { z-index: -3 !important; }
+    #snow-canvas { z-index: -1 !important; }
+
+    /* 3. Ensure UI stays clickable and in front */
+    #nowPlayingView {
+        position: relative;
+        z-index: 10;
+    }
+
+    /* 4. Cinematic Apple Music Lyrics Style */
+    .lyric-line {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.5); 
+        filter: blur(3px); 
+        transform: scale(0.95);
+        transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        margin: 18px 0;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .lyric-line.active {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #ffffff;
+        filter: blur(0px); 
+        transform: scale(1.05);
+        text-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+    }
+
+    .lyric-line:hover {
+        color: rgba(255, 255, 255, 0.9);
+        filter: blur(0px);
+    }
+  </style>
 </head>
 <body>
 <div id="reactive-bg"></div>
@@ -220,21 +275,35 @@
         <div id="trackList"></div>
       </div>
 
+      <!-- REBUILT NOW PLAYING VIEW -->
       <div id="nowPlayingView" style="display: none; height: 100%; position: relative;">
-        <!-- Background blurred cover art -->
-        <img id="np-background" src="" style="position: absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; filter: blur(30px); opacity: 0.3; z-index: 0;">
+        <!-- Clean background blurred cover art controlled by our new CSS -->
+        <img id="np-background" src="" alt="">
         
-        <div class="np-container" style="position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; padding: 2rem;">
+        <div class="np-container" style="position: relative; z-index: 10; display: flex; flex-direction: column; height: 100%; padding: 2rem;">
           
-            <!-- WAVEFORM TOGGLE BUTTON -->
-<div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
-    <button id="waveToggleBtn" onclick="toggleWaveform()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 50px; cursor: pointer; font-size: 0.8rem; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
-        <i class="fas fa-chart-bar"></i> Toggle Wave
-    </button>
-</div>
+            <!-- FULL CONTROL DECK -->
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                <button onclick="toggleWaveform()" id="waveToggleBtn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 14px; border-radius: 50px; cursor: pointer; font-size: 0.85rem; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-chart-bar"></i> Wave
+                </button>
+
+                <button onclick="toggleParticles()" id="particleToggleBtn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 14px; border-radius: 50px; cursor: pointer; font-size: 0.85rem; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-snowflake"></i> Particles
+                </button>
+
+                <button onclick="toggleCinematicBg()" id="bgToggleBtn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 14px; border-radius: 50px; cursor: pointer; font-size: 0.85rem; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-image"></i> Art Backdrop
+                </button>
+
+                <button onclick="toggleFullScreen()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 14px; border-radius: 50px; cursor: pointer; font-size: 0.85rem; transition: 0.3s; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
             <!-- Lyrics Display -->
             <div id="lyrics-container" style="flex: 1; overflow-y: auto; text-align: center; margin-bottom: 2rem; mask-image: linear-gradient(transparent, black 10%, black 90%, transparent); -webkit-mask-image: linear-gradient(transparent, black 10%, black 90%, transparent);">
-                <div id="lyrics-content" style="font-size: 1.5rem; color: rgba(255,255,255,0.5); line-height: 2.5;" data-active-index="-1">
+                <div id="lyrics-content" style="line-height: 2.5;" data-active-index="-1">
                     <!-- Lyrics will be injected here via JS -->
                 </div>
             </div>

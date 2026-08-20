@@ -618,3 +618,35 @@
     color: rgba(255, 255, 255, 0.9);
     filter: blur(0px);
 }
+
+/* ==========================================
+   NOW PLAYING CINEMATIC BACKDROP
+========================================== */
+#np-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    z-index: -2; /* Keeps it strictly behind the UI */
+    opacity: 0.4; /* Default visibility */
+    filter: blur(25px) brightness(0.5); /* Deep Apple-Music style blur */
+    transform: scale(1.1); /* Prevents the blur from showing white edges */
+    transition: opacity 0.5s ease-in-out;
+    pointer-events: none;
+}
+
+/* Ensure the visualizers sit perfectly on top */
+#reactive-bg {
+    z-index: -1; 
+}
+#snow-canvas {
+    z-index: 0; 
+}
+
+/* Ensure the Now Playing content (lyrics, waveform) stays in front */
+#nowPlayingPage {
+    position: relative;
+    z-index: 10;
+}
