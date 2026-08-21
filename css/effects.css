@@ -193,22 +193,22 @@ body.glass-mode .background-cover { display: block !important; }
     cursor: pointer;
     text-align: center;
 }
-
 .lyric-line.active {
     font-size: 2.2rem;
     font-weight: 800;
     
-    /* TRUE KARAOKE EFFECT: Uses your JS --progress variable for a hard-stop fill */
-    background: linear-gradient(90deg, #ffffff var(--progress, 0%), rgba(255, 255, 255, 0.25) var(--progress, 0%));
+    /* A smooth, clean gradient reverting back to the original style */
+    background: linear-gradient(90deg, #00e5ff, #ffffff);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     
-    /* Removed text-shadow because it breaks clipped backgrounds */
-    text-shadow: none;
-    
-    filter: blur(0px);
+    filter: blur(0px); 
     transform: scale(1.05);
-    transition: transform 0.2s ease-out, filter 0.2s ease-out;
+    
+    /* A soft glow that matches the new gradient */
+    filter: drop-shadow(0 0 15px rgba(0, 229, 255, 0.4));
+    
+    transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 /* Clean hover state so users know they can click to jump */
@@ -218,15 +218,15 @@ body.glass-mode .background-cover { display: block !important; }
     filter: blur(0px);
 }
 /* ==========================================
-   SMOOTH PAGE & IMAGE TRANSITIONS
+   SMOOTH PAGE TRANSITIONS
 ========================================== */
 
-/* Fade & slide animation when switching views */
-#homeView, #databaseView, #nowPlayingView, #artistView {
-    animation: fadeInView 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* Apply the slide animation ONLY to these pages */
+#homeView, #databaseView, #artistView {
+    animation: fadeInSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes fadeInView {
+@keyframes fadeInSlide {
     from {
         opacity: 0;
         transform: translateY(12px);
@@ -237,6 +237,15 @@ body.glass-mode .background-cover { display: block !important; }
     }
 }
 
+/* Give Now Playing a pure opacity fade so it doesn't break the fixed background! */
+#nowPlayingView {
+    animation: simpleFade 0.4s ease forwards;
+}
+
+@keyframes simpleFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 /* Smooth normal image load for the artist hero banner */
 .artist-hero-banner {
     transition: background-image 0.6s ease-in-out;
@@ -254,4 +263,7 @@ body.glass-mode .background-cover { display: block !important; }
 .discover-greeting-text.fade-out {
     opacity: 0;
     transform: translateY(5px); /* Creates a subtle sinking effect as it fades */
+}
+.artist-bio-card:hover {
+    transform: scale(1.02);
 }

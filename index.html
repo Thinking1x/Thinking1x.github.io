@@ -198,11 +198,16 @@
 <!-- 3.5. ARTIST BIO / ABOUT SECTION -->
     <div class="artist-about-section" style="margin-bottom: 40px;">
       <h2 class="section-heading">About</h2>
-      <div class="artist-bio-card" id="artistBioCard" style="position: relative; height: 280px; border-radius: 12px; overflow: hidden; display: flex; align-items: flex-end; padding: 30px; background-size: cover; background-position: center;">
-        <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(5,5,8,0.85) 70%, rgba(5,5,8,0.95) 100%); z-index: 1;"></div>
-        <div style="position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px; max-width: 700px;">
-          <span id="artistBioListeners" style="font-size: 0.85rem; font-weight: 700; color: var(--accent);">0 monthly listeners</span>
-          <p id="artistBioText" style="color: var(--text-sub, #a7a7a7); font-size: 0.9rem; line-height: 1.5; margin: 0;">
+      <!-- Restricted the max-width to 680px to match Spotify's compact card look -->
+      <div class="artist-bio-card" id="artistBioCard" style="position: relative; height: 350px; width: 100%; max-width: 680px; border-radius: 16px; overflow: hidden; display: flex; align-items: flex-end; padding: 35px; background-size: cover; background-position: center; cursor: pointer; transition: transform 0.2s ease;">
+        
+        <!-- Darker gradient overlay to ensure text is readable -->
+        <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.85) 100%); z-index: 1;"></div>
+        
+        <!-- Text content pushed to the bottom left -->
+        <div style="position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px;">
+          <span id="artistBioListeners" style="font-size: 1rem; font-weight: 800; color: #fff;">0 monthly listeners</span>
+          <p id="artistBioText" style="color: rgba(255, 255, 255, 0.8); font-size: 0.95rem; line-height: 1.5; margin: 0; font-weight: 500; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
             Loading artist profile data and background metrics...
           </p>
         </div>
