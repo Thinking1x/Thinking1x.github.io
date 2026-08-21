@@ -397,10 +397,30 @@ async function handleGrantAccess(userId, btnElement) {
     btnElement.style.color = "#fff";
     btnElement.style.borderColor = "var(--success)";
 }
-// ==========================================
-// DASHBOARD RENDERING (Spotify-Style Shelves)
-// ==========================================
+function renderDynamicGreeting() {
+    const greetingEl = document.getElementById('dynamicGreeting');
+    if (greetingEl) {
+        const hour = new Date().getHours();
+        if (hour < 12) greetingEl.innerText = "Good morning";
+        else if (hour < 18) greetingEl.innerText = "Good afternoon";
+        else greetingEl.innerText = "Good evening"; // Current time is 5:25 PM
+    }
 
+    const highlightGrid = document.getElementById('highlightGrid');
+    if (highlightGrid && allTracks.length > 0) {
+        // Grab 4 random tracks to act as "Featured/Jump Back In" cards
+        const shuffled = [...allTracks].sort(() => 0.5 - Math.random()).slice(0, 4);
+        
+        highlightGrid.innerHTML = shuffled.map(track => {
+            const globalIndex = allTracks.findIndex(t => t.id === track.id);
+            return `
+            <div onclick="loadTrack(${globalIndex}, true)" style="display: flex; align-items: center; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; cursor: pointer; transition: background 0.2s ease;">
+                <img src="${track.cover}" style="width: 60px; height: 60px; object-fit: cover; box-shadow: 2px 0 10px rgba(0,0,0,0.2);">
+                <div style="padding: 0 16px; font-weight: 700; color: #fff; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${track.name}</div>
+            </div>`;
+        }).join('');
+    }
+}
 // ==========================================
 // DASHBOARD RENDERING 
 // ==========================================

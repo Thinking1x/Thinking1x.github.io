@@ -195,17 +195,6 @@
       </div>
     </div>
   </div>
-
-  <!-- 4. RELEASES / SHELF -->
-  <div class="artist-discography-section">
-    <div class="shelf-header">
-      <h2>All Transmissions</h2>
-    </div>
-    <div class="shelf-grid" id="artistDiscographyGrid">
-      <!-- Rendered by JS -->
-    </div>
-  </div>
-</div>
 <!-- 3.5. ARTIST BIO / ABOUT SECTION -->
     <div class="artist-about-section" style="margin-bottom: 40px;">
       <h2 class="section-heading">About</h2>
@@ -219,15 +208,29 @@
         </div>
       </div>
     </div>
+  <!-- 4. RELEASES / SHELF -->
+  <div class="artist-discography-section">
+    <div class="shelf-header">
+      <h2>All Transmissions</h2>
+    </div>
+    <div class="shelf-grid" id="artistDiscographyGrid">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</div>
 
       <div id="homeView" style="display: block;">
         <div class="hud-main-container">
           
           <main class="hud-feed-canvas">
 
-    <header class="hud-promo-banner">
-        <span class="banner-badge">SYSTEM</span>
-        <p class="banner-text">Welcome to <strong>Thinking's Media Server</strong>. All audio signals are operational.</p>
+<header class="discover-header-block" style="margin-bottom: 30px; padding-top: 10px;">
+        <h1 id="dynamicGreeting" style="font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 20px; letter-spacing: -0.5px;">Good evening</h1>
+        
+        <!-- Featured Highlight Row -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;" id="highlightGrid">
+            <!-- Rendered by JS -->
+        </div>
     </header>
 
     <!-- 1. TRENDING SIGNALS (Top Listening Times) -->
