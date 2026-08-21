@@ -49,7 +49,9 @@ window.switchView = function(viewName) {
 
     } else if (viewName === 'nowPlaying') {
         const el = document.getElementById('nowPlayingView');
-        if (el) el.style.display = 'flex'; // Uses flex to center the lyrics
+        // FIX: Changed from 'flex' to 'block' to let it stretch full-width
+        if (el) el.style.display = 'block'; 
+        
         const nav = document.getElementById('navNowPlaying');
         if (nav) nav.classList.add('active');
         if (viewTitle) viewTitle.innerText = "Now Playing";
@@ -69,7 +71,6 @@ window.switchView = function(viewName) {
     const mainView = document.querySelector('.main-view');
     if (mainView) mainView.scrollTop = 0;
 };
-
 // ==========================================
 // PLAYLIST RENDERING & COVERS
 // ==========================================
@@ -397,18 +398,62 @@ async function handleGrantAccess(userId, btnElement) {
     btnElement.style.color = "#fff";
     btnElement.style.borderColor = "var(--success)";
 }
+// Global variable to prevent overlapping loops if you leave the page and come back
+let greetingCarouselInterval;
+
 function renderDynamicGreeting() {
     const greetingEl = document.getElementById('dynamicGreeting');
+    
     if (greetingEl) {
+        // 1. Clear any existing animation loops to prevent glitches
+        if (greetingCarouselInterval) clearInterval(greetingCarouselInterval);
+
+        // 2. Determine the time of day
         const hour = new Date().getHours();
-        if (hour < 12) greetingEl.innerText = "Good morning";
-        else if (hour < 18) greetingEl.innerText = "Good afternoon";
-        else greetingEl.innerText = "Good evening"; // Current time is 5:25 PM
+        let baseGreeting = "Good evening";
+        if (hour < 12) baseGreeting = "Good morning";
+        else if (hour < 18) baseGreeting = "Good afternoon";
+
+        // 3. Build the sequence of messages
+        let messageSequence = [
+            baseGreeting,
+            "All audio signals are operational"
+        ];
+
+        // Safely grab a random track to recommend if the database has loaded
+        if (typeof allTracks !== 'undefined' && allTracks.length > 0) {
+            const randomTrack = allTracks[Math.floor(Math.random() * allTracks.length)];
+            messageSequence.push(`System recommends: ${randomTrack.name}`);
+        }
+
+        let currentIndex = 0;
+        
+        // 4. Initialize the element
+        greetingEl.className = 'discover-greeting-text';
+        greetingEl.innerText = messageSequence[currentIndex];
+
+        // 5. Start the animation engine (Loops every 6.5 seconds)
+        greetingCarouselInterval = setInterval(() => {
+            
+            // A: Trigger the CSS fade out
+            greetingEl.classList.add('fade-out');
+            
+            // B: Wait for the CSS fade to finish (800ms), then swap text and fade back in
+            setTimeout(() => {
+                currentIndex = (currentIndex + 1) % messageSequence.length;
+                greetingEl.innerText = messageSequence[currentIndex];
+                
+                // Remove the fade-out class to trigger the fade-in animation
+                greetingEl.classList.remove('fade-out');
+            }, 800); 
+
+        }, 6500); 
     }
 
+    // --- Render the Featured Highlight Grid Below the Text ---
     const highlightGrid = document.getElementById('highlightGrid');
-    if (highlightGrid && allTracks.length > 0) {
-        // Grab 4 random tracks to act as "Featured/Jump Back In" cards
+    if (highlightGrid && typeof allTracks !== 'undefined' && allTracks.length > 0) {
+        // Grab 4 random tracks to act as "Jump Back In" cards
         const shuffled = [...allTracks].sort(() => 0.5 - Math.random()).slice(0, 4);
         
         highlightGrid.innerHTML = shuffled.map(track => {

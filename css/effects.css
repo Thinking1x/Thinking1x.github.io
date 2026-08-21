@@ -198,18 +198,17 @@ body.glass-mode .background-cover { display: block !important; }
     font-size: 2.2rem;
     font-weight: 800;
     
-    /* Smooth punch forward on the heavy beat */
-    transform: scale(calc(1.05 + (var(--lyric-beat-state, 0) * 0.05)));
-
-    /* The Magic Gradient: Crisp white fading into the dynamic visualizer color */
-    background: linear-gradient(135deg, #ffffff 20%, hsla(var(--beat-hue, 180), 100%, 70%, calc(0.3 + (var(--lyric-beat-state, 0) * 0.7))));
+    /* TRUE KARAOKE EFFECT: Uses your JS --progress variable for a hard-stop fill */
+    background: linear-gradient(90deg, #ffffff var(--progress, 0%), rgba(255, 255, 255, 0.25) var(--progress, 0%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-
-    /* Expanding neon drop-shadow glow when the bass hits */
-    filter: blur(0px) drop-shadow(0 0 calc(10px + (var(--lyric-beat-state, 0) * 20px)) hsla(var(--beat-hue, 180), 100%, 60%, calc(0.2 + (var(--lyric-beat-state, 0) * 0.6))));
-
-    transition: transform 0.1s ease-out, filter 0.1s ease-out;
+    
+    /* Removed text-shadow because it breaks clipped backgrounds */
+    text-shadow: none;
+    
+    filter: blur(0px);
+    transform: scale(1.05);
+    transition: transform 0.2s ease-out, filter 0.2s ease-out;
 }
 
 /* Clean hover state so users know they can click to jump */
@@ -241,4 +240,18 @@ body.glass-mode .background-cover { display: block !important; }
 /* Smooth normal image load for the artist hero banner */
 .artist-hero-banner {
     transition: background-image 0.6s ease-in-out;
+}
+/* ==========================================
+   DYNAMIC GREETING CAROUSEL
+========================================== */
+.discover-greeting-text {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+    display: inline-block; /* Required for the transform to work on text */
+}
+
+.discover-greeting-text.fade-out {
+    opacity: 0;
+    transform: translateY(5px); /* Creates a subtle sinking effect as it fades */
 }
