@@ -403,24 +403,40 @@
   </div>
 
 <div class="player" id="player-bar">
-    <!-- NEW: Mobile Close Arrow (Invisible on Desktop) -->
-    <button class="close-mobile-player" onclick="toggleMobilePlayer()">
-        <i class="fas fa-chevron-down"></i>
-    </button>
+    <!-- Mobile Drag Line -->
+    <button class="close-mobile-player" onclick="toggleMobilePlayer()"></button>
 
-    <!-- NEW: Added onclick and cursor style so tapping this opens the player -->
+    <!-- Cover Art & Info -->
     <div class="now-playing" onclick="toggleMobilePlayer(event)" style="cursor: pointer;">
-      <div id="npCover" class="album-art" style="background:#1a1b26; border:1px solid rgba(255,255,255,0.05); display:flex; justify-content:center; align-items:center;">
+      <div id="npCover" class="album-art" style="background:#1a1b26; display:flex; justify-content:center; align-items:center;">
           <i class="fas fa-music" style="color:rgba(255,255,255,0.2); font-size: 1.2rem;"></i>
       </div>
       <div class="np-info">
-        <span class="np-title"  id="npTitle">System Idle</span>
+        <span class="np-title" id="npTitle">System Idle</span>
         <span class="np-artist" id="npArtist">--</span>
       </div>
     </div>
 
-    <!-- NEW: Added hidden-on-mobile class -->
+    <!-- NEW: Mobile Lyrics Toggle Button -->
+    <button id="mobileLyricsToggle" class="hidden-on-mobile" onclick="toggleMobileLyricsView()">
+        <i class="fas fa-quote-right"></i> Show Lyrics
+    </button>
+
+    <!-- NEW: Mobile Lyrics Display Box -->
+    <div id="mobileLyricsContainer" class="hidden-on-mobile">
+        <div id="mobile-lyrics-content">
+            <div style="color: rgba(255,255,255,0.5); padding-top: 50px;">Play a song to see lyrics...</div>
+        </div>
+    </div>
+
+    <!-- Player Controls (Timeline & Buttons) -->
     <div class="player-controls hidden-on-mobile">
+      <div class="progress-container" id="mobile-timeline">
+        <span class="time" id="currentTime">0:00</span>
+        <input id="seekbar" type="range" value="0" min="0" max="100">
+        <span class="time" id="totalTime">0:00</span>
+      </div>
+      
       <div class="buttons">
         <button class="ctrl-btn" id="shuffleBtn" onclick="toggleShuffle()"><i class="fas fa-random"></i></button>
         <button class="ctrl-btn" onclick="prevTrack()"><i class="fas fa-step-backward"></i></button>
@@ -428,19 +444,14 @@
         <button class="ctrl-btn" onclick="nextTrack()"><i class="fas fa-step-forward"></i></button>
         <button class="ctrl-btn" id="repeatBtn" onclick="toggleRepeat()"><i class="fas fa-redo-alt"></i></button>
       </div>
-      <div class="progress-container">
-        <span class="time" id="currentTime">0:00</span>
-        <input id="seekbar" type="range" value="0" min="0" max="100">
-        <span class="time" id="totalTime">0:00</span>
-      </div>
     </div>
 
-    <!-- NEW: Added hidden-on-mobile class -->
+    <!-- Volume -->
     <div class="right-controls hidden-on-mobile">
       <i class="fas fa-volume-up" style="color:var(--text-sub); font-size:0.9rem;"></i>
       <input id="volumebar" class="volume-bar" type="range" value="100" min="0" max="100">
     </div>
-  </div>
+</div>
 
 
 <div id="playlistModal" class="modal-overlay hidden">

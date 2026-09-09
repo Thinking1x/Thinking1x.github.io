@@ -199,4 +199,71 @@ html, body {
             width: 50px; height: 6px; background: rgba(255, 255, 255, 0.3); border-radius: 10px; border: none; cursor: pointer; padding: 0; z-index: 10000;
         }
         #player-bar.mobile-expanded .close-mobile-player i { display: none; }
-    }
+   /* 1. STOP THE PICTURE SHAKING & RESIZE IT */
+        #player-bar.mobile-expanded #npCover {
+            width: 200px !important;
+            height: 200px !important;
+            margin: 20px auto 20px auto !important;
+            border-radius: 12px !important;
+            animation: none !important; /* Kills the visualizer pulse */
+            transform: none !important; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+        }
+
+        /* 2. FORCE THE TIMELINE TO SHOW UP */
+        #player-bar.mobile-expanded .player-controls {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            gap: 25px !important;
+        }
+
+        #player-bar.mobile-expanded .progress-container {
+            display: flex !important;
+            width: 100% !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 15px !important;
+            position: relative !important; /* Overrides desktop absolute positioning */
+        }
+
+        #player-bar.mobile-expanded input[type="range"] {
+            flex: 1 !important;
+            width: 100% !important;
+            height: 6px !important;
+            background: rgba(255,255,255,0.2) !important;
+            border-radius: 5px !important;
+            display: block !important;
+        }
+
+        #player-bar.mobile-expanded .time {
+            font-size: 0.85rem !important;
+            color: rgba(255,255,255,0.7) !important;
+            min-width: 40px !important;
+            display: block !important;
+        }
+
+        /* 3. FORCE THE LYRICS BUTTON TO SHOW */
+        #player-bar.mobile-expanded #mobileLyricsToggle {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 auto 20px auto !important;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* 4. LYRICS UI TOGGLE STATE */
+        #player-bar.mobile-expanded #mobileLyricsContainer { display: none !important; width: 100%; flex: 1; overflow-y: auto; text-align: center; margin-bottom: 15px; }
+        
+        #player-bar.mobile-expanded.show-lyrics #mobileLyricsContainer { display: block !important; }
+        #player-bar.mobile-expanded.show-lyrics #mobileLyricsToggle { background: rgba(0, 229, 255, 0.2); color: var(--accent, #00e5ff); }
+        #player-bar.mobile-expanded.show-lyrics #npCover { width: 80px !important; height: 80px !important; margin-bottom: 10px !important; }
+        #player-bar.mobile-expanded.show-lyrics .right-controls { display: none !important; } /* Hide volume when reading lyrics */
+       }

@@ -733,7 +733,7 @@ function toggleMobilePlayer(event) {
     }
 }
 
-// 1. Toggles the UI state when the button is clicked
+// Toggle the Mobile Lyrics Window
 function toggleMobileLyricsView() {
     const playerBar = document.getElementById('player-bar');
     playerBar.classList.toggle('show-lyrics');
@@ -746,24 +746,23 @@ function toggleMobileLyricsView() {
     }
 }
 
-// 2. The Lyrics Mirror (Syncs desktop engine to mobile screen)
+// Sync the Desktop Lyrics to the Mobile Screen
 setInterval(() => {
     const playerBar = document.getElementById('player-bar');
     
-    // Only run this logic if the mobile lyrics window is actually open to save CPU
+    // Only run if the mobile lyrics view is open
     if (playerBar && playerBar.classList.contains('show-lyrics')) {
         
-        // Grab the desktop lyrics (checks for both ID formats you might be using)
-        const mainLyrics = document.getElementById('lyrics-content') || document.getElementById('lyrics-list');
-        const mobileLyrics = document.getElementById('mobile-lyrics-content');
+        const mainLyrics = document.getElementById('lyrics-content'); // Desktop lyrics
+        const mobileLyrics = document.getElementById('mobile-lyrics-content'); // Mobile lyrics
         
         if (mainLyrics && mobileLyrics) {
-            // Clone the exact HTML (which includes the bright white glowing active states)
+            // Clone the HTML so it gets the glowing text updates
             if (mobileLyrics.innerHTML !== mainLyrics.innerHTML) {
                 mobileLyrics.innerHTML = mainLyrics.innerHTML;
             }
             
-            // Find whichever line is glowing right now and force the phone to scroll to it
+            // Auto-scroll mobile view to the glowing active line
             const activeLine = mobileLyrics.querySelector('.active') || mobileLyrics.querySelector('[style*="color: rgb(255, 255, 255)"]');
             if (activeLine) {
                 activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
