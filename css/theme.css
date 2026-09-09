@@ -278,4 +278,32 @@ html, body {
         #player-bar.mobile-expanded.show-lyrics #mobileLyricsToggle { background: rgba(0, 229, 255, 0.2); color: var(--accent, #00e5ff); }
         #player-bar.mobile-expanded.show-lyrics #npCover { width: 80px !important; height: 80px !important; margin-bottom: 10px !important; }
         #player-bar.mobile-expanded.show-lyrics .right-controls { display: none !important; } /* Hide volume when reading lyrics */
-       }
+       
+    /* ------------------------------------------- */
+        /* SHOW SHUFFLE & REPEAT BUTTONS               */
+        /* ------------------------------------------- */
+        
+        /* 1. Force the buttons to un-hide */
+        #player-bar.mobile-expanded #shuffleBtn,
+        #player-bar.mobile-expanded #repeatBtn {
+            display: inline-flex !important;
+            font-size: 1.1rem !important;
+            background: transparent !important;
+            border: none !important;
+        }
+
+        /* 2. Spread all 5 buttons across the screen flawlessly */
+        #player-bar.mobile-expanded .buttons {
+            display: flex !important;
+            justify-content: space-evenly !important; /* Automatically spaces 5 items perfectly */
+            align-items: center !important;
+            width: 100% !important;
+            gap: 0 !important; /* Removes the old rigid gap */
+            padding: 0 15px !important;
+        }
+
+        /* 3. Keep the Play button massive and center-focused */
+        #player-bar.mobile-expanded .play-btn {
+            transform: scale(1.35) !important;
+            margin: 0 !important;
+        }}
