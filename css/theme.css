@@ -21,6 +21,18 @@
   --sidebar-width: 240px; 
   --player-height: 90px;
 }
+/* 1. Hide the mobile close button on desktop by default */
+    .close-mobile-player {
+        display: none; 
+    }
+
+    /* ------------------------------------------- */
+    /* NEW: HIDE MOBILE LYRICS UI ON DESKTOP       */
+    /* ------------------------------------------- */
+    #mobileLyricsToggle, 
+    #mobileLyricsContainer {
+        display: none !important;
+    }
 
 /* =============================================
    RESET & BASE TYPOGRAPHY
