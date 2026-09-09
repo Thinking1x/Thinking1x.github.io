@@ -243,20 +243,32 @@ html, body {
             display: block !important;
         }
 
-        /* 3. FORCE THE LYRICS BUTTON TO SHOW */
+/* ------------------------------------------- */
+        /* LYRICS FONT SIZE & BUTTON RE-SIZING FIX     */
+        /* ------------------------------------------- */
+        
+        /* 1. Stop the button from stretching to full width and make it smaller */
         #player-bar.mobile-expanded #mobileLyricsToggle {
             display: inline-flex !important;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 0 auto 20px auto !important;
-            background: rgba(255,255,255,0.1);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-size: 0.9rem;
-            cursor: pointer;
+            align-self: center !important; /* Prevents it from stretching */
+            width: max-content !important; /* Keeps it as a pill shape */
+            padding: 6px 14px !important;
+            font-size: 0.75rem !important;
+            margin: 5px auto 15px auto !important;
+        }
+
+        /* 2. Shrink the normal, un-highlighted lyrics */
+        #player-bar.mobile-expanded #mobile-lyrics-content .lyric-line {
+            font-size: 0.9rem !important;
+            margin: 12px 10px !important;
+            line-height: 1.4 !important;
+        }
+
+        /* 3. Shrink the active glowing lyric so it doesn't overflow the screen */
+        #player-bar.mobile-expanded #mobile-lyrics-content .lyric-line.active {
+            font-size: 1.15rem !important;
+            margin: 12px 10px !important;
+            line-height: 1.4 !important;
         }
 
         /* 4. LYRICS UI TOGGLE STATE */
