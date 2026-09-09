@@ -544,9 +544,11 @@ artistsGrid.innerHTML = topArtists.map((artist, index) => `
         }
     }
 
-    // 3. Render Recently Transmitted
+// 3. Render Recently Transmitted
     if (recentGrid) {
-        const recentTracks = allTracks.slice(0, 10); 
+        // Creates a copy of the array, reverses it so newest is first, then takes top 10
+        const recentTracks = [...allTracks].reverse().slice(0, 10); 
+        
         recentGrid.innerHTML = recentTracks.map(track => {
             const originalIndex = allTracks.findIndex(t => t.id === track.id);
             return `
@@ -563,7 +565,6 @@ artistsGrid.innerHTML = topArtists.map((artist, index) => `
         }).join('');
     }
 }
-
 let currentArtistTracks = [];
 
 // ==========================================
@@ -701,6 +702,7 @@ async function openArtistPage(artistName) {
           </div>
           <div class="card-meta">
             <span class="card-title">${track.name}</span>
+
             <span class="card-subtitle">${track.genre || 'Signal'}</span>
           </div>
         </div>
