@@ -401,70 +401,75 @@ async function handleGrantAccess(userId, btnElement) {
 // Global variable to prevent overlapping loops if you leave the page and come back
 let greetingCarouselInterval;
 
+
 function renderDynamicGreeting() {
     const greetingEl = document.getElementById('dynamicGreeting');
-    
-    if (greetingEl) {
-        // 1. Clear any existing animation loops to prevent glitches
-        if (greetingCarouselInterval) clearInterval(greetingCarouselInterval);
+    if (!greetingEl) return;
 
-        // 2. Determine the time of day
-        const hour = new Date().getHours();
-        let baseGreeting = "Good evening";
-        if (hour < 12) baseGreeting = "Good morning";
-        else if (hour < 18) baseGreeting = "Good afternoon";
+    // 1. Clear any old animations
+    if (greetingCarouselInterval) clearInterval(greetingCarouselInterval);
 
-        // 3. Build the sequence of messages
-        let messageSequence = [
-            baseGreeting,
-            "All audio signals are operational"
-        ];
+    // 2. Determine time of day
+    const hour = new Date().getHours();
+    let baseGreeting = "Good evening";
+    if (hour < 12) baseGreeting = "Good morning";
+    else if (hour < 18) baseGreeting = "Good afternoon";
 
-        // Safely grab a random track to recommend if the database has loaded
-        if (typeof allTracks !== 'undefined' && allTracks.length > 0) {
-            const randomTrack = allTracks[Math.floor(Math.random() * allTracks.length)];
-            messageSequence.push(`System recommends: ${randomTrack.name}`);
-        }
+    // 3. Build the sequence of messages
+    let messages = [
+        { text: baseGreeting, isLink: false },
+        { text: "All audio signals are operational.", isLink: false }
+    ];
 
-        let currentIndex = 0;
+    // Safely grab a random track for the recommendation
+    let randomTrackIndex = -1;
+    if (typeof allTracks !== 'undefined' && allTracks.length > 0) {
+        randomTrackIndex = Math.floor(Math.random() * allTracks.length);
+        const track = allTracks[randomTrackIndex];
         
-        // 4. Initialize the element
-        greetingEl.className = 'discover-greeting-text';
-        greetingEl.innerText = messageSequence[currentIndex];
-
-        // 5. Start the animation engine (Loops every 6.5 seconds)
-        greetingCarouselInterval = setInterval(() => {
-            
-            // A: Trigger the CSS fade out
-            greetingEl.classList.add('fade-out');
-            
-            // B: Wait for the CSS fade to finish (800ms), then swap text and fade back in
-            setTimeout(() => {
-                currentIndex = (currentIndex + 1) % messageSequence.length;
-                greetingEl.innerText = messageSequence[currentIndex];
-                
-                // Remove the fade-out class to trigger the fade-in animation
-                greetingEl.classList.remove('fade-out');
-            }, 800); 
-
-        }, 6500); 
+        // Add the custom question!
+        messages.push({ 
+            text: `Want to listen to ${track.name}?`, 
+            isLink: true 
+        });
     }
 
-    // --- Render the Featured Highlight Grid Below the Text ---
-    const highlightGrid = document.getElementById('highlightGrid');
-    if (highlightGrid && typeof allTracks !== 'undefined' && allTracks.length > 0) {
-        // Grab 4 random tracks to act as "Jump Back In" cards
-        const shuffled = [...allTracks].sort(() => 0.5 - Math.random()).slice(0, 4);
+    let currentIndex = 0;
+    greetingEl.className = 'discover-greeting-text';
+    greetingEl.innerText = messages[currentIndex].text;
+    greetingEl.style.transition = 'color 0.3s ease, text-shadow 0.3s ease';
+
+    // 4. Start the fading engine (Changes every 5 seconds)
+    greetingCarouselInterval = setInterval(() => {
         
-        highlightGrid.innerHTML = shuffled.map(track => {
-            const globalIndex = allTracks.findIndex(t => t.id === track.id);
-            return `
-            <div onclick="loadTrack(${globalIndex}, true)" style="display: flex; align-items: center; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; cursor: pointer; transition: background 0.2s ease;">
-                <img src="${track.cover}" style="width: 60px; height: 60px; object-fit: cover; box-shadow: 2px 0 10px rgba(0,0,0,0.2);">
-                <div style="padding: 0 16px; font-weight: 700; color: #fff; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${track.name}</div>
-            </div>`;
-        }).join('');
-    }
+        // Trigger fade out
+        greetingEl.classList.add('fade-out');
+        
+        // Wait for the fade out to finish, then swap text
+        setTimeout(() => {
+            currentIndex = (currentIndex + 1) % messages.length;
+            const msg = messages[currentIndex];
+            
+            greetingEl.innerText = msg.text;
+            
+            // If it's a song recommendation, make it a clickable neon button!
+            if (msg.isLink && randomTrackIndex !== -1) {
+                greetingEl.onclick = () => loadTrack(randomTrackIndex, true);
+                greetingEl.style.cursor = 'pointer';
+                greetingEl.style.color = 'var(--accent, #00e5ff)';
+                greetingEl.style.textShadow = '0 0 15px rgba(0, 229, 255, 0.4)';
+            } else {
+                greetingEl.onclick = null;
+                greetingEl.style.cursor = 'default';
+                greetingEl.style.color = '#fff';
+                greetingEl.style.textShadow = 'none';
+            }
+            
+            // Trigger fade back in
+            greetingEl.classList.remove('fade-out');
+        }, 800); 
+
+    }, 5000); 
 }
 // ==========================================
 // DASHBOARD RENDERING 
@@ -711,4 +716,15 @@ function playArtistAll() {
   if (firstTrackIndex !== -1) {
     loadTrack(firstTrackIndex, true);
   }
+}
+
+function toggleMobilePlayer(event) {
+    // Prevent the modal from toggling if they tap a button inside it
+    if (event && event.target.closest('.controls, .player-controls, .right-controls')) return;
+
+    // Only run on mobile dimensions
+    if (window.innerWidth <= 768) {
+        const playerBar = document.getElementById('player-bar');
+        playerBar.classList.toggle('mobile-expanded');
+    }
 }
