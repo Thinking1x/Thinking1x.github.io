@@ -231,4 +231,105 @@ html, body {
         #player-bar.mobile-expanded .close-mobile-player i {
             display: none;
         }
-    }
+  /* ------------------------------------------- */
+        /* FIX MISSING PROGRESS BAR & VOLUME CONTROLS  */
+        /* ------------------------------------------- */
+        
+        /* 1. Trap the progress bar inside the modal and put it ABOVE the buttons */
+        #player-bar.mobile-expanded .progress-container {
+            position: relative !important; /* Kills the desktop absolute positioning */
+            top: 0 !important;
+            bottom: auto !important;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            gap: 15px !important;
+            order: -1 !important; /* MAGIC: Pushes the progress bar above the play buttons */
+            margin-bottom: 25px !important;
+            padding: 0 10px !important;
+        }
+
+        /* Make the timestamps readable */
+        #player-bar.mobile-expanded .progress-container .time {
+            font-size: 0.85rem !important;
+            color: rgba(255, 255, 255, 0.7) !important;
+            min-width: 40px !important;
+            text-align: center;
+        }
+
+        /* 2. Trap the volume controls and stretch the slider */
+        #player-bar.mobile-expanded .right-controls {
+            position: relative !important;
+            display: flex !important;
+            flex-direction: row !important; /* Forces icon and slider side-by-side */
+            width: 80% !important;
+            margin-top: 30px !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 15px !important;
+        }
+
+        /* Ensure all sliders (volume and timeline) take up the right amount of space */
+        #player-bar.mobile-expanded input[type="range"] {
+            position: relative !important;
+            flex: 1 !important;
+            width: 100% !important;
+        }
+  
+  /* ------------------------------------------- */
+        /* MOBILE LYRICS UI                            */
+        /* ------------------------------------------- */
+        
+        /* The Toggle Button */
+        #player-bar.mobile-expanded #mobileLyricsToggle {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        /* The Lyrics Box */
+        #player-bar.mobile-expanded #mobileLyricsContainer {
+            display: none !important; /* Hidden by default */
+            width: 100%;
+            flex: 1; /* Stretches to fill available space */
+            overflow-y: auto;
+            text-align: center;
+            mask-image: linear-gradient(transparent, black 10%, black 90%, transparent);
+            -webkit-mask-image: linear-gradient(transparent, black 10%, black 90%, transparent);
+        }
+
+        /* --- WHEN LYRICS ARE ACTIVE --- */
+        #player-bar.mobile-expanded.show-lyrics #mobileLyricsContainer {
+            display: block !important;
+        }
+
+        #player-bar.mobile-expanded.show-lyrics #mobileLyricsToggle {
+            background: rgba(0, 229, 255, 0.2);
+            color: var(--accent, #00e5ff);
+        }
+
+        /* Shrink the cover art drastically so lyrics have room */
+        #player-bar.mobile-expanded.show-lyrics #npCover {
+            width: 70px !important;
+            height: 70px !important;
+            margin-bottom: 10px !important;
+            border-radius: 8px !important;
+            transition: all 0.4s ease;
+        }
+
+        /* Hide the volume controls to make more room for lyrics */
+        #player-bar.mobile-expanded.show-lyrics .right-controls {
+            display: none !important;
+        }    
+}

@@ -732,3 +732,42 @@ function toggleMobilePlayer(event) {
         playerBar.classList.toggle('mobile-expanded');
     }
 }
+
+// 1. Toggles the UI state when the button is clicked
+function toggleMobileLyricsView() {
+    const playerBar = document.getElementById('player-bar');
+    playerBar.classList.toggle('show-lyrics');
+    
+    const btn = document.getElementById('mobileLyricsToggle');
+    if (playerBar.classList.contains('show-lyrics')) {
+        btn.innerHTML = '<i class="fas fa-image"></i> Hide Lyrics';
+    } else {
+        btn.innerHTML = '<i class="fas fa-quote-right"></i> Show Lyrics';
+    }
+}
+
+// 2. The Lyrics Mirror (Syncs desktop engine to mobile screen)
+setInterval(() => {
+    const playerBar = document.getElementById('player-bar');
+    
+    // Only run this logic if the mobile lyrics window is actually open to save CPU
+    if (playerBar && playerBar.classList.contains('show-lyrics')) {
+        
+        // Grab the desktop lyrics (checks for both ID formats you might be using)
+        const mainLyrics = document.getElementById('lyrics-content') || document.getElementById('lyrics-list');
+        const mobileLyrics = document.getElementById('mobile-lyrics-content');
+        
+        if (mainLyrics && mobileLyrics) {
+            // Clone the exact HTML (which includes the bright white glowing active states)
+            if (mobileLyrics.innerHTML !== mainLyrics.innerHTML) {
+                mobileLyrics.innerHTML = mainLyrics.innerHTML;
+            }
+            
+            // Find whichever line is glowing right now and force the phone to scroll to it
+            const activeLine = mobileLyrics.querySelector('.active') || mobileLyrics.querySelector('[style*="color: rgb(255, 255, 255)"]');
+            if (activeLine) {
+                activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    }
+}, 100);
