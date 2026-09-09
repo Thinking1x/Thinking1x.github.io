@@ -81,62 +81,12 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.25);
 }
-/* Only apply to screens smaller than 768px (Phones) */
-@media (max-width: 768px) {
-    /* Smooth transition for the slide-up effect */
-    #player-bar {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* The Full-Screen Expanded State */
-    #player-bar.mobile-expanded {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh; /* Take up the whole screen */
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 30px 20px;
-        background: rgba(10, 10, 10, 0.95); /* Darker background so the site underneath is hidden */
-        backdrop-filter: blur(15px);
-        z-index: 9999;
-    }
-
-    /* Make the cover art massive when expanded */
-    #player-bar.mobile-expanded #npCover {
-        width: 250px;
-        height: 250px;
-        margin-bottom: 30px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-
-    /* Show the hidden controls (seekbar, volume, toggles) */
-    #player-bar.mobile-expanded .hidden-on-mobile {
-        display: flex !important;
-        width: 100%;
-        margin-top: 20px;
-    }
-
-    /* Add a close button that only appears in expanded mode */
+/* 1. Hide the mobile close button on desktop by default */
     .close-mobile-player {
-        display: none;
+        display: none; 
     }
-    
-    #player-bar.mobile-expanded .close-mobile-player {
-        display: block;
-        position: absolute;
-        top: 20px;
-        left: 20px;
-        font-size: 1.5rem;
-        color: white;
-        background: transparent;
-        border: none;
-    }
-}
-/* --- MOBILE PLAYER SLIDE-UP MODAL --- */
+
+    /* --- MOBILE PLAYER SLIDE-UP MODAL --- */
     @media (max-width: 768px) {
         .hidden-on-mobile {
             display: none !important;
@@ -165,6 +115,7 @@ html, body {
             flex-direction: column;
             text-align: center;
             margin-bottom: 20px;
+            cursor: default !important; /* Disables the pointer finger when expanded */
         }
 
         #player-bar.mobile-expanded #npCover {
@@ -179,12 +130,11 @@ html, body {
             display: flex !important;
             width: 100%;
             margin-top: 20px;
+            flex-direction: column; /* Stacks the progress bar nicely */
+            align-items: center;
         }
 
-        .close-mobile-player {
-            display: none;
-        }
-        
+        /* 2. Show the close button ONLY when expanded on mobile */
         #player-bar.mobile-expanded .close-mobile-player {
             display: block;
             position: absolute;
