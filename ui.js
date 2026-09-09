@@ -719,8 +719,10 @@ function playArtistAll() {
 }
 
 function toggleMobilePlayer(event) {
-    // Prevent the modal from toggling if they tap a button inside it
-    if (event && event.target.closest('.controls, .player-controls, .right-controls')) return;
+    // Stop the modal from closing/opening if the user is interacting with buttons or sliders
+    if (event && event.target.closest('.controls, .player-controls, .right-controls, .close-mobile-player, input')) {
+        return; 
+    }
 
     // Only run on mobile dimensions
     if (window.innerWidth <= 768) {
